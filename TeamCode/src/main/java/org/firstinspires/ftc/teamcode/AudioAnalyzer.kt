@@ -1,14 +1,19 @@
 package org.firstinspires.ftc.teamcode
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
+import androidx.core.app.ActivityCompat
 
 class AudioAnalyzer
 {
     private var ar: AudioRecord? = null;
     private var minSize = 0;
 
+    @SuppressLint("MissingPermission")
     fun start()
     {
         minSize = AudioRecord.getMinBufferSize(8000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
