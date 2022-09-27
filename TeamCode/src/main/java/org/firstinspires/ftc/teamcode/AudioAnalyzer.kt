@@ -1,12 +1,10 @@
 package org.firstinspires.ftc.teamcode
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
-import androidx.core.app.ActivityCompat
+import kotlin.math.abs
 
 class AudioAnalyzer
 {
@@ -30,14 +28,44 @@ class AudioAnalyzer
     {
         val buffer = ShortArray(minSize);
         ar!!.read(buffer, 0, minSize);
+
+        // Prints Contents of buffer (Don't know what it is)
+        val builder = StringBuilder();
+        builder.append(buffer)
+            .append(" With Size Of: ")
+            .append(buffer.size);
+        println(builder.toString());
+
         var max = 0;
         for (s in buffer)
         {
-            if (Math.abs(s.toInt()) > max)
+            if (abs(s.toInt()) > max)
             {
-                max = Math.abs(s.toInt());
+                max = abs(s.toInt());
             }
         }
         return max;
+    }
+
+    private fun forierTransform(buffer: ShortArray): FloatArray
+    {
+        var out = FloatArray(4);
+
+        out[0] = 0.0f;
+        out[1] = 0.0f;
+        out[2] = 0.0f;
+        out[3] = 0.0f;
+
+        return out;
+    }
+
+    fun getPitches(): FloatArray
+    {
+        var pitchValues = FloatArray(4);
+
+        // TODO: Implement Forier transform
+//        forierTransform();
+
+        return pitchValues;
     }
 }
