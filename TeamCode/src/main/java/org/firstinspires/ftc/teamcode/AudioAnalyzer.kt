@@ -4,8 +4,6 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 
-import kotlin.math.abs;
-
 class AudioAnalyzer
 {
     private var ar: AudioRecord? = null;
@@ -30,9 +28,9 @@ class AudioAnalyzer
         var max = 0;
         for (s in buffer)
         {
-            if (abs(s.toInt()) > max)
+            if (Math.abs(s.toInt()) > max)
             {
-                max = abs(s.toInt());
+                max = Math.abs(s.toInt());
             }
         }
         return max;
