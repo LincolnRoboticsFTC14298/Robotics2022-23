@@ -5,7 +5,12 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import kotlin.math.abs
+import org.firstinspires.ftc.teamcode.audio.ForierTransform
 
+/**
+ * Class for analyzing audio and getting recommended action from it
+ * @author Tony Riggioni
+ */
 class AudioAnalyzer
 {
     private var ar: AudioRecord? = null;
@@ -47,25 +52,12 @@ class AudioAnalyzer
         return max;
     }
 
-    private fun forierTransform(buffer: ShortArray): FloatArray
+    fun getReccomendedAction(): PitchData
     {
-        var out = FloatArray(4);
+        val buffer = ShortArray(minSize);
+        ar!!.read(buffer, 0, minSize);
 
-        out[0] = 0.0f;
-        out[1] = 0.0f;
-        out[2] = 0.0f;
-        out[3] = 0.0f;
-
-        return out;
-    }
-
-    fun getPitches(): FloatArray
-    {
-        var pitchValues = FloatArray(4);
-
-        // TODO: Implement Forier transform
-//        forierTransform();
-
-        return pitchValues;
+        var data = ForierTransform().getForierTransformFromBuffer(buffer);
+        return data;
     }
 }
