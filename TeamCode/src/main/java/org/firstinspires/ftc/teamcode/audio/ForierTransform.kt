@@ -9,11 +9,11 @@ import org.firstinspires.ftc.teamcode.audio.PitchData
  */
 class ForierTransform
 {
-    public fun getForierTransformFromBuffer(buffer: ShortArray): PitchData
+    fun getForierTransformFromBuffer(buffer: ShortArray): PitchData
     {
-        TODO();
+        TODO()
 
-        var data = PitchData(0.0f, 0.0f, 0.0f, 0.0f);
-        return data;
+        var data = PitchData(0.0f, 0.0f, 0.0f, 0.0f)
+        return data
     }
 }
