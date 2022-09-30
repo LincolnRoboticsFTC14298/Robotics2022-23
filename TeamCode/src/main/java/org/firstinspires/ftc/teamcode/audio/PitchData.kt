@@ -11,7 +11,7 @@ data class PitchData(var FWD: Float, val BCK: Float, val LFT: Float, val RHT: Fl
 {
     override fun toString(): String
     {
-        val builder = StringBuilder();
+        val builder = StringBuilder()
         builder.append("FWD: ")
             .append(FWD)
             .append(" BCK: ")
@@ -19,7 +19,7 @@ data class PitchData(var FWD: Float, val BCK: Float, val LFT: Float, val RHT: Fl
             .append(" LFT: ")
             .append(LFT)
             .append(" RHT: ")
-            .append(RHT);
-        return builder.toString();
+            .append(RHT)
+        return builder.toString()
     }
 }
