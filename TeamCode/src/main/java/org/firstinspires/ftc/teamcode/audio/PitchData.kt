@@ -1,8 +1,11 @@
 package org.firstinspires.ftc.teamcode.audio
 
 /**
- * Data class that holds values for the robot FROM AUDIO
- * In order to get this class from audio use the {@link org.firstinspires.ftc.teamcode.audio.ForierTransform}
+ * Data class that holds values for robot control
+ * Values are get from audio
+ * @see org.firstinspires.ftc.teamcode.audio.AudioAnalyzer
+ * @see org.firstinspires.ftc.teamcode.audio.ForierTransform
+ * @author Tony Riggioni
  */
 data class PitchData(var FWD: Float, val BCK: Float, val LFT: Float, val RHT: Float)
 {
