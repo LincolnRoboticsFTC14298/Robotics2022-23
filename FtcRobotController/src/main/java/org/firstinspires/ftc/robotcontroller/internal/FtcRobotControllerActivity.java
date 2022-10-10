@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 package org.firstinspires.ftc.robotcontroller.internal;
 
+import android.Manifest;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -39,6 +40,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
@@ -49,6 +51,8 @@ import android.preference.PreferenceManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+import androidx.core.content.ContextCompat;
+
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -292,6 +296,21 @@ public class FtcRobotControllerActivity extends Activity
 
     context = this;
     utility = new Utility(this);
+
+    // Added by Tony for audio purposes
+    int req = 0;
+    while (true)
+    {
+      if (ContextCompat.checkSelfPermission(this.context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+        break;
+      } else {
+        // You can directly ask for the permission.
+        // The registered ActivityResultCallback gets the result of this request.
+        requestPermissions(new String[] { Manifest.permission.RECORD_AUDIO}, req);
+        continue;
+      }
+    }
+
 
     DeviceNameManagerFactory.getInstance().start(deviceNameStartResult);
 
