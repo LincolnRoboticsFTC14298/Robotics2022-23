@@ -24,13 +24,19 @@ allprojects {
     repositories {
         mavenCentral()
         google()
+
+        maven { url = 'https://jitpack.io' }
+
     }
 }
 
 repositories {
     mavenCentral()
 
+    maven { url = 'https://jitpack.io' }
+
     flatDir {
         dirs '../libs'
     }
 }
+
