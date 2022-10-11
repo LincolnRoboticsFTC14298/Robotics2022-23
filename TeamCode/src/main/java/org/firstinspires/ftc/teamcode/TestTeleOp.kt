@@ -1,37 +1,42 @@
 package org.firstinspires.ftc.teamcode
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
+import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorSimple
 
 import org.firstinspires.ftc.teamcode.audio.AudioAnalyzer
 
 @TeleOp
-class TestTeleOp: LinearOpMode()
+class TestTeleOp: OpMode()
 {
-    override fun runOpMode()
+    private lateinit var analyzer: AudioAnalyzer
+    private lateinit var motors: Array<DcMotorSimple>
+
+    override fun init()
     {
-        val analyzer = AudioAnalyzer()
+        analyzer = AudioAnalyzer()
         analyzer.start()
 
-        val motors = arrayOf(hardwareMap.dcMotor["motorFrontLeft"], hardwareMap.dcMotor["motorBackLeft"], hardwareMap.dcMotor["motorFrontRight"], hardwareMap.dcMotor["motorBackRight"])
+        motors = arrayOf(hardwareMap.dcMotor["motorFrontLeft"], hardwareMap.dcMotor["motorBackLeft"], hardwareMap.dcMotor["motorFrontRight"], hardwareMap.dcMotor["motorBackRight"])
 
         motors[2].direction = DcMotorSimple.Direction.REVERSE
         motors[3].direction = DcMotorSimple.Direction.REVERSE
+    }
 
-        waitForStart()
-
-        if (isStopRequested)
+    override fun loop()
+    {
+        for (i in motors.iterator())
+            i.power = 1.0 * (analyzer.getAmplitude() > 10).compareTo(false)
+        telemetry.addData("Volume", analyzer.volume)
+        if (analyzer.volume > 0)
         {
-            analyzer.stop()
-            return
+            telemetry.addData("Success", "This is working")
         }
+        telemetry.update()
+    }
 
-        while (opModeIsActive())
-        {
-            for (i in motors.iterator())
-                i.power = 1.0 * (analyzer.getAmplitude() > 10).compareTo(false)
-        }
+    override fun stop()
+    {
+        analyzer.stop()
     }
 }
