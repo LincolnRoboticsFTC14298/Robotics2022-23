@@ -12,7 +12,7 @@ import kotlin.math.abs
  */
 class AudioAnalyzer
 {
-    private var ar: AudioRecord? = null
+    private lateinit var ar: AudioRecord;
     private var minSize = 0
     var volume = 0
 
@@ -26,20 +26,20 @@ class AudioAnalyzer
             {
                 minSize = AudioRecord.getMinBufferSize(rate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
                 ar = AudioRecord(MediaRecorder.AudioSource.MIC, rate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, minSize)
-                ar?.startRecording()
+                ar.startRecording()
             }
         }
     }
 
     fun stop()
     {
-        ar?.stop()
+        ar.stop()
     }
 
     fun getAmplitude(): Int
     {
         val buffer = ShortArray(minSize)
-        ar?.read(buffer, 0, minSize)
+        ar.read(buffer, 0, minSize)
 
         // Prints Contents of buffer (Don't know what it is)
 
@@ -58,7 +58,7 @@ class AudioAnalyzer
     fun getReccomendedAction(): PitchData
     {
         val buffer = ShortArray(minSize)
-        ar?.read(buffer, 0, minSize)
+        ar.read(buffer, 0, minSize)
 
         var data = ForierTransform().getForierTransformFromBuffer(buffer)
         return data
