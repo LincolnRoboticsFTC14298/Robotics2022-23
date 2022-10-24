@@ -6,9 +6,11 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @TeleOp
-public class MecanumTeleOp extends LinearOpMode {
+public class MecanumTeleOp extends LinearOpMode
+{
     @Override
-    public void runOpMode() throws InterruptedException {
+    public void runOpMode() throws InterruptedException
+    {
 
         //motors
         DcMotor motorFrontLeft = hardwareMap.dcMotor.get("motorFrontLeft");
@@ -23,7 +25,8 @@ public class MecanumTeleOp extends LinearOpMode {
 
         if (isStopRequested()) return;
 
-        while (opModeIsActive()) {
+        while (opModeIsActive())
+        {
             double y = -gamepad1.left_stick_y;
             double x = gamepad1.left_stick_x * 1.1;
             double rx = gamepad1.right_stick_x;
