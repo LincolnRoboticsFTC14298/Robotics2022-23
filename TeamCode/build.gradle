@@ -18,6 +18,14 @@ apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
 
+
+    defaultConfig {
+        externalNativeBuild {
+            cmake {
+                cppFlags ''
+            }
+        }
+    }
     packagingOptions {
         jniLibs {
             pickFirsts += ['**/*.so']
@@ -26,6 +34,12 @@ android {
     namespace = 'org.firstinspires.ftc.teamcode'
     androidResources {
         noCompress 'tflite'
+    }
+    externalNativeBuild {
+        cmake {
+            path file('src/main/CMakeLists.txt')
+            version '3.18.1'
+        }
     }
 }
 
