@@ -2,8 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
+import org.firstinspires.ftc.teamcode.CPPBridge;
 
 @TeleOp
 public class BrokenTeleOp extends LinearOpMode
@@ -13,10 +13,8 @@ public class BrokenTeleOp extends LinearOpMode
     {
         waitForStart();
 
-        breakShit();
+        CPPBridge.breakShit();
 
         if (isStopRequested()) return;
     }
-
-    private static native void breakShit();
 }
