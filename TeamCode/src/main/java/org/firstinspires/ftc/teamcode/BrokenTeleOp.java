@@ -17,7 +17,5 @@ public class BrokenTeleOp extends LinearOpMode
     {
         waitForStart();
         CPPBridge.breakShit();
-
-        if (isStopRequested()) return;
     }
 }
