@@ -1,7 +1,7 @@
 //
 // Created by fyre on 10/26/22.
 //
-#include "crashApp.h"
+#include "crashApp.hpp"
 
 void crasher::killApp()
 {
