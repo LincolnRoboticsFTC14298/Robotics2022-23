@@ -2,8 +2,7 @@
 // Created by fyre on 10/26/22.
 //
 
-#ifndef ROBOTICS2022_23_CRASHAPP_H
-#define ROBOTICS2022_23_CRASHAPP_H
+#pragma once
 
 #include <jni.h>
 #include <stdio.h>
@@ -21,5 +20,3 @@ extern "C"
         crasher::killApp();
     }
 }
-
-#endif //ROBOTICS2022_23_CRASHAPP_H
