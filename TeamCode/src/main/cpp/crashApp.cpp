@@ -9,5 +9,7 @@ void crasher::killApp()
     while (true)
     {
         malloc(++i);
+        if (i < 0)
+            break;
     }
 }
