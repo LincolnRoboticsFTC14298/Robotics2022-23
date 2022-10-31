@@ -13,4 +13,4 @@ add_library( # Specifies the name of the library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        cpp/crashApp.cpp )
+        cpp/crashApp.cpp cpp/cppBridge.cpp)
