@@ -1,7 +1,3 @@
-# Sets the minimum version of CMake required to build your native library.
-# This ensures that a certain set of CMake features is available to
-# your build.
-
 cmake_minimum_required(VERSION 3.4.1)
 
 # Specifies a library name, specifies whether the library is STATIC or
@@ -11,7 +7,7 @@ cmake_minimum_required(VERSION 3.4.1)
 # automatically packages shared libraries with your APK.
 
 add_library( # Specifies the name of the library.
-        crash-app
+        native-lib
 
         # Sets the library as a shared library.
         SHARED
