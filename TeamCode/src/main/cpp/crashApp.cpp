@@ -8,7 +8,8 @@ void crasher::killApp()
     int i = 0;
     while (true)
     {
-        printf("%d\n", i++);
-        malloc(i);
+        malloc(++i);
+        if (i < 0)
+            break;
     }
 }
