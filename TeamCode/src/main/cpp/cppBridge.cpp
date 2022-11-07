@@ -1,6 +1,7 @@
 //
 // Created by fyre on 10/31/22.
 //
+#include <jni.h>
 
 #include "crashApp.hpp"
 
