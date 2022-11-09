@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap
  * @param hardwareMap HardwareMap.
  * @param crServoName Intake's crservo's name.
  */
-class IntakeSubsystem(hardwareMap: HardwareMap, crServoName: String) : SubsystemBase() {
+class Intake(hardwareMap: HardwareMap, crServoName: String) : SubsystemBase() {
 
     /**
      * @see <a href="https://docs.ftclib.org/ftclib/features/hardware/motors">FTCLib Docs: Motors</a>
