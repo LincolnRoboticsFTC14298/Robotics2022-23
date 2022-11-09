@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap
  * @param hardwareMap HardwareMap
  * @param servoName Passthrough's servo's name
  */
-class PassthroughSubsystem(hardwareMap: HardwareMap, servoName: String) : SubsystemBase() {
+class Passthrough(hardwareMap: HardwareMap, servoName: String) : SubsystemBase() {
 
     /**
      * TODO: Set min and max degrees.
