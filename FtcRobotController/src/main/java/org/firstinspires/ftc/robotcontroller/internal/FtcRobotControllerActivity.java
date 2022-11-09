@@ -297,21 +297,6 @@ public class FtcRobotControllerActivity extends Activity
     context = this;
     utility = new Utility(this);
 
-    // Added by Tony for audio purposes
-    int req = 0;
-    while (true)
-    {
-      if (ContextCompat.checkSelfPermission(this.context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-        break;
-      } else {
-        // You can directly ask for the permission.
-        // The registered ActivityResultCallback gets the result of this request.
-        requestPermissions(new String[] { Manifest.permission.RECORD_AUDIO}, req);
-        continue;
-      }
-    }
-
-
     DeviceNameManagerFactory.getInstance().start(deviceNameStartResult);
 
     PreferenceRemoterRC.getInstance().start(prefRemoterStartResult);
