@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap
  * @param leftMotorName Lift's left motor's name.
  * @param rightMotorName Lift's right motor's name.
  */
-class LiftSubsystem(hardwareMap: HardwareMap, leftMotorName: String, rightMotorName: String)
+class Lift(hardwareMap: HardwareMap, leftMotorName: String, rightMotorName: String)
     : SubsystemBase() {
 
     /**
