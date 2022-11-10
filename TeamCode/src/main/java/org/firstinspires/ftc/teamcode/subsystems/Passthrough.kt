@@ -29,7 +29,7 @@ class Passthrough(hwMap: HardwareMap, servoName: String) : SubsystemBase()
      */
     fun drop()
     {
-        servo.position = MAX;
+        servo.position = MAX
     }
 
     /**
@@ -37,6 +37,6 @@ class Passthrough(hwMap: HardwareMap, servoName: String) : SubsystemBase()
      */
     fun pickUp()
     {
-        servo.position = MIN;
+        servo.position = MIN
     }
 }
