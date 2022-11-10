@@ -7,38 +7,43 @@ import com.qualcomm.robotcore.hardware.HardwareMap
 /**
  * Intake subsystem consists of a continuous rotating servo
  * that picks up cones and a touch sensor to detect it.
- * @param hardwareMap HardwareMap.
- * @param crServoName Intake's crservo's name.
+ * @param hwMap HardwareMap.
+ * @param servoName Intake continuous servo's name.
+ * @param sensorName Touch Sensor Name
  */
-class Intake(hardwareMap: HardwareMap, crServoName: String) : SubsystemBase() {
+class Intake(hwMap: HardwareMap, servoName: String, sensorName: String) : SubsystemBase()
+{
 
     /**
      * @see <a href="https://docs.ftclib.org/ftclib/features/hardware/motors">FTCLib Docs: Motors</a>
      */
-    private val crServo = CRServo(hardwareMap, crServoName)
+    private val servo = CRServo(hwMap, servoName)
+    private val sensor = hwMap.touchSensor.get(sensorName)
 
-    // TODO: add touch sensor
+    private val SPD = 0.5
 
     /**
      * Turn servo on to a constant speed.
      */
-    fun turnOn() {
-
+    fun on()
+    {
+        servo.set(SPD)
     }
 
     /**
      * Turn servo off.
      */
-    fun turnOff() {
-
+    fun off()
+    {
+        servo.stop()
     }
 
     /**
      * Check if there is a cone based on touch sensor.
      * @return [Boolean] of state.
      */
-    fun isConeInside(): Boolean {
-        return false
+    fun isConeInside(): Boolean
+    {
+        return sensor.isPressed
     }
-
 }
