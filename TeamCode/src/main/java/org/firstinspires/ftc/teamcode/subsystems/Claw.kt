@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor
  * Claw subsystem consists of a servo with a touch sensor that picks up cones.
  * @param hardwareMap HardwareMap.
  * @param servoName Claw's servo's name.
+ * @param sensorName Name of the touch sensor
  */
 class Claw(hwMap: HardwareMap, servoName: String, sensorName: String) : SubsystemBase()
 {
