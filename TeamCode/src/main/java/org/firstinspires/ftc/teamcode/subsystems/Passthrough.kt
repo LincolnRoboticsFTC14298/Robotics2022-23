@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap
  * Passthrough subsystem consist of a servo that rotates
  * the mechanism containing the intake/claw from pick up to drop off.
  * @param hwMap HardwareMap
- * @param servoName Passthrough's servo's name
+ * @param servoName Passthrough servo's name
  */
 class Passthrough(hwMap: HardwareMap, servoName: String) : SubsystemBase()
 {
@@ -29,7 +29,7 @@ class Passthrough(hwMap: HardwareMap, servoName: String) : SubsystemBase()
      */
     fun drop()
     {
-        servo.position = MAX;
+        servo.position = MAX
     }
 
     /**
@@ -37,6 +37,6 @@ class Passthrough(hwMap: HardwareMap, servoName: String) : SubsystemBase()
      */
     fun pickUp()
     {
-        servo.position = MIN;
+        servo.position = MIN
     }
 }
