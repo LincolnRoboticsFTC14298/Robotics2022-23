@@ -9,9 +9,9 @@ interface PotentiometerEx : HardwareDevice {
     /**
      * Sets the range of the potentiometer at specified angles.
      *
-     * @param min       The minimum value. The specified minimum is the angle the potentiometer
+     * @param minAngle  The minimum value. The specified minimum is the angle the potentiometer
      *                  makes when it is at the position of 0.
-     * @param max       The maximum value. The specified maximum is the angle the potentiometer
+     * @param maxAngle  The maximum value. The specified maximum is the angle the potentiometer
      *                  makes when it is at the position of 1.
      * @param angleUnit The unit of the range parameters
      */
@@ -20,7 +20,7 @@ interface PotentiometerEx : HardwareDevice {
     /**
      * Sets the inversion factor of the servo.
      *
-     * <p>By default, the inversion is false.</p>
+     * <br>By default, the inversion is false.</br>
      *
      * @param isInverted the desired inversion factor
      */
