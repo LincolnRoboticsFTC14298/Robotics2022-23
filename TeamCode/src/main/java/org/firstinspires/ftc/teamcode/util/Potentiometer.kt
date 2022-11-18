@@ -33,9 +33,9 @@ class Potentiometer(
 
     private var isInverted: Boolean = false
 
-    override fun setRange(min: Double, max: Double, angleUnit: AngleUnit) {
-        this.minAngle = toRadians(min, angleUnit)
-        this.maxAngle = toRadians(max, angleUnit)
+    override fun setRange(minAngle: Double, maxAngle: Double, angleUnit: AngleUnit) {
+        this.minAngle = toRadians(minAngle, angleUnit)
+        this.maxAngle = toRadians(maxAngle, angleUnit)
     }
 
     override fun setInverted(isInverted: Boolean) {
