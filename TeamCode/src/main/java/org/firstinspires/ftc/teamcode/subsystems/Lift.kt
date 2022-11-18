@@ -11,15 +11,15 @@ import com.qualcomm.robotcore.hardware.HardwareMap
  * @param leftMotorName Lift's left motor's name.
  * @param rightMotorName Lift's right motor's name.
  */
-class Lift(hardwareMap: HardwareMap, leftMotorName: String, rightMotorName: String)  : SubsystemBase() {
+class Lift(hwMap: HardwareMap, leftMotorName: String, rightMotorName: String)  : SubsystemBase() {
 
     /**
      * Avoid using the individual motors, it's best to use the group.
      * TODO: reverse motor if appropriate.
      * @see <a href="https://docs.ftclib.org/ftclib/features/hardware/motors">FTCLib Docs: Motors</a>
      */
-    private val leftMotor  = Motor(hardwareMap, leftMotorName)
-    private val rightMotor = Motor(hardwareMap, rightMotorName)
+    private val leftMotor  = Motor(hwMap, leftMotorName)
+    private val rightMotor = Motor(hwMap, rightMotorName)
     private val motorGroup = MotorGroup(leftMotor, rightMotor)
 
     init {
