@@ -19,7 +19,7 @@ import java.lang.Math.toRadians
  * @param angleUnit The unit of the range parameters
  */
 class Potentiometer(
-    hw: HardwareMap,
+    hwMap: HardwareMap,
     name: String,
     private var minAngle: Double,
     private var maxAngle: Double,
@@ -31,7 +31,7 @@ class Potentiometer(
         maxAngle = toRadians(maxAngle, angleUnit)
     }
 
-    private val potentiometer: AnalogInput = hw.get(AnalogInput::class.java, name)
+    private val potentiometer: AnalogInput = hwMap.get(AnalogInput::class.java, name)
 
     private var direction: PotentiometerEx.Direction = PotentiometerEx.Direction.FORWARD
 
