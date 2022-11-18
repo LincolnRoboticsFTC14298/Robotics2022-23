@@ -3,12 +3,14 @@ package org.firstinspires.ftc.teamcode.util
 import com.arcrobotics.ftclib.hardware.motors.Motor
 import com.qualcomm.robotcore.hardware.AnalogInput
 import com.qualcomm.robotcore.hardware.HardwareMap
+import com.qualcomm.robotcore.hardware.ServoImplEx
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import java.lang.Math.toDegrees
 import java.lang.Math.toRadians
 
 /**
- * "Wrapper class" for potentiometer
+ * A wrapper class for a potentiometer.
+ *
  * @param hw        HardwareMap.
  * @param minAngle  The minimum value. The specified minimum is the angle the potentiometer
  *                  makes when it is at the position of 0.
@@ -31,24 +33,24 @@ class Potentiometer(
 
     private val potentiometer: AnalogInput = hw.get(AnalogInput::class.java, name)
 
-    private var isInverted: Boolean = false
+    private var direction: PotentiometerEx.Direction = PotentiometerEx.Direction.FORWARD
 
     override fun setRange(minAngle: Double, maxAngle: Double, angleUnit: AngleUnit) {
         this.minAngle = toRadians(minAngle, angleUnit)
         this.maxAngle = toRadians(maxAngle, angleUnit)
     }
 
-    override fun setInverted(isInverted: Boolean) {
-        this.isInverted = isInverted
+    override fun setInverted(direction: PotentiometerEx.Direction) {
+        this.direction = direction
     }
 
-    override fun getInverted(): Boolean {
-        return isInverted
+    override fun getInverted(): PotentiometerEx.Direction {
+        return direction
     }
 
     override fun getPosition(): Double {
         val position = potentiometer.voltage / potentiometer.maxVoltage
-        return if (isInverted) 1 - position else position
+        return if (direction == PotentiometerEx.Direction.REVERSE) 1 - position else position
     }
 
     override fun getAngle(angleUnit: AngleUnit): Double {

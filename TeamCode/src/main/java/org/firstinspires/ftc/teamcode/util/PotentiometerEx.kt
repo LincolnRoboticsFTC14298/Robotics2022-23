@@ -1,10 +1,14 @@
 package org.firstinspires.ftc.teamcode.util
 
 import com.arcrobotics.ftclib.hardware.HardwareDevice
-import com.qualcomm.robotcore.hardware.Servo.Direction
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 
 interface PotentiometerEx : HardwareDevice {
+
+    enum class Direction {
+        FORWARD,
+        REVERSE
+    }
 
     /**
      * Sets the range of the potentiometer at specified angles.
@@ -22,14 +26,14 @@ interface PotentiometerEx : HardwareDevice {
      *
      * <br>By default, the inversion is false.</br>
      *
-     * @param isInverted the desired inversion factor
+     * @param direction The desired inversion factor.
      */
-    fun setInverted(isInverted: Boolean)
+    fun setInverted(direction: Direction)
 
     /**
      * @return true if the servo is inverted, false otherwise
      */
-    fun getInverted() : Boolean
+    fun getInverted() : Direction
 
     /**
      * @return The current position of the potentiometer from 0 to 1.
