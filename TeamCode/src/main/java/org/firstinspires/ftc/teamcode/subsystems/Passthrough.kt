@@ -17,14 +17,14 @@ import kotlin.math.abs
  * @param hw HardwareMap
  * @param servoName Passthrough servo's name
  */
-class Passthrough(hw: HardwareMap, servoName: String, potentiometerName: String) : SubsystemBase() {
+class Passthrough(hwMap: HardwareMap, servoName: String, potentiometerName: String) : SubsystemBase() {
 
     /**
      * TODO: Set min and max degrees for servo and potentiometer.
      * @see <a href="https://docs.ftclib.org/ftclib/features/hardware">FTCLib Docs: Hardware</a>
      */
-    private val servo: ServoEx = SimpleServo(hw, servoName, 0.0, 1.0)
-    private val potentiometer: Potentiometer = Potentiometer(hw, potentiometerName, 0.0, 0.0)
+    private val servo: ServoEx = SimpleServo(hwMap, servoName, 0.0, 1.0)
+    private val potentiometer: Potentiometer = Potentiometer(hwMap, potentiometerName, 0.0, 0.0)
 
     private val min: Double = 0.0;
     private val max: Double = 1.0;
