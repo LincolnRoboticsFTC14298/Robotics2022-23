@@ -7,9 +7,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap
 
 /**
  * Lift consists of two multistage slides powered by a motor which pulls a string.
- * @param hardwareMap HardwareMap.
- * @param leftMotorName Lift's left motor's name.
- * @param rightMotorName Lift's right motor's name.
+ * @param hardwareMap        HardwareMap.
+ * @param leftMotorName      Lift's left motor's name.
+ * @param rightMotorName     Lift's right motor's name.
  */
 class Lift(hwMap: HardwareMap, leftMotorName: String, rightMotorName: String)  : SubsystemBase() {
 
@@ -24,11 +24,12 @@ class Lift(hwMap: HardwareMap, leftMotorName: String, rightMotorName: String)  :
 
     init {
         motorGroup.setDistancePerPulse(1.0) // TODO: Experimentally find value.
-        motorGroup.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE)
+        motorGroup.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE) // TODO: is this desirable w/ motion profiling?
     }
 
     /**
      * Set power of lift.
+     * TODO: Account for voltage of the robot
      * @param power Percentage of the maximum speed of the lift.
      */
     fun setPower(power: Double) {
@@ -48,6 +49,14 @@ class Lift(hwMap: HardwareMap, leftMotorName: String, rightMotorName: String)  :
      */
     fun getHeight(): Double {
         return motorGroup.distance
+    }
+
+    /**
+     * Get vertical component of the velocity using encoder ticks.
+     * @return Velocity of the lift in cm / s.
+     */
+    fun getVelocity(): Double {
+        return motorGroup.rate
     }
 
 }
