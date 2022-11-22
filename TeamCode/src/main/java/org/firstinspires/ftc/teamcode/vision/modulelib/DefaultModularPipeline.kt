@@ -10,22 +10,16 @@ import org.openftc.easyopencv.OpenCvPipeline
 class DefaultModularPipeline(
     private val displayModule: AbstractPipelineModule<Mat>,
     private vararg val outputModules: AbstractPipelineModule<*>
-    ) : OpenCvPipeline() {
+    ) : ModularPipeline() {
+
+    init {
+        addEndModules(displayModule, *outputModules)
+    }
 
     var lastOutput: Array<Any?> = arrayOfNulls(outputModules.size)
         private set
 
-    override fun init(input: Mat) {
-        displayModule.init(input)
-        outputModules.forEach { module -> module.init(input) }
-    }
-
-    override fun processFrame(input: Mat): Mat {
-        // Clear cache
-        displayModule.clearCache()
-        for (module in outputModules) module.clearCache()
-
-        // Calculate fresh values
+    override fun processFrameForCache(input: Mat): Mat {
         outputModules.forEachIndexed { i, module -> lastOutput[i] = module.processFrame(input) }
         return displayModule.processFrame(input)
     }
