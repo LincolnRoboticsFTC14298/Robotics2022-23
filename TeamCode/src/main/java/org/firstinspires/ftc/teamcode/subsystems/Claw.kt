@@ -12,33 +12,29 @@ import com.qualcomm.robotcore.hardware.TouchSensor
  * @param servoName Claw's servo's name.
  * @param sensorName Name of the touch sensor
  */
-class Claw(hwMap: HardwareMap, servoName: String, sensorName: String) : SubsystemBase()
-{
+class Claw(hwMap: HardwareMap, servoName: String, sensorName: String) : SubsystemBase() {
 
     /**
      * TODO: Set min and max degrees.
      * @see <a href="https://docs.ftclib.org/ftclib/features/hardware">FTCLib Docs: Hardware</a>
      */
     private val servo: ServoEx = SimpleServo(hwMap, servoName, 0.0, 1.0)
-    private val sensor: TouchSensor = hwMap.touchSensor.get(sensorName);
+    private val sensor: TouchSensor = hwMap.get(TouchSensor::class.java, sensorName)
 
     private val MIN = 0.0
     private val MAX = 0.7
-    // TODO: add touch sensor
 
     /**
      * Rotate servo to drop cone.
      */
-    fun drop()
-    {
+    fun drop() {
         servo.position = MAX
     }
 
     /**
      * Rotate servo to pick up cone.
      */
-    fun grab()
-    {
+    fun grab() {
         servo.position = MIN
     }
 
@@ -46,8 +42,7 @@ class Claw(hwMap: HardwareMap, servoName: String, sensorName: String) : Subsyste
      * Check if there is a cone based on touch sensor.
      * @return [Boolean] of state.
      */
-    fun isConeTouched(): Boolean
-    {
+    fun isConeTouched(): Boolean {
         return sensor.isPressed
     }
 
