@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Intake
  * Assumes passthrough is in correct position.
  * @author Jared Haertel
  */
-class ConePickUp(private val intake: Intake) : CommandBase() {
+class IntakePickUp(private val intake: Intake) : CommandBase() {
 
     init {
         addRequirements(intake)
