@@ -1,62 +1,141 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
+import com.acmerobotics.roadrunner.control.PIDFController
+import com.acmerobotics.roadrunner.profile.MotionProfile
+import com.acmerobotics.roadrunner.profile.MotionProfileGenerator
+import com.acmerobotics.roadrunner.profile.MotionState
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.arcrobotics.ftclib.hardware.motors.Motor
 import com.arcrobotics.ftclib.hardware.motors.MotorGroup
 import com.qualcomm.robotcore.hardware.HardwareMap
+import com.qualcomm.robotcore.util.ElapsedTime
+import com.qualcomm.robotcore.util.Range
+import org.firstinspires.ftc.teamcode.RobotConfig
+import kotlin.math.abs
 
 /**
  * Lift consists of two multistage slides powered by a motor which pulls a string.
- * @param hardwareMap        HardwareMap.
- * @param leftMotorName      Lift's left motor's name.
- * @param rightMotorName     Lift's right motor's name.
+ * @param hwMap        HardwareMap.
  */
-class Lift(hwMap: HardwareMap, leftMotorName: String, rightMotorName: String)  : SubsystemBase() {
+class Lift(hwMap: HardwareMap) : SubsystemBase() {
 
     /**
      * Avoid using the individual motors, it's best to use the group.
-     * TODO: reverse motor if appropriate.
      * @see <a href="https://docs.ftclib.org/ftclib/features/hardware/motors">FTCLib Docs: Motors</a>
      */
-    private val leftMotor  = Motor(hwMap, leftMotorName)
-    private val rightMotor = Motor(hwMap, rightMotorName)
+    private val leftMotor  = Motor(hwMap, RobotConfig.liftLeftMotorName)
+    private val rightMotor = Motor(hwMap, RobotConfig.liftRightMotorName)
     private val motorGroup = MotorGroup(leftMotor, rightMotor)
 
+    private val batteryVoltageSensor = hwMap.voltageSensor.iterator().next()
+
+
+    private val controller = PIDFController(
+        RobotConfig.liftCoeffs,
+        RobotConfig.liftKStatic,
+        RobotConfig.liftKV,
+        RobotConfig.liftKA
+    )
+
+    private lateinit var motionProfile: MotionProfile
+
+    /**
+     * @return Target height off the ground in cm.
+     */
+    var setpoint = 0.0
+        private set
+
+    private val timer = ElapsedTime()
+
     init {
-        motorGroup.setDistancePerPulse(1.0) // TODO: Experimentally find value.
-        motorGroup.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE) // TODO: is this desirable w/ motion profiling?
+        // TODO: reverse motor if appropriate.
+        motorGroup.setDistancePerPulse(RobotConfig.liftDPP)
+        motorGroup.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE)
+
+        retract()
+    }
+
+    override fun periodic() {
+        val state = motionProfile[timer.seconds()]
+
+        controller.apply {
+            targetPosition = state.x
+            targetVelocity = state.v
+            targetAcceleration = state.a + 981.0 // gravity term
+        }
+
+        setPower(controller.update(getCurrentHeight(), getCurrentVelocity()))
+    }
+
+    /**
+     * @return Height of the lift relative to the ground in cm.
+     */
+    fun getCurrentHeight(): Double {
+        return motorGroup.distance + RobotConfig.liftHeightOffset
+    }
+
+
+    /**
+     * @return Velocity of the lift in cm / s.
+     */
+    fun getCurrentVelocity(): Double {
+        return motorGroup.rate
+    }
+
+    /**
+     * @return Acceleration of the lift in cm / s2.
+     */
+    fun getCurrentAcceleration(): Double {
+        return RobotConfig.liftDPP * motorGroup.encoder.acceleration
+    }
+
+    /**
+     * Sets the target height of the lift and constructs an optimal motion profile for it.
+     * @param height        Target height off the ground in cm.
+     */
+    fun setSetpoint(height: Double) {
+        timer.reset()
+        setpoint = Range.clip(height, RobotConfig.liftHeightOffset, RobotConfig.liftMaxHeight)
+        motionProfile = MotionProfileGenerator.generateSimpleMotionProfile(
+            MotionState(getCurrentHeight(), getCurrentVelocity(), getCurrentAcceleration()),
+            MotionState(setpoint, 0.0, 0.0),
+            RobotConfig.liftMaxVel,
+            RobotConfig.liftMaxAccel
+        )
+    }
+
+    /**
+     * Sets the target height of the lift and constructs an optimal motion profile for it.
+     * @param pole          Based on [RobotConfig.PoleType] heights.
+     */
+    fun setSetpoint(pole: RobotConfig.PoleType) {
+        setSetpoint(pole.height + RobotConfig.poleLiftOffset)
+    }
+
+    fun retract() {
+        setSetpoint(RobotConfig.liftHeightOffset) // The zero point
     }
 
     /**
      * Set power of lift.
-     * TODO: Account for voltage of the robot
-     * @param power Percentage of the maximum speed of the lift.
+     * @param power         Percentage of the maximum speed of the lift.
      */
-    fun setPower(power: Double) {
-        motorGroup.set(power)
+    private fun setPower(power: Double) {
+        motorGroup.set(power * 12.0 / batteryVoltageSensor.voltage)
     }
 
     /**
-     * Stop lift.
+     * @return True if the controller has reached the target with some tolerance.
      */
-    fun stop() {
-        motorGroup.stopMotor()
+    fun atTarget(): Boolean {
+        return abs(controller.lastError) < RobotConfig.liftTargetErrorTolerance
     }
 
     /**
-     * Get vertical component of the lift extension using encoder ticks.
-     * @return Height of the lift in cm.
+     * @return Time remaining from reaching the target.
      */
-    fun getHeight(): Double {
-        return motorGroup.distance
-    }
-
-    /**
-     * Get vertical component of the velocity using encoder ticks.
-     * @return Velocity of the lift in cm / s.
-     */
-    fun getVelocity(): Double {
-        return motorGroup.rate
+    fun timeFromTarget(): Double {
+        return motionProfile.duration() - timer.seconds()
     }
 
 }
