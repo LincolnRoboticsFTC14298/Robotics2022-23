@@ -11,7 +11,11 @@ import org.opencv.core.Mat
  */
 open class SimpleModule<T>(
     private val onProcessFrame: (input: Mat) -> T,
-    vararg parents: AbstractPipelineModule<T>) : AbstractPipelineModule<T>(*parents) {
+    vararg parents: AbstractPipelineModule<T>) : AbstractPipelineModule<T>() {
+
+    init {
+        addParentModules(*parents)
+    }
 
     override fun processFrameForCache(input: Mat): T {
         return processFrame(input)
