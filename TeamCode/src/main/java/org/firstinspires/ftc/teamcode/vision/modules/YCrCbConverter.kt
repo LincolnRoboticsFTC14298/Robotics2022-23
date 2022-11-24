@@ -1,13 +1,17 @@
 package org.firstinspires.ftc.teamcode.vision.modules
 
 import org.firstinspires.ftc.teamcode.vision.modulelib.AbstractPipelineModule
-import org.firstinspires.ftc.teamcode.vision.modulelib.PipelineModule
 import org.opencv.core.Mat
 import org.opencv.imgproc.Imgproc
 
-class YCrCbConverter(private val inputFrame: AbstractPipelineModule<Mat>) : AbstractPipelineModule<Mat>(inputFrame) {
+class YCrCbConverter(private val inputFrame: AbstractPipelineModule<Mat>) : AbstractPipelineModule<Mat>() {
 
     private lateinit var output: Mat
+
+    init {
+        addParentModules(inputFrame)
+    }
+
 
     override fun init(input: Mat) {
         output = input.clone()

@@ -5,12 +5,20 @@ import org.opencv.core.Mat
 /**
  * Automatically caches values to avoid redundant calculations.
  * @param T                  Type of output.
- * @param parents            Dependent modules. Used to properly clear cached values.
  * @author Jared Haertel
  */
-abstract class AbstractPipelineModule<T>(private vararg val parents: AbstractPipelineModule<T>) : PipelineModule<T> {
+abstract class AbstractPipelineModule<T>() : PipelineModule<T> {
 
     private var cachedValue: T? = null
+
+    private val parents = mutableListOf<AbstractPipelineModule<*>>()
+
+    /**
+     * @param parents        Dependent modules. Used to properly clear cached values.
+     */
+    fun addParentModules(vararg parents: AbstractPipelineModule<T>) {
+        this.parents.addAll(parents)
+    }
 
     override fun init(input: Mat) {
 
