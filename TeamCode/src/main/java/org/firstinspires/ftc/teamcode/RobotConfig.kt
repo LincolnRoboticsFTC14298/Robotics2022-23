@@ -141,8 +141,10 @@ object RobotConfig {
     const val poleLiftOffset = 10.0 // cm above the pole the lift should be at
 
     /**
-     * Intake
+     * [Intake]
      */
+    const val intakeServoName = "intake"
+    const val intakeTouchSensorName = "intakeTouch"
     val intakePosition = Pose2d(0.0, 0.0, 0.0) // Position of the center of the intake during pick up position
 
     const val intakeTimeToSpitOut = 500 // milliseconds
