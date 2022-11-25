@@ -13,7 +13,7 @@ object RobotConfig {
      * Field                                            *
      ****************************************************/
 
-    const val tileSize = 59.5 // cm
+    const val tileSize = .595 // m
 
 
     /**
