@@ -1,16 +1,15 @@
 package org.firstinspires.ftc.teamcode.commands
 
-import com.arcrobotics.ftclib.command.Command
 import com.arcrobotics.ftclib.command.InstantCommand
 import com.arcrobotics.ftclib.command.ParallelDeadlineGroup
 import com.arcrobotics.ftclib.command.SequentialCommandGroup
-import com.arcrobotics.ftclib.command.WaitCommand
 import com.arcrobotics.ftclib.command.WaitUntilCommand
 import org.firstinspires.ftc.teamcode.RobotConfig
 import org.firstinspires.ftc.teamcode.commands.drive.ApproachRelativePoint
 import org.firstinspires.ftc.teamcode.subsystems.Intake
 import org.firstinspires.ftc.teamcode.subsystems.Mecanum
 import org.firstinspires.ftc.teamcode.subsystems.Vision
+import org.firstinspires.ftc.teamcode.subsystems.localization.Localizer
 
 /**
  * Use vision to align robot and precisely pick up the cone with input from driver.
@@ -20,6 +19,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Vision
  */
 class ApproachCone(
     mecanum: Mecanum,
+    localizer: Localizer,
     vision: Vision,
     intake: Intake,
     speed: () -> Double
@@ -41,6 +41,7 @@ class ApproachCone(
                     // Switch to auto approach the cone once the cone has been detected
                     ApproachRelativePoint(
                         mecanum,
+                        localizer,
                         vision::getConeRelativePosition,
                         RobotConfig.intakePosition,
                         speed
@@ -49,7 +50,7 @@ class ApproachCone(
             ),
             InstantCommand(vision::stopStreamingFrontCamera)
         )
-        addRequirements(mecanum, vision, intake)
+        addRequirements(mecanum, localizer, vision, intake)
     }
 
 }
