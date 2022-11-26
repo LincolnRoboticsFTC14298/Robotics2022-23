@@ -110,6 +110,26 @@ object RobotConfig {
     @JvmField
     var driveRightFront: String = "rightFront"
 
+    /**
+     * [StandardTrackingWheelLocalizer]
+     */
+    const val leftEncoderName = "leftEncoder"
+    const val rightEncoderName = "rightEncoder"
+    const val frontEncoderName = "frontEncoder"
+
+    var TICKS_PER_REV = 0.0
+    var WHEEL_RADIUS = 2.0 // in
+    var GEAR_RATIO = 1.0 // output (wheel) speed / input (encoder) speed
+
+    @JvmField
+    var X_MULTIPLIER = 1.0 // TODO multipliers for each individual encoder
+    @JvmField
+    var Y_MULTIPLIER = 1.0
+    @JvmField
+    var LATERAL_DISTANCE = 10.0 // in; distance between the left and right wheels
+    @JvmField
+    var FORWARD_OFFSET = 4.0 // in; offset of the lateral wheel
+
 
     /**
      * [Mecanum]
