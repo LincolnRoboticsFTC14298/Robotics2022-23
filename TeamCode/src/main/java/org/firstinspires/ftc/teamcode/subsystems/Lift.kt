@@ -11,6 +11,19 @@ import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.util.ElapsedTime
 import com.qualcomm.robotcore.util.Range
 import org.firstinspires.ftc.teamcode.RobotConfig
+import org.firstinspires.ftc.teamcode.RobotConfig.leftLiftName
+import org.firstinspires.ftc.teamcode.RobotConfig.liftCoeffs
+import org.firstinspires.ftc.teamcode.RobotConfig.liftDPP
+import org.firstinspires.ftc.teamcode.RobotConfig.liftHeightOffset
+import org.firstinspires.ftc.teamcode.RobotConfig.liftKA
+import org.firstinspires.ftc.teamcode.RobotConfig.liftKStatic
+import org.firstinspires.ftc.teamcode.RobotConfig.liftKV
+import org.firstinspires.ftc.teamcode.RobotConfig.liftMaxAccel
+import org.firstinspires.ftc.teamcode.RobotConfig.liftMaxHeight
+import org.firstinspires.ftc.teamcode.RobotConfig.liftMaxVel
+import org.firstinspires.ftc.teamcode.RobotConfig.liftTargetErrorTolerance
+import org.firstinspires.ftc.teamcode.RobotConfig.poleLiftOffset
+import org.firstinspires.ftc.teamcode.RobotConfig.rightLiftName
 import kotlin.math.abs
 
 /**
@@ -23,18 +36,18 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
      * Avoid using the individual motors, it's best to use the group.
      * @see <a href="https://docs.ftclib.org/ftclib/features/hardware/motors">FTCLib Docs: Motors</a>
      */
-    private val leftMotor  = Motor(hwMap, RobotConfig.liftLeftMotorName)
-    private val rightMotor = Motor(hwMap, RobotConfig.liftRightMotorName)
+    private val leftMotor  = Motor(hwMap, leftLiftName)
+    private val rightMotor = Motor(hwMap, rightLiftName)
     private val motorGroup = MotorGroup(leftMotor, rightMotor)
 
     private val batteryVoltageSensor = hwMap.voltageSensor.iterator().next()
 
 
     private val controller = PIDFController(
-        RobotConfig.liftCoeffs,
-        RobotConfig.liftKStatic,
-        RobotConfig.liftKV,
-        RobotConfig.liftKA
+        liftCoeffs,
+        liftKStatic,
+        liftKV,
+        liftKA
     )
 
     private lateinit var motionProfile: MotionProfile
@@ -49,7 +62,7 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
 
     init {
         // TODO: reverse motor if appropriate.
-        motorGroup.setDistancePerPulse(RobotConfig.liftDPP)
+        motorGroup.setDistancePerPulse(liftDPP)
         motorGroup.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE)
 
         retract()
@@ -71,7 +84,7 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
      * @return Height of the lift relative to the ground in cm.
      */
     fun getCurrentHeight(): Double {
-        return motorGroup.distance + RobotConfig.liftHeightOffset
+        return motorGroup.distance + liftHeightOffset
     }
 
 
@@ -86,7 +99,7 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
      * @return Acceleration of the lift in cm / s2.
      */
     fun getCurrentAcceleration(): Double {
-        return RobotConfig.liftDPP * motorGroup.encoder.acceleration
+        return liftDPP * motorGroup.encoder.acceleration
     }
 
     /**
@@ -95,25 +108,25 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
      */
     fun setSetpoint(height: Double) {
         timer.reset()
-        setpoint = Range.clip(height, RobotConfig.liftHeightOffset, RobotConfig.liftMaxHeight)
+        setpoint = Range.clip(height, liftHeightOffset, liftMaxHeight)
         motionProfile = MotionProfileGenerator.generateSimpleMotionProfile(
             MotionState(getCurrentHeight(), getCurrentVelocity(), getCurrentAcceleration()),
             MotionState(setpoint, 0.0, 0.0),
-            RobotConfig.liftMaxVel,
-            RobotConfig.liftMaxAccel
+            liftMaxVel,
+            liftMaxAccel
         )
     }
 
     /**
      * Sets the target height of the lift and constructs an optimal motion profile for it.
-     * @param pole          Based on [RobotConfig.PoleType] heights.
+     * @param pole          Based on [PoleType] heights.
      */
     fun setSetpoint(pole: RobotConfig.PoleType) {
-        setSetpoint(pole.height + RobotConfig.poleLiftOffset)
+        setSetpoint(pole.height + poleLiftOffset)
     }
 
     fun retract() {
-        setSetpoint(RobotConfig.liftHeightOffset) // The zero point
+        setSetpoint(liftHeightOffset) // The zero point
     }
 
     /**
@@ -128,7 +141,7 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
      * @return True if the controller has reached the target with some tolerance.
      */
     fun atTarget(): Boolean {
-        return abs(controller.lastError) < RobotConfig.liftTargetErrorTolerance
+        return abs(controller.lastError) < liftTargetErrorTolerance
     }
 
     /**
