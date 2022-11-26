@@ -14,7 +14,7 @@ class PassthroughDeposit(private val passthrough: Passthrough) : CommandBase() {
     }
 
     override fun initialize() {
-        passthrough.drop()
+        passthrough.deposit()
     }
 
     override fun isFinished(): Boolean {
