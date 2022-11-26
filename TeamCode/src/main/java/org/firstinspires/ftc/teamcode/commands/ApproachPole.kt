@@ -5,7 +5,6 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup
 import com.arcrobotics.ftclib.command.WaitUntilCommand
 import org.firstinspires.ftc.teamcode.RobotConfig
 import org.firstinspires.ftc.teamcode.commands.drive.ApproachPoint
-import org.firstinspires.ftc.teamcode.commands.drive.ApproachRelativePoint
 import org.firstinspires.ftc.teamcode.subsystems.*
 import org.firstinspires.ftc.teamcode.subsystems.localization.Localizer
 
@@ -32,6 +31,7 @@ class ApproachPole(
                     ReadyPoleDeposit(nearestPole.type, lift, passthrough),
                     ApproachPoint(
                         mecanum,
+                        localizer,
                         nearestPole::vector,
                         RobotConfig.intakePosition,
                         speed

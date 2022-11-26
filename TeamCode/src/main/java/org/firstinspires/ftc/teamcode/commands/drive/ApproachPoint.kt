@@ -2,9 +2,9 @@ package org.firstinspires.ftc.teamcode.commands.drive
 
 import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.acmerobotics.roadrunner.geometry.Vector2d
-import com.arcrobotics.ftclib.command.CommandBase
 import com.arcrobotics.ftclib.command.SequentialCommandGroup
 import org.firstinspires.ftc.teamcode.subsystems.Mecanum
+import org.firstinspires.ftc.teamcode.subsystems.localization.Localizer
 
 /**
  * Approaches a global point while accepting an input controlling speed or aggressiveness.
@@ -17,20 +17,22 @@ import org.firstinspires.ftc.teamcode.subsystems.Mecanum
  * @param maxTolerableAngleDifference   Maximum angle it can face away from the target in radians.
  */
 class ApproachPoint(
-    private val mecanum: Mecanum,
-    private val targetPoint: () -> Vector2d,
-    private val offsetPose: Pose2d = Pose2d(0.0, 0.0, 0.0),
-    private val speed: () -> Double,
-    private val maxTolerableDistance: Double = 0.005, // m
-    private val maxTolerableAngleDifference: Double = 0.05 // radians
+    mecanum: Mecanum,
+    localizer: Localizer,
+    targetPoint: () -> Vector2d,
+    offsetPose: Pose2d = Pose2d(0.0, 0.0, 0.0),
+    speed: () -> Double,
+    maxTolerableDistance: Double = 0.005, // m
+    maxTolerableAngleDifference: Double = 0.05 // radians
 ) : SequentialCommandGroup() {
 
     init {
         addCommands(
             ApproachRelativePoint(
                 mecanum,
+                localizer,
                 {
-                    val pose = mecanum.getPoseEstimate()
+                    val pose = localizer.poseEstimate
                     val dT =  targetPoint.invoke().minus(pose.vec())
                     dT.rotated(-pose.heading)
                 },
@@ -40,7 +42,7 @@ class ApproachPoint(
                 maxTolerableAngleDifference
             )
         )
-        addRequirements(mecanum)
+        addRequirements(mecanum, localizer)
     }
 
 }
