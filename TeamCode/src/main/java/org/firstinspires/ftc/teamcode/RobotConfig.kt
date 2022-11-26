@@ -4,8 +4,8 @@ import com.acmerobotics.roadrunner.control.PIDCoefficients
 import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.acmerobotics.roadrunner.geometry.Vector2d
 import org.firstinspires.ftc.teamcode.subsystems.*
-import org.firstinspires.ftc.teamcode.commands.*
 import org.firstinspires.ftc.teamcode.subsystems.drive.SampleMecanumDrive
+import org.firstinspires.ftc.teamcode.subsystems.drive.StandardTrackingWheelLocalizer
 
 object RobotConfig {
 
@@ -119,8 +119,8 @@ object RobotConfig {
     /**
      * [Lift]
      */
-    const val liftLeftMotorName = "liftLeft"
-    const val liftRightMotorName = "liftRight"
+    const val leftLiftName = "leftLift"
+    const val rightLiftName = "rightLift"
 
     const val liftHeightOffset = 0.0 // cm The raw height of zero is off the ground
     const val liftMaxHeight = 0.0 // cm Max allowable extension height
@@ -154,8 +154,8 @@ object RobotConfig {
     /**
      * Passthrough
      */
-    const val passthroughServoLeftName = "passthroughLeft"
-    const val passthroughServoRightName = "passthroughRight"
+    const val leftPassthroughName = "leftPassthrough"
+    const val rightPassthroughName = "rightPassthrough"
     const val potentiometerName = "potentiometer"
 
     const val passthroughMinDegree = 0.0

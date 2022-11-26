@@ -8,10 +8,10 @@ import org.firstinspires.ftc.teamcode.RobotConfig.passthroughDepositAngle
 import org.firstinspires.ftc.teamcode.RobotConfig.passthroughMaxDegree
 import org.firstinspires.ftc.teamcode.RobotConfig.passthroughMinDegree
 import org.firstinspires.ftc.teamcode.RobotConfig.passthroughRetractedAngle
-import org.firstinspires.ftc.teamcode.RobotConfig.passthroughServoLeftName
-import org.firstinspires.ftc.teamcode.RobotConfig.passthroughServoRightName
+import org.firstinspires.ftc.teamcode.RobotConfig.leftPassthroughName
 import org.firstinspires.ftc.teamcode.RobotConfig.potentiometerName
 import org.firstinspires.ftc.teamcode.RobotConfig.potentiometerOffset
+import org.firstinspires.ftc.teamcode.RobotConfig.rightPassthroughName
 import org.firstinspires.ftc.teamcode.util.Potentiometer
 import kotlin.math.abs
 
@@ -29,13 +29,13 @@ class Passthrough(hwMap: HardwareMap) : SubsystemBase() {
      */
     private val servoLeft: ServoEx = SimpleServo(
         hwMap,
-        passthroughServoLeftName,
+        leftPassthroughName,
         passthroughMinDegree,
         passthroughMaxDegree
     )
     private val servoRight: ServoEx = SimpleServo(
         hwMap,
-        passthroughServoRightName,
+        rightPassthroughName,
         passthroughMinDegree,
         passthroughMaxDegree
     )
