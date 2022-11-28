@@ -3,10 +3,15 @@ package org.firstinspires.ftc.teamcode.subsystems
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.arcrobotics.ftclib.hardware.ServoEx
 import com.arcrobotics.ftclib.hardware.SimpleServo
-import com.arcrobotics.ftclib.hardware.motors.MotorEx
-import com.qualcomm.robotcore.hardware.AnalogInput
 import com.qualcomm.robotcore.hardware.HardwareMap
-import com.qualcomm.robotcore.hardware.Servo
+import org.firstinspires.ftc.teamcode.RobotConfig.passthroughDepositAngle
+import org.firstinspires.ftc.teamcode.RobotConfig.passthroughMaxDegree
+import org.firstinspires.ftc.teamcode.RobotConfig.passthroughMinDegree
+import org.firstinspires.ftc.teamcode.RobotConfig.passthroughRetractedAngle
+import org.firstinspires.ftc.teamcode.RobotConfig.leftPassthroughName
+import org.firstinspires.ftc.teamcode.RobotConfig.potentiometerName
+import org.firstinspires.ftc.teamcode.RobotConfig.potentiometerOffset
+import org.firstinspires.ftc.teamcode.RobotConfig.rightPassthroughName
 import org.firstinspires.ftc.teamcode.util.Potentiometer
 import kotlin.math.abs
 
@@ -14,38 +19,56 @@ import kotlin.math.abs
 /**
  * Passthrough subsystem consist of a servo that rotates
  * the mechanism containing the intake/claw from pick up to drop off.
- * @param hw HardwareMap
- * @param servoName Passthrough servo's name
+ * The angle is that made with the heading vector (i.e. w/ the front of the intake side)
+ * @param hwMap             HardwareMap
  */
-class Passthrough(hwMap: HardwareMap, servoName: String, potentiometerName: String) : SubsystemBase() {
+class Passthrough(hwMap: HardwareMap) : SubsystemBase() {
 
     /**
-     * TODO: Set min and max degrees for servo and potentiometer.
      * @see <a href="https://docs.ftclib.org/ftclib/features/hardware">FTCLib Docs: Hardware</a>
      */
-    private val servo: ServoEx = SimpleServo(hwMap, servoName, 0.0, 1.0)
-    private val potentiometer: Potentiometer = Potentiometer(hwMap, potentiometerName, 0.0, 0.0)
+    private val servoLeft: ServoEx = SimpleServo(
+        hwMap,
+        leftPassthroughName,
+        passthroughMinDegree,
+        passthroughMaxDegree
+    )
+    private val servoRight: ServoEx = SimpleServo(
+        hwMap,
+        rightPassthroughName,
+        passthroughMinDegree,
+        passthroughMaxDegree
+    )
 
-    private val min: Double = 0.0;
-    private val max: Double = 1.0;
+    private val potentiometer: Potentiometer = Potentiometer(
+        hwMap,
+        potentiometerName,
+        0.0 + potentiometerOffset,
+        270.0 + potentiometerOffset
+    )
 
+    var depositOffset = 0.0
+
+    // TODO: check direction of servo
 
     /**
      * Rotate servo to drop off position.
      */
-    fun drop() {
-        servo.position = max
+    fun deposit() {
+        servoLeft.turnToAngle(passthroughDepositAngle + depositOffset)
+        servoRight.turnToAngle(passthroughDepositAngle + depositOffset)
     }
 
     /**
      * Rotate servo to pick up cone.
      */
     fun pickUp() {
-        servo.position = min
+        servoLeft.turnToAngle(passthroughRetractedAngle)
+        servoRight.turnToAngle(passthroughRetractedAngle)
     }
 
     fun atTargetAngle(errorTolerance: Double = 0.05): Boolean {
-        return abs(servo.angle - potentiometer.getAngle()) < errorTolerance
+        return abs(servoLeft.angle - potentiometer.getAngle()) < errorTolerance
     }
 
 }
