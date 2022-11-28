@@ -4,7 +4,10 @@ import org.firstinspires.ftc.teamcode.vision.modulelib.AbstractPipelineModule
 import org.opencv.core.Mat
 import org.opencv.imgproc.Imgproc
 
-class YCrCbConverter(private val inputFrame: AbstractPipelineModule<Mat>) : AbstractPipelineModule<Mat>() {
+class ColorConverter(
+    private val inputFrame: AbstractPipelineModule<Mat>,
+    private val colorMode: Int = Imgproc.COLOR_RGB2Lab
+) : AbstractPipelineModule<Mat>() {
 
     private lateinit var output: Mat
 
@@ -18,7 +21,7 @@ class YCrCbConverter(private val inputFrame: AbstractPipelineModule<Mat>) : Abst
     }
 
     override fun processFrameForCache(input: Mat): Mat {
-        Imgproc.cvtColor(inputFrame.processFrame(input), output, Imgproc.COLOR_RGB2YCrCb)
+        Imgproc.cvtColor(inputFrame.processFrame(input), output, colorMode)
         return input
     }
 
