@@ -4,14 +4,12 @@ import com.acmerobotics.roadrunner.control.PIDFController
 import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.acmerobotics.roadrunner.geometry.Vector2d
 import com.arcrobotics.ftclib.command.CommandBase
-import com.arcrobotics.ftclib.purepursuit.PurePursuitUtil.angleWrap
 import com.qualcomm.robotcore.util.ElapsedTime
-import com.qualcomm.robotcore.util.Range
-import org.firstinspires.ftc.teamcode.RobotConfig
 import org.firstinspires.ftc.teamcode.subsystems.Mecanum
 import org.firstinspires.ftc.teamcode.subsystems.drive.DriveConstants
+import org.firstinspires.ftc.teamcode.subsystems.drive.SampleMecanumDrive
+import org.firstinspires.ftc.teamcode.subsystems.localization.Localizer
 import kotlin.math.abs
-import kotlin.math.max
 import kotlin.math.min
 
 /**
@@ -27,6 +25,7 @@ import kotlin.math.min
  */
 class ApproachRelativePoint(
     private val mecanum: Mecanum,
+    private val localizer: Localizer,
     private val targetPoint: () -> Vector2d?,
     private val offsetPose: Pose2d = Pose2d(0.0, 0.0, 0.0),
     private val speed: () -> Double,
@@ -36,10 +35,10 @@ class ApproachRelativePoint(
 ) : CommandBase() {
 
     init {
-        addRequirements(mecanum)
+        addRequirements(mecanum, localizer)
     }
 
-    private val controller = PIDFController(RobotConfig.trackingCoeffs)
+    private val controller = PIDFController(SampleMecanumDrive.HEADING_PID)
 
     private var distanceFromTarget: Double = Double.MAX_VALUE
 
@@ -48,15 +47,20 @@ class ApproachRelativePoint(
     private val timeoutTimer = ElapsedTime()
 
     override fun initialize() {
-        controller.setInputBounds(-Math.PI, Math.PI) // Input and target must be an angle in [-pi, pi]
+        // Automatically handles overflow
+        controller.setInputBounds(-Math.PI, Math.PI)
+
+        // Target position is the heading of the offset.
         controller.targetPosition = offsetPose.heading
     }
 
     override fun execute() {
         val possibleTarget = targetPoint.invoke()
         if (possibleTarget != null) {
-            target = possibleTarget // Saves target in case the targetPoint goes offline
-            timeoutTimer.reset() // Resets timeout timer because the target is fresh
+            // Save target in case the targetPoint goes offline
+            target = possibleTarget
+            // Reset timeout timer because the target is fresh
+            timeoutTimer.reset()
         }
 
         if (target != null) {
@@ -64,18 +68,30 @@ class ApproachRelativePoint(
             val errorVec = target!!.minus(offsetPose.headingVec())
             distanceFromTarget = errorVec.norm()
 
-            // TODO: Dynamic "motion profiler"???
-            // Turning
-            val turn = controller.update(errorVec.angle())
+            // Get velocity pose for translation and turning
+            val velocityPose = mecanum.getVelocityEstimate()!!
 
-            // Translating
-            val v = mecanum.getVelocityEstimate()!!.vec().norm()
-            val distTillDeaccel = v * v / (2 * DriveConstants.MAX_ACCEL) // Distance required to go from current velocity to zero
-            val maxPower = min(distanceFromTarget / distTillDeaccel, 1.0) // Max allowable power taking into account need for de-acceleration
-            val forward = errorVec.times(speed.invoke() * maxPower / distanceFromTarget)
+            // Translating //
+            // Desired movement direction is towards the error
+            val inputDir = errorVec.div(distanceFromTarget)
+            // Get the currently velocity of the drivetrain
+            val v = velocityPose.vec().norm()
+            // Distance required to go from current velocity to zero
+            val distTillDeaccel = v * v / (2 * DriveConstants.MAX_ACCEL)
+            // Calculate maximum allowable magnitude of the input by taking into account need for de-acceleration
+            // If the distanceFromTarget <= distTillDeaccel (i.e. the robot should de-accelerate),
+            // the fraction will be less than one and is the correct scaling behavior to de-accelerate
+            val maxPower = min(distanceFromTarget / distTillDeaccel, 1.0)
+            val power = speed.invoke() * maxPower
+            // Rotate driveInput by heading to go from tangent space to global space
+            val driveInput = inputDir.times(power).rotated(localizer.poseEstimate.heading)
 
-            val power = Pose2d(forward, turn)
-            mecanum.setWeightedDrivePower(power)
+            // Turning //
+            // github.com/NoahBres/road-runner-quickstart/blob/advanced-examples/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/drive/advanced/TeleOpAlignWithPoint.java
+            // Set desired angular velocity to the heading controller output
+            val turnInput = controller.update(errorVec.angle()) * DriveConstants.kV * DriveConstants.TRACK_WIDTH
+
+            mecanum.setWeightedDrivePower(Pose2d(driveInput, turnInput))
         }
     }
 
