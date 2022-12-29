@@ -4,11 +4,14 @@ import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
+import com.acmerobotics.roadrunner.drive.Drive;
 import com.acmerobotics.roadrunner.drive.DriveSignal;
 import com.acmerobotics.roadrunner.drive.MecanumDrive;
 import com.acmerobotics.roadrunner.followers.HolonomicPIDVAFollower;
 import com.acmerobotics.roadrunner.followers.TrajectoryFollower;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.path.Path;
+import com.acmerobotics.roadrunner.path.PathBuilder;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.acmerobotics.roadrunner.trajectory.constraints.AngularVelocityConstraint;
@@ -26,6 +29,7 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 import org.firstinspires.ftc.teamcode.RobotConfig;
+import org.firstinspires.ftc.teamcode.subsystems.drive.localization.OdometryLocalizer;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceBuilder;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceRunner;
@@ -35,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.firstinspires.ftc.teamcode.subsystems.drive.DriveConstants.GVF_ERROR;
 import static org.firstinspires.ftc.teamcode.subsystems.drive.DriveConstants.MAX_ACCEL;
 import static org.firstinspires.ftc.teamcode.subsystems.drive.DriveConstants.MAX_ANG_ACCEL;
 import static org.firstinspires.ftc.teamcode.subsystems.drive.DriveConstants.MAX_ANG_VEL;
@@ -44,6 +49,8 @@ import static org.firstinspires.ftc.teamcode.subsystems.drive.DriveConstants.RUN
 import static org.firstinspires.ftc.teamcode.subsystems.drive.DriveConstants.TRACK_WIDTH;
 import static org.firstinspires.ftc.teamcode.subsystems.drive.DriveConstants.encoderTicksToInches;
 import static org.firstinspires.ftc.teamcode.subsystems.drive.DriveConstants.kA;
+import static org.firstinspires.ftc.teamcode.subsystems.drive.DriveConstants.kN;
+import static org.firstinspires.ftc.teamcode.subsystems.drive.DriveConstants.kOmega;
 import static org.firstinspires.ftc.teamcode.subsystems.drive.DriveConstants.kStatic;
 import static org.firstinspires.ftc.teamcode.subsystems.drive.DriveConstants.kV;
 
@@ -68,6 +75,8 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     private final TrajectoryFollower follower;
 
+    private final HolonomicGVFFollower gvfFollower;
+
     private final DcMotorEx leftFront, leftRear, rightRear, rightFront;
     private final List<DcMotorEx> motors;
 
@@ -78,6 +87,8 @@ public class SampleMecanumDrive extends MecanumDrive {
 
         follower = new HolonomicPIDVAFollower(TRANSLATIONAL_PID, TRANSLATIONAL_PID, HEADING_PID,
                 new Pose2d(0.5, 0.5, Math.toRadians(5.0)), 0.5);
+
+        gvfFollower = new HolonomicGVFFollower(MAX_VEL, MAX_ACCEL, GVF_ERROR, kN, kOmega);
 
         LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap);
 
@@ -113,7 +124,7 @@ public class SampleMecanumDrive extends MecanumDrive {
 
         // TODO: reverse any motors using DcMotor.setDirection()
 
-        setLocalizer(new StandardTrackingWheelLocalizer(hardwareMap));
+        setLocalizer(new OdometryLocalizer(hardwareMap));
 
         trajectorySequenceRunner = new TrajectorySequenceRunner(follower, HEADING_PID);
     }
@@ -136,6 +147,10 @@ public class SampleMecanumDrive extends MecanumDrive {
                 VEL_CONSTRAINT, ACCEL_CONSTRAINT,
                 MAX_ANG_VEL, MAX_ANG_ACCEL
         );
+    }
+
+    public void followPathAsync(Path path) {
+        gvfFollower.followPath(path);
     }
 
     public void turnAsync(double angle) {
@@ -179,8 +194,10 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     public void update() {
         updatePoseEstimate();
-        DriveSignal signal = trajectorySequenceRunner.update(getPoseEstimate(), getPoseVelocity());
-        if (signal != null) setDriveSignal(signal);
+        DriveSignal signalTraj = trajectorySequenceRunner.update(getPoseEstimate(), getPoseVelocity());
+        DriveSignal signalPath = gvfFollower.update(getPoseEstimate());
+        if (signalTraj != null) setDriveSignal(signalTraj);
+        else if (!signalPath.equals(new DriveSignal())) setDriveSignal(signalPath); // TODO Check as this may not work
     }
 
     public void waitForIdle() {
@@ -256,10 +273,12 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     @Override
     public void setMotorPowers(double v, double v1, double v2, double v3) {
-        leftFront.setPower(v);
+        // TODO PID adjusted lift PID
+        double antiTilt = 0.0;
+        leftFront.setPower(v - antiTilt);
         leftRear.setPower(v1);
         rightRear.setPower(v2);
-        rightFront.setPower(v3);
+        rightFront.setPower(v3 - antiTilt);
     }
 
     public static TrajectoryVelocityConstraint getVelocityConstraint(double maxVel, double maxAngularVel, double trackWidth) {
