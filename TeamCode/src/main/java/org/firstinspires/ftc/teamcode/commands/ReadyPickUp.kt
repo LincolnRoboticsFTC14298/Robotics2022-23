@@ -15,7 +15,7 @@ class ReadyPickUp(lift: Lift, passthrough: Passthrough) : SequentialCommandGroup
     init{
         addCommands(
             InstantCommand(lift::retract, lift),
-            PassthroughPickUp(passthrough)
+            InstantCommand(passthrough::pickUp, passthrough)
         )
         addRequirements(lift, passthrough)
     }
