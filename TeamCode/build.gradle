@@ -32,6 +32,10 @@ android {
         }
     }
     namespace = 'org.firstinspires.ftc.teamcode'
+
+    packagingOptions {
+        jniLibs.useLegacyPackaging true
+    }
     androidResources {
         noCompress 'tflite'
     }
@@ -62,4 +66,3 @@ dependencies {
 
     annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
 }
-
