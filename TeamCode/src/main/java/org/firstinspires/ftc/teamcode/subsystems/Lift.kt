@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
 import com.acmerobotics.roadrunner.control.PIDFController
+import com.acmerobotics.roadrunner.geometry.Vector2d
 import com.acmerobotics.roadrunner.profile.MotionProfile
 import com.acmerobotics.roadrunner.profile.MotionProfileGenerator
 import com.acmerobotics.roadrunner.profile.MotionState
@@ -55,13 +56,26 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
     /**
      * @return Target height off the ground in cm.
      */
-    var setpoint = 0.0
-        private set
+    var setpoint: Double = 0.0
+        /**
+         * Sets the target height of the lift and constructs an optimal motion profile for it.
+         * @param height        Target height off the ground in cm.
+         */
+        set(height) {
+            timer.reset()
+            field = Range.clip(height, liftHeightOffset, liftMaxHeight)
+            motionProfile = MotionProfileGenerator.generateSimpleMotionProfile(
+                MotionState(getCurrentHeight(), getCurrentVelocity(), getCurrentAcceleration()),
+                MotionState(setpoint, 0.0, 0.0),
+                liftMaxVel,
+                liftMaxAccel
+            )
+        }
 
     private val timer = ElapsedTime()
 
     init {
-        // TODO: reverse motor if appropriate.
+        // TODO: reverse motor if appropriate
         motorGroup.setDistancePerPulse(liftDPP)
         motorGroup.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE)
 
@@ -69,6 +83,10 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
     }
 
     override fun periodic() {
+        // TODO: Maybe only set power if it has actually changed!! Do this through thresholding
+        //  integrating current power with desired power. Write wrappers for automatic voltage
+        //  compensation.
+        // Naive optimization would only write when motion profiling is active; heavily trusts ff
         val state = motionProfile[timer.seconds()]
 
         controller.apply {
@@ -78,6 +96,14 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
         }
 
         setPower(controller.update(getCurrentHeight(), getCurrentVelocity()))
+    }
+
+    /**
+     * Returns the position of the intake at a certain height in robot tangent space.
+     * TODO: implement
+     */
+    fun getRelativePositionAtHeight(height: Double): Vector2d {
+        return Vector2d(0.0, 0.0)
     }
 
     /**
@@ -104,33 +130,23 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
 
     /**
      * Sets the target height of the lift and constructs an optimal motion profile for it.
-     * @param height        Target height off the ground in cm.
-     */
-    fun setSetpoint(height: Double) {
-        timer.reset()
-        setpoint = Range.clip(height, liftHeightOffset, liftMaxHeight)
-        motionProfile = MotionProfileGenerator.generateSimpleMotionProfile(
-            MotionState(getCurrentHeight(), getCurrentVelocity(), getCurrentAcceleration()),
-            MotionState(setpoint, 0.0, 0.0),
-            liftMaxVel,
-            liftMaxAccel
-        )
-    }
-
-    /**
-     * Sets the target height of the lift and constructs an optimal motion profile for it.
      * @param pole          Based on [PoleType] heights.
      */
     fun setSetpoint(pole: RobotConfig.PoleType) {
-        setSetpoint(pole.height + poleLiftOffset)
+        setpoint = pole.height + poleLiftOffset
     }
 
+    /**
+     * Retracts the lift to the starting height.
+     */
     fun retract() {
-        setSetpoint(liftHeightOffset) // The zero point
+        // Set to the zero point plus insurance
+        setpoint = liftHeightOffset + 3.0
     }
 
     /**
      * Set power of lift.
+     * TODO check battery voltage sensor is probably wrong
      * @param power         Percentage of the maximum speed of the lift.
      */
     private fun setPower(power: Double) {

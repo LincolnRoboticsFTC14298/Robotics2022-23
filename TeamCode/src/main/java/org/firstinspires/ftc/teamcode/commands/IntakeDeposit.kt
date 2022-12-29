@@ -6,7 +6,7 @@ import org.firstinspires.ftc.teamcode.RobotConfig
 import org.firstinspires.ftc.teamcode.subsystems.Intake
 
 /**
- * Reverses intake to spit out cone and stops after a predetermined amount of time.
+ * Time based outake command that spits out the cone and stops after a certain amount of time.
  * @author Jared Haertel
  */
 class IntakeDeposit(private val intake: Intake) : CommandBase() {
