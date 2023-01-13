@@ -25,7 +25,7 @@ abstract class ModularPipeline() : OpenCvPipeline() {
         for (module in endModules) module.init(input)
     }
 
-    abstract fun processFrameForCache(input: Mat): Mat
+    protected abstract fun processFrameForCache(input: Mat): Mat
 
     override fun processFrame(input: Mat): Mat {
         ensureNonEmptyEndModules()
