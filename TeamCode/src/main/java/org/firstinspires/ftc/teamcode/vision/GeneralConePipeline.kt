@@ -19,7 +19,7 @@ open class GeneralConePipeline(
 
     enum class DisplayModes {
         RAW_CAMERA_INPUT,
-        RAW_MASK, // Purple is stack, red is single red cone, blue is single blue cone
+        RAW_MASK,
         RAW_RED_MASK,
         RAW_BLUE_MASK,
         DENOISED_MASK,
