@@ -2,20 +2,20 @@ package org.firstinspires.ftc.teamcode.commands
 
 import com.arcrobotics.ftclib.command.ParallelCommandGroup
 import com.arcrobotics.ftclib.command.SequentialCommandGroup
-import com.arcrobotics.ftclib.command.WaitUntilCommand
 import org.firstinspires.ftc.teamcode.RobotConfig
 import org.firstinspires.ftc.teamcode.commands.drive.ApproachPoint
 import org.firstinspires.ftc.teamcode.subsystems.*
-import org.firstinspires.ftc.teamcode.subsystems.localization.Localizer
+import org.firstinspires.ftc.teamcode.subsystems.drive.Mecanum
 
 /**
- * Uses localizer to align with largest pole "in sight" for depositing the cone.
- * Also deposits.
- * TODO: Should it deposit and reset? What if the odometry error is too high?
+ * Uses localizer to align with pole most "in sight" of the robot for depositing
+ * the cone while accepting driver input. It then deposits the cone and
+ * resets. If there is no pole detected the command does nothing.
+ * TODO: Reconsider purpose
+ * @author Jared Haertel
  */
-class ApproachPole(
+class ApproachPoleAndDeposit(
     mecanum: Mecanum,
-    localizer: Localizer,
     lift: Lift,
     passthrough: Passthrough,
     intake: Intake,
@@ -23,26 +23,26 @@ class ApproachPole(
 ) : SequentialCommandGroup() {
 
     init {
-        val nearestPole = localizer.getFacingPole()
+        val nearestPole = mecanum.getFacingPole()
         if (nearestPole != null) {
             addCommands(
                 ParallelCommandGroup(
+                    // Start the lift and extend passthrough once appropriate
                     // TODO: Maybe activate lift/passthrough based on the distance to the pole
                     ReadyPoleDeposit(nearestPole.type, lift, passthrough),
+                    // Approach pole
                     ApproachPoint(
                         mecanum,
-                        localizer,
                         nearestPole::vector,
-                        RobotConfig.intakePosition,
+                        RobotConfig.intakePosition, // TODO: Correct
                         speed
                     )
                 ),
-                WaitUntilCommand { lift.atTarget() && passthrough.atTargetAngle() },
-                IntakeDeposit(intake),
-                ReadyPickUp(lift, passthrough)
+                // Once lift and passthrough are done and at the pole, deposit
+                IntakeDeposit(intake)
             )
         }
-        addRequirements(mecanum, localizer, lift, passthrough, intake)
+        addRequirements(mecanum, lift, passthrough, intake)
     }
 
 }
