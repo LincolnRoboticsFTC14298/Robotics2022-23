@@ -7,7 +7,7 @@ import org.opencv.core.Scalar
 
 
 class Filter (
-    private val inputFrame: AbstractPipelineModule<Mat>,
+    private val inputModule: AbstractPipelineModule<Mat>,
     private val lowerBound: Scalar,
     private val upperBound: Scalar
     ) : AbstractPipelineModule<Mat>() {
@@ -15,15 +15,15 @@ class Filter (
     private lateinit var output: Mat
 
     init {
-        addParentModules(inputFrame)
+        addParentModules(inputModule)
     }
 
     override fun init(input: Mat) {
         output = input.clone()
     }
 
-    override fun processFrameForCache(input: Mat): Mat {
-        Core.inRange(inputFrame.processFrame(input), lowerBound, upperBound, output)
+    override fun processFrameForCache(rawInput: Mat): Mat {
+        Core.inRange(inputModule.processFrame(rawInput), lowerBound, upperBound, output)
         return output
     }
 

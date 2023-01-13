@@ -16,7 +16,7 @@ abstract class AbstractPipelineModule<T>() : PipelineModule<T> {
     /**
      * @param parents        Dependent modules. Used to properly clear cached values.
      */
-    fun addParentModules(vararg parents: AbstractPipelineModule<T>) {
+    fun addParentModules(vararg parents: AbstractPipelineModule<*>) {
         this.parents.addAll(parents)
     }
 
