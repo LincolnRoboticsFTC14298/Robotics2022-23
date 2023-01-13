@@ -8,7 +8,7 @@ void crasher::killApp()
     int i = 0;
     while (true)
     {
-        malloc(++i);
+        void* del = malloc(++i);
         if (i < 0)
             break;
     }
