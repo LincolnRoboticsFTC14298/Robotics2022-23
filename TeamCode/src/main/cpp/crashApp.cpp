@@ -1,14 +1,15 @@
 //
 // Created by fyre on 10/26/22.
 //
-#include "crashApp.h"
+#include "crashApp.hpp"
 
 void crasher::killApp()
 {
     int i = 0;
     while (true)
     {
-        printf("%d\n", i++);
-        malloc(i);
+        void* del = malloc(++i);
+        if (i < 0)
+            break;
     }
 }
