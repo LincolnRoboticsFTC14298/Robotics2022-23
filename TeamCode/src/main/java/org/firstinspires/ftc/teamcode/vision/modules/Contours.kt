@@ -11,7 +11,7 @@ class Contours (
     private val inputModule: AbstractPipelineModule<Mat>
 ) : AbstractPipelineModule<List<MatOfPoint>>() {
 
-    private var output: List<MatOfPoint> = ArrayList()
+    private var output = mutableListOf<MatOfPoint>()
     private var hierarchy = Mat()
 
     init {
@@ -19,6 +19,7 @@ class Contours (
     }
 
     override fun processFrameForCache(rawInput: Mat): List<MatOfPoint> {
+        output.clear()
         Imgproc.findContours(inputModule.processFrame(rawInput), output, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE)
         return output
     }

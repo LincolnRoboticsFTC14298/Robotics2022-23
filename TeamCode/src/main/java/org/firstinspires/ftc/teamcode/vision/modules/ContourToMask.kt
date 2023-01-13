@@ -16,6 +16,7 @@ class ContourToMask (
     }
 
     override fun init(input: Mat) {
+        super.init(input)
         output = Mat.zeros(input.size(), CvType.CV_8U)
     }
 

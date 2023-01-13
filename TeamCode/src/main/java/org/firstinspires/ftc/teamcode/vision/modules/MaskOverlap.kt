@@ -18,6 +18,7 @@ class MaskOverlap (
     }
 
     override fun init(input: Mat) {
+        super.init(input)
         output = input.clone()
     }
 

@@ -18,7 +18,7 @@ open class SimpleModule<T>(
     }
 
     override fun processFrameForCache(input: Mat): T {
-        return processFrame(input)
+        return onProcessFrame.invoke(input)
     }
 
 }

@@ -21,7 +21,7 @@ abstract class AbstractPipelineModule<T>() : PipelineModule<T> {
     }
 
     override fun init(input: Mat) {
-
+        for (parent in parents) parent.init(input)
     }
 
     abstract fun processFrameForCache(input: Mat): T

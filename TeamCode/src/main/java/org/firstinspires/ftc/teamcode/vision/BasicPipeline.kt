@@ -17,16 +17,16 @@ class BasicPipeline() : ModularPipeline() {
 
     private val inputModule = InputModule()
     private val converter = ColorConverter(inputModule, Imgproc.COLOR_RGB2Lab)
-    private val filter = Filter(converter, Scalar(0.0, 0.0, 0.0), Scalar(0.0, 0.0, 255.0))
+    private val filter = Filter(converter, Scalar(0.0, 0.0, 0.0), Scalar(255.0, 255.0, 255.0))
 
     init {
-        addEndModules(converter, filter)
+        addEndModules(filter)
     }
 
     private lateinit var lastConverterOutput: Mat
 
     override fun processFrameForCache(input: Mat) : Mat {
-        lastConverterOutput = converter.processFrame(input)
+        //lastConverterOutput = converter.processFrame(input)
         return filter.processFrame(input)
     }
 
