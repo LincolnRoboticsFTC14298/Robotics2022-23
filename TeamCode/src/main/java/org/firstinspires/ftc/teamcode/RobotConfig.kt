@@ -5,7 +5,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.acmerobotics.roadrunner.geometry.Vector2d
 import org.firstinspires.ftc.teamcode.subsystems.*
 import org.firstinspires.ftc.teamcode.subsystems.drive.SampleMecanumDrive
-import org.firstinspires.ftc.teamcode.subsystems.drive.StandardTrackingWheelLocalizer
+import org.firstinspires.ftc.teamcode.subsystems.drive.localization.OdometryLocalizer
 
 object RobotConfig {
 
@@ -13,7 +13,8 @@ object RobotConfig {
      * Field                                            *
      ****************************************************/
 
-    const val tileSize = .595 // m
+    // TODO CONVERT TO FEET YOU DWEEEB
+    const val tileSize = .5967 // m
 
 
     /**
@@ -50,7 +51,7 @@ object RobotConfig {
         NEG_TWO_ONE(-2, 1, PoleType.LOW),
         NEG_TWO_NEG_ONE(-2, -1, PoleType.LOW);
 
-        val vector = Vector2d(x.toDouble() * tileSize, y.toDouble() * tileSize)
+        val vector = Vector2d(x * tileSize, y * tileSize)
 
         companion object {
             fun getPole(vector: Vector2d): Pole? {
@@ -77,7 +78,7 @@ object RobotConfig {
         NEG_TWO_ZERO(-2, 0),
         NEG_TWO_NEG_TWO(-2, -2);
 
-        val vector = Vector2d(x.toDouble() * tileSize, y.toDouble() * tileSize)
+        val vector = Vector2d(x * tileSize, y * tileSize)
 
         companion object {
             fun getJunction(vector: Vector2d): Junction? {
@@ -111,7 +112,7 @@ object RobotConfig {
     var driveRightFront: String = "rightFront"
 
     /**
-     * [StandardTrackingWheelLocalizer]
+     * [OdometryLocalizer]
      */
     const val leftEncoderName = "leftEncoder"
     const val rightEncoderName = "rightEncoder"
@@ -129,12 +130,6 @@ object RobotConfig {
     var LATERAL_DISTANCE = 10.0 // in; distance between the left and right wheels
     @JvmField
     var FORWARD_OFFSET = 4.0 // in; offset of the lateral wheel
-
-
-    /**
-     * [Mecanum]
-     */
-    val trackingCoeffs = PIDCoefficients(0.0, 0.0, 0.0) // For rotation
 
     /**
      * [Lift]
@@ -178,10 +173,10 @@ object RobotConfig {
     const val rightPassthroughName = "rightPassthrough"
     const val potentiometerName = "potentiometer"
 
-    const val passthroughMinDegree = 0.0
-    const val passthroughMaxDegree = 0.0
-    // TODO: Make degrees?
-    const val passthroughRetractedAngle = -15.0
+    const val passthroughMinDegree = 0.0 // degrees
+    const val passthroughMaxDegree = 0.0 // degrees
+
+    const val passthroughRetractedAngle = -15.0 // degrees
     const val passthroughDepositAngle = 180.0 // degrees
 
     const val potentiometerOffset = 0.0 // degrees
@@ -193,6 +188,14 @@ object RobotConfig {
      * Commands                                         *
      ****************************************************/
 
-    const val poleDepositAnticipationTime: Double = 2.0 // Time in seconds the passthrough starts moving before the lift reaches its target height.
+    // Time in seconds the passthrough starts moving before the lift reaches its target height.
+    const val poleDepositAnticipationTime = 2.0
 
+
+    /****************************************************
+     * Driver Controls                                  *
+     ****************************************************/
+
+    const val teleOpSetPointAdj = 1.0
+    const val teleOpDepositAdj = 5.0
 }
