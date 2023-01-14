@@ -6,12 +6,13 @@ import org.opencv.core.MatOfPoint
 import org.opencv.core.MatOfPoint2f
 import org.opencv.core.Point
 import org.opencv.imgproc.Imgproc.*
+import java.lang.Math.min
 import java.lang.Math.toRadians
 
 
 /**
  * Returns contours that pass the scorers by thresholding a weighted sum.
- * @param scorers Pair of weight and its module scorer
+ * @param cameraHeight must be in same units as returned distance
  */
 class ContourResults(
     private val contourModule: AbstractPipelineModule<List<MatOfPoint>>,
@@ -46,19 +47,14 @@ class ContourResults(
             val yaw = (Ax/2.0) * toRadians(FOVX)
             val distance = -cameraHeight/kotlin.math.tan(cameraPitch + pitch)
 
-            /// Source variable
-            var SrcMtx: MatOfPoint
             /// New variable
             val contour2f = MatOfPoint2f(*contour.toArray())
             val contourMinAreaRect = minAreaRect(contour2f)
-            val contourBoxPoints = Mat()
-            boxPoints(contourMinAreaRect, contourBoxPoints)
-            val distanceByWidth = contourBoxPoints.width() //TODO double check, finish formula
-
+            val distanceByWidth = min(contourMinAreaRect.size.width, contourMinAreaRect.size.height) //TODO double check, finish formula
 
             // add to results
             if(useDistanceByWidth){
-                results.add(AnalysisResult(pixelPoint, yaw, distanceByWidth.toDouble()))
+                results.add(AnalysisResult(pixelPoint, yaw, distanceByWidth))
             } else {
                 results.add(AnalysisResult(pixelPoint, yaw, distance))
             }

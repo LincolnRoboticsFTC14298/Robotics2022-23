@@ -38,14 +38,14 @@ open class PolePipeline(
     val denoisedMask = Denoise(poleMask, 5, 3, 3, 1)
     val contours = Contours(denoisedMask)
 
-    // Scorer // //TODO tune scorers and change weights
+    // Scorer // // RUSH JOB - SCORERS AND WEIGHTS ESTIMATED
     val poleConvexity = Convexity(0.97)
-    val poleExtent = Extent(0.68) //TODO Find
-    val poleSolidity = Solidity(0.9) //TODO Find
+    val poleExtent = Extent(0.4)
+    val poleSolidity = Solidity(0.95)
     val poleAspectRatio = ThresholdAspectRatio(3.5, 50.0)
-    val poleContours = FilterContours(contours, 0.1, Pair(1.0, poleConvexity), Pair(1.0, poleExtent), Pair(1.0, poleSolidity), Pair(10.0, poleAspectRatio))
+    val poleContours = FilterContours(contours, 0.1, Pair(5.0, poleConvexity), Pair(0.5, poleExtent), Pair(1.0, poleSolidity), Pair(5.0, poleAspectRatio))
 
-    val poleResultsModule = ContourResults(poleContours, cameraHeight, FOVX, FOVY, cameraPitch)
+    val poleResultsModule = ContourResults(poleContours, cameraHeight, FOVX, FOVY, cameraPitch, true)
 
     // Data we care about and wish to access
     var poleResults = listOf<ContourResults.AnalysisResult>()

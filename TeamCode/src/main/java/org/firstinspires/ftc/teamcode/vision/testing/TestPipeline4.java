@@ -6,10 +6,12 @@ import static org.opencv.imgproc.Imgproc.CHAIN_APPROX_SIMPLE;
 import static org.opencv.imgproc.Imgproc.RETR_EXTERNAL;
 import static org.opencv.imgproc.Imgproc.arcLength;
 import static org.opencv.imgproc.Imgproc.boundingRect;
+import static org.opencv.imgproc.Imgproc.boxPoints;
 import static org.opencv.imgproc.Imgproc.contourArea;
 import static org.opencv.imgproc.Imgproc.convexHull;
 import static org.opencv.imgproc.Imgproc.drawContours;
 import static org.opencv.imgproc.Imgproc.findContours;
+import static org.opencv.imgproc.Imgproc.minAreaRect;
 import static org.opencv.imgproc.Imgproc.moments;
 import static org.opencv.imgproc.Imgproc.rectangle;
 
@@ -23,6 +25,7 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
@@ -107,14 +110,22 @@ public class TestPipeline4 extends OpenCvPipeline {
             double hullPerimeter = arcLength(new MatOfPoint2f(convexHull.toArray()),true);
             double hullArea = contourArea(convexHull);
 
+            /// New variable
+            MatOfPoint2f contour2f = new MatOfPoint2f(contour.toArray());
+            RotatedRect contourMinAreaRect = minAreaRect(contour2f);
+            Mat contourBoxPoints = new Mat();
+            boxPoints(contourMinAreaRect, contourBoxPoints);
+
             double solidity = contourArea / hullArea;
             double aspectRatio = height/width;
             double extent = contourArea / (boundingBox.width * boundingBox.height);
             double convexity = hullPerimeter / contourPerimeter;
+            double distanceByWidth = Math.min(contourMinAreaRect.size.width, contourMinAreaRect.size.height); //TODO double check, finish formula
 
-            String testScorer = "extent";
+
+            String testScorer = "solidity";
             telemetry.addData("centroid #" + (i+1), centroid);
-            telemetry.addData(testScorer + " #" + (i+1), extent);
+            telemetry.addData(testScorer + " #" + (i+1), solidity);
 
             //rectangle(realInput, boundingBox, new Scalar(255,0,0));
         }
