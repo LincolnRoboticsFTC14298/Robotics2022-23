@@ -1,12 +1,13 @@
 package org.firstinspires.ftc.teamcode
 
+import com.acmerobotics.dashboard.config.Config
 import com.acmerobotics.roadrunner.control.PIDCoefficients
-import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.acmerobotics.roadrunner.geometry.Vector2d
 import org.firstinspires.ftc.teamcode.subsystems.*
-import org.firstinspires.ftc.teamcode.subsystems.drive.SampleMecanumDrive
-import org.firstinspires.ftc.teamcode.subsystems.drive.localization.OdometryLocalizer
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive
+import org.firstinspires.ftc.teamcode.drive.localization.OdometryLocalizer
 
+@Config
 object RobotConfig {
 
     /****************************************************
@@ -14,7 +15,7 @@ object RobotConfig {
      ****************************************************/
 
     // TODO CONVERT TO FEET YOU DWEEEB
-    const val tileSize = .5967 // m
+    const val tileSize = 23.5 // in
 
 
     /**
@@ -56,7 +57,7 @@ object RobotConfig {
         companion object {
             fun getPole(vector: Vector2d): Pole? {
                 values().forEach { pole ->
-                    if (pole.vector.epsilonEquals(vector)) {
+                    if (pole.vector epsilonEquals vector) {
                         return pole
                     }
                 }
@@ -136,50 +137,83 @@ object RobotConfig {
      */
     const val leftLiftName = "leftLift"
     const val rightLiftName = "rightLift"
+    const val magnetLimitName = "magnet"
 
     const val liftHeightOffset = 0.0 // cm The raw height of zero is off the ground
-    const val liftMaxHeight = 0.0 // cm Max allowable extension height
+    const val liftMaxExtension = 0.0 // cm Max allowable extension height
+    const val poleLiftOffset = 20.0 // cm above the pole the lift should be at
 
     const val liftDPP = 1.0 // TODO: Find experimentally
 
-    const val liftMaxVel = 25.0 // cm / s  // TODO: Find max values
-    const val liftMaxAccel = 40.0 // cm / s2
+    @JvmField
+    var liftMaxVel = 20.0 // cm / s  // TODO: Find max values
+    @JvmField
+    var liftMaxAccel = 20.0 // cm / s2
 
-    const val liftKStatic = 0.0
-    const val liftKV = 1.0 / liftMaxVel
-    const val liftKA = 0.0
+    @JvmField
+    var liftKStatic = 0.0
+    @JvmField
+    var liftKV = 1.0 / liftMaxVel
+    @JvmField
+    var liftKA = 0.0
+    @JvmField
+    var gravityFeedforward = 0.0
 
-    val liftCoeffs = PIDCoefficients(0.0, 0.0, 0.0) // TODO: Calculate from kV and kA
 
-    const val liftTargetErrorTolerance = 0.5 // cm
+    @JvmField
+    var liftCoeffs = PIDCoefficients(0.0, 0.0, 0.0) // TODO: Calculate from kV and kA
 
-    const val poleLiftOffset = 10.0 // cm above the pole the lift should be at
+    val liftTargetErrorTolerance = 1.0 // cm
+
+    const val withinSwitchRange = 5.0 // cm from the bottom to check magnet switch for reset
 
     /**
-     * [Intake]
+     * [Claw]
      */
-    const val intakeServoName = "intake"
-    const val intakeTouchSensorName = "intakeTouch"
-    val intakePosition = Pose2d(0.0, 0.0, 0.0) // Position of the center of the intake during pick up position
+    const val clawServoName = "claw"
+    const val colorSensorName = "color"
 
-    const val intakeTimeToSpitOut = 500 // milliseconds
+    @JvmField
+    var clawClosedPosition = 0.85
+    @JvmField
+    var clawOpenedPosition = 0.73
+    @JvmField
+    var clawPartiallyOpenedPosition = 0.80
 
-    const val intakeSpeed = 0.5
+
+    @JvmField
+    var clawMaxVel = 0.7
+    @JvmField
+    var clawMaxAccel = 4.5
+
+    @JvmField
+    var colorGain = 20.0
+    @JvmField
+    var valueThreshold = 0.15
+
+
+
 
     /**
      * Passthrough
      */
     const val leftPassthroughName = "leftPassthrough"
     const val rightPassthroughName = "rightPassthrough"
-    const val potentiometerName = "potentiometer"
 
     const val passthroughMinDegree = 0.0 // degrees
     const val passthroughMaxDegree = 0.0 // degrees
 
-    const val passthroughRetractedAngle = -15.0 // degrees
-    const val passthroughDepositAngle = 180.0 // degrees
+    @JvmField
+    var passthroughPickUpAngle = -15.0 // degrees
+    @JvmField
+    var passthroughDepositAngle = 180.0 // degrees
 
-    const val potentiometerOffset = 0.0 // degrees
+    @JvmField
+    var passthroughMaxVel = 0.0
+    var passthroughMaxAccel = 0.0
+
+    @JvmField
+    var passthroughTimeTolerance = 0.2 // Seconds to wait after motion profile supposedly complete
 
     /**
      * Vision
@@ -194,7 +228,8 @@ object RobotConfig {
      ****************************************************/
 
     // Time in seconds the passthrough starts moving before the lift reaches its target height.
-    const val poleDepositAnticipationTime = 2.0
+    @JvmField
+    val poleDepositAnticipationTime = 0.5
 
 
     /****************************************************

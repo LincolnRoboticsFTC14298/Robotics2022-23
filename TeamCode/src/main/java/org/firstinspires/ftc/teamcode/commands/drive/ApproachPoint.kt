@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.commands.drive
 import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.acmerobotics.roadrunner.geometry.Vector2d
 import com.arcrobotics.ftclib.command.SequentialCommandGroup
-import org.firstinspires.ftc.teamcode.subsystems.drive.Mecanum
+import org.firstinspires.ftc.teamcode.subsystems.Mecanum
 
 /**
  * Approaches a global point while accepting an input controlling speed or aggressiveness.
@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.subsystems.drive.Mecanum
  * @param offsetPose                    Offset vector in robot tangent space. This offset vector
  *                                      will approach the target instead.
  * @param speed                         Controls how fast the robot drives forward towards the point.
- * @param maxTolerableDistance          Maximum distance it can be from the target in m.
+ * @param maxTolerableDistance          Maximum distance it can be from the target in inches.
  * @param maxTolerableAngleDifference   Maximum angle it can face away from the target in radians.
  */
 class ApproachPoint(
@@ -20,7 +20,7 @@ class ApproachPoint(
     targetPoint: () -> Vector2d,
     offsetPose: Pose2d = Pose2d(0.0, 0.0, 0.0),
     speed: () -> Double,
-    maxTolerableDistance: Double = 0.005, // m
+    maxTolerableDistance: Double = 1.0, // in
     maxTolerableAngleDifference: Double = 0.05 // radians
 ) : SequentialCommandGroup() {
 
@@ -30,7 +30,7 @@ class ApproachPoint(
                 mecanum,
                 {
                     val pose = mecanum.getPoseEstimate()
-                    val dT =  targetPoint.invoke().minus(pose.vec())
+                    val dT = targetPoint.invoke().minus(pose.vec())
                     dT.rotated(-pose.heading)
                 },
                 offsetPose,

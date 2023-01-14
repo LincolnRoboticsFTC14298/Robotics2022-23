@@ -6,11 +6,11 @@ import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.acmerobotics.roadrunner.geometry.Vector2d
 import com.arcrobotics.ftclib.command.CommandBase
 import com.qualcomm.robotcore.util.ElapsedTime
-import org.firstinspires.ftc.teamcode.subsystems.drive.Mecanum
-import org.firstinspires.ftc.teamcode.subsystems.drive.DriveConstants
-import org.firstinspires.ftc.teamcode.subsystems.drive.DriveConstants.MAX_ACCEL
-import org.firstinspires.ftc.teamcode.subsystems.drive.DriveConstants.MAX_VEL
-import org.firstinspires.ftc.teamcode.subsystems.drive.SampleMecanumDrive
+import org.firstinspires.ftc.teamcode.subsystems.Mecanum
+import org.firstinspires.ftc.teamcode.drive.DriveConstants
+import org.firstinspires.ftc.teamcode.drive.DriveConstants.MAX_ACCEL
+import org.firstinspires.ftc.teamcode.drive.DriveConstants.MAX_VEL
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive
 import org.firstinspires.ftc.teamcode.util.normalize
 import kotlin.math.abs
 import kotlin.math.max
@@ -23,7 +23,7 @@ import kotlin.math.sqrt
  * @param offsetPose                    Offset vector in robot tangent space. This offset vector
  *                                      will approach the target instead.
  * @param speed                         Controls how fast the robot drives forward towards the point.
- * @param maxTolerableDistance          Maximum distance it can be from the target in m.
+ * @param maxTolerableDistance          Maximum distance it can be from the target in inches.
  * @param maxTolerableAngleDifference   Maximum angle it can face away from the target in radians.
  * @param timeout                       Timeout after that many seconds if no target provided.
  */
@@ -32,7 +32,7 @@ class ApproachRelativePoint(
     private val targetPoint: () -> Vector2d?,
     private val offsetPose: Pose2d = Pose2d(0.0, 0.0, 0.0),
     private val speed: () -> Double,
-    private val maxTolerableDistance: Double = 0.005, // m
+    private val maxTolerableDistance: Double = 1.0, // in
     private val maxTolerableAngleDifference: Double = 0.05, // radians
     private val timeout: Double = 2.0
 ) : CommandBase() {

@@ -66,7 +66,6 @@ class Vision(
      */
     fun stopStreamingFrontCamera() {
         phoneCam.stopStreaming()
-
     }
 
     /**
@@ -74,7 +73,6 @@ class Vision(
      */
     fun startStreamingRearCamera() {
         webCam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT)
-
     }
 
     /**
@@ -82,7 +80,6 @@ class Vision(
      */
     fun stopStreamingRearCamera() {
         webCam.stopStreaming()
-
     }
 
     /**
@@ -90,7 +87,7 @@ class Vision(
      * @param pipeline     From the [RearPipeline] pipeline options.
      */
     fun setRearPipeline(pipeline: RearPipeline) {
-        webCam.setPipeline(pipeline.pipeline)
+        // backCamera.setPipeline(pipeline.pipeline)
     }
 
     /**

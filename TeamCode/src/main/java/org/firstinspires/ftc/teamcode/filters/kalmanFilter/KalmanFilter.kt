@@ -38,11 +38,10 @@ class KalmanFilter(
         // K[k] = P[k/k-1] HT[K] S[K]-1
         // TODO: possible numerical errors may occur
         K = covariance * H.transpose() * innovationCovariance.invert()
-        print(K)
 
         // Update state estimate
         // x[k|k] = x[k|k-1] + K[k] y[k]
-        stateEstimate += K*innovation
+        stateEstimate += K * innovation
 
         // Update covariance estimate
         // P[k|k] = (I - K[k] H[k]) P[k|k-1]

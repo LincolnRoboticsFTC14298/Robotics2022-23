@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
-    <bytecodeTargetLevel target="1.7">
+    <bytecodeTargetLevel target="11">
       <module name="Robotics2022-23.ftcrobotcontroller.JOOS" target="11" />
       <module name="Robotics2022-23.ftcrobotcontroller.JOOS.main" target="11" />
       <module name="Robotics2022-23.ftcrobotcontroller.JOOS.test" target="11" />
+      <module name="Robotics2022-23.JoosGUI" target="11" />
+      <module name="Robotics2022-23.JoosGUI.main" target="11" />
+      <module name="Robotics2022-23.JoosGUI.test" target="11" />
     </bytecodeTargetLevel>
   </component>
 </project>

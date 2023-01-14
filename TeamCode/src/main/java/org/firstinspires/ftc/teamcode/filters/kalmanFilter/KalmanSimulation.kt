@@ -8,7 +8,9 @@ package org.firstinspires.ftc.teamcode.filters.kalmanFilter
 //import javafx.scene.layout.FlowPane
 //import javafx.stage.Stage
 //import org.ejml.simple.SimpleMatrix
-//import org.firstinspires.ftc.teamcode.filters.MeasurementModel
+//import org.firstinspires.ftc.teamcode.util.arrayToColumnMatrix
+//import org.firstinspires.ftc.teamcode.util.arrayToRowMatrix
+//import org.firstinspires.ftc.teamcode.util.minus
 //import java.util.*
 //import kotlin.jvm.JvmStatic
 //import kotlin.math.abs
@@ -23,13 +25,13 @@ class KalmanSimulation {//: Application() {
 //
 //        stage.title = "EKF Simulation"
 //
-//        val positionError = difference(realState[0], predictedState[0])
+//        val positionError = realState[0] - predictedState[0]
 //        val positionChart = generateGraph(arrayOf(makeData(timeData, positionError)), "Position Error", "Time", "Error")
 //
-//        val velocityError = difference(realState[1], predictedState[1])
+//        val velocityError = realState[1] - predictedState[1]
 //        val velocityChart = generateGraph(arrayOf(makeData(timeData, velocityError)), "Velocity Error", "Time", "Error")
 //
-//        val accelerationError = difference(realState[2], predictedState[2])
+//        val accelerationError = realState[2] - predictedState[2]
 //        val accelerationChart = generateGraph(arrayOf(makeData(timeData, accelerationError)), "Acceleration Error", "Time", "Error")
 //
 //
@@ -99,30 +101,16 @@ class KalmanSimulation {//: Application() {
 //        return newSeries
 //    }
 //
-//    fun difference(series1: DoubleArray, series2: DoubleArray): DoubleArray {
-//        val diff = DoubleArray(series1.size)
-//        for (i in series1.indices) {
-//            diff[i] = series1[i] - series2[i]
-//        }
-//        return diff
-//    }
-//
-//    fun absdiff(series1: DoubleArray, series2: DoubleArray): DoubleArray {
-//        val diff = DoubleArray(series1.size)
-//        for (i in series1.indices) {
-//            diff[i] = abs(series1[i] - series2[i])
-//        }
-//        return diff
-//    }
+//    fun absdiff(series1: DoubleArray, series2: DoubleArray) = series1.zip(series2).map{abs(it.first-it.second)}.toDoubleArray()
 //
 //    fun makeData(x: DoubleArray, y: DoubleArray): Array<XYChart.Data<Number, Number>> {
 //        return Array(x.size) { i -> XYChart.Data(x[i], y[i]) }
 //    }
 //
 //    private val filter = KalmanFilter(
-//        OneDModel(),
+//        ConstantAccelerationProcessModel(),
 //        OneDSensor(),
-//        SimpleMatrix(arrayOf(doubleArrayOf(0.0), doubleArrayOf(2.0), doubleArrayOf(0.1))),
+//        arrayToColumnMatrix(doubleArrayOf(0.0, 2.0, 0.1)),
 //        SimpleMatrix.diag(1.0, 1.0, 1.0)
 //    )
 //
@@ -132,7 +120,7 @@ class KalmanSimulation {//: Application() {
 //        val ahat = DoubleArray(measurements.size)
 //        for (i in measurements.indices) {
 //            filter.predict(null, timeStep)
-//            filter.update(SimpleMatrix(arrayOf(doubleArrayOf(measurements[i]))))
+//            filter.update(arrayToColumnMatrix(doubleArrayOf(measurements[i])))
 //            val state = filter.stateEstimate.ddrm.data
 //            xhat[i] = state[0]
 //            vhat[i] = state[1]
@@ -141,50 +129,13 @@ class KalmanSimulation {//: Application() {
 //        return arrayOf(xhat, vhat, ahat)
 //    }
 //
-//    internal class OneDModel : KalmanProcessModel {
-//        override fun predictState(
-//            previousState: SimpleMatrix,
-//            u: SimpleMatrix?,
-//            dt: Double
-//        ): SimpleMatrix {
-//            return getStateTransitionMatrix(previousState, u, dt).mult(previousState)
-//        }
-//
-//        override fun getStateTransitionMatrix(
-//            previousState: SimpleMatrix,
-//            u: SimpleMatrix?,
-//            dt: Double
-//        ): SimpleMatrix {
-//            return SimpleMatrix(
-//                arrayOf(
-//                    doubleArrayOf(1.0, dt, 0.5 * dt * dt),
-//                    doubleArrayOf(0.0, 1.0, dt),
-//                    doubleArrayOf(0.0, 0.0, 1.0)
-//                )
-//            )
-//        }
-//
-//        override fun getProcessNoise(dt: Double): SimpleMatrix {
-//            val dt4 = dt * dt * dt * dt
-//            val dt3 = dt * dt * dt
-//            val dt2 = dt * dt
-//            return SimpleMatrix(
-//                arrayOf(
-//                    doubleArrayOf(dt4 / 4.0, dt3 / 2.0, dt2 / 2.0),
-//                    doubleArrayOf(dt3 / 2.0, dt2, dt),
-//                    doubleArrayOf(dt2 / 2.0, dt, 1.0)
-//                )
-//            ).scale(0.1)
-//        }
-//    }
-//
 //    internal class OneDSensor : KalmanMeasurementModel {
 //        override fun predictObservation(state: SimpleMatrix): SimpleMatrix {
 //            return getObservationMatrix(state).mult(state)
 //        }
 //
 //        override fun getObservationMatrix(state: SimpleMatrix): SimpleMatrix {
-//            return SimpleMatrix(arrayOf(doubleArrayOf(1.0, 0.0, 0.0)))
+//            return arrayToRowMatrix(doubleArrayOf(1.0, 0.0, 0.0))
 //        }
 //
 //        override fun getObservationNoise(): SimpleMatrix {

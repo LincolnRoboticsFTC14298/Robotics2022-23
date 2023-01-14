@@ -7,37 +7,35 @@ import com.arcrobotics.ftclib.command.button.Trigger
 import com.arcrobotics.ftclib.gamepad.GamepadEx
 import com.arcrobotics.ftclib.gamepad.GamepadKeys
 import com.arcrobotics.ftclib.gamepad.TriggerReader
+import com.outoftheboxrobotics.photoncore.PhotonCore
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.RobotConfig
 import org.firstinspires.ftc.teamcode.RobotConfig.teleOpDepositAdj
-import org.firstinspires.ftc.teamcode.RobotConfig.teleOpSetPointAdj
 import org.firstinspires.ftc.teamcode.commands.*
 import org.firstinspires.ftc.teamcode.commands.ApproachCone
-import org.firstinspires.ftc.teamcode.commands.ApproachPoleAndDeposit
-import org.firstinspires.ftc.teamcode.commands.drive.modes.AssistedDrive
-import org.firstinspires.ftc.teamcode.commands.drive.modes.ManualDrive
+import org.firstinspires.ftc.teamcode.commands.drive.JoystickDrive
 import org.firstinspires.ftc.teamcode.subsystems.*
-import org.firstinspires.ftc.teamcode.subsystems.drive.Mecanum
-import org.firstinspires.ftc.teamcode.subsystems.drive.localization.MecanumMonteCarloLocalizer
+import org.firstinspires.ftc.teamcode.subsystems.Mecanum
+import org.firstinspires.ftc.teamcode.drive.localization.MecanumMonteCarloLocalizer
 
 
 class MainTeleOp : CommandOpMode() {
 
     override fun initialize() {
+        PhotonCore.enable()
 
         /****************************************************
          * Initialize hardware                              *
          ****************************************************/
 
         val lift = Lift(hardwareMap)
-        val intake = Intake(hardwareMap)
+        val claw = Claw(hardwareMap)
         val passthrough = Passthrough(hardwareMap)
-        val mecanum = Mecanum(hardwareMap)
         val vision = Vision(hardwareMap)
         val localizer = MecanumMonteCarloLocalizer(hardwareMap, vision)
+        val mecanum = Mecanum(hardwareMap, localizer)
 
-
-        register(lift, intake, passthrough, mecanum, vision)
+        register(lift, claw, passthrough, mecanum, vision)
 
         /****************************************************
          * Driver 1 Controls                                *
@@ -55,61 +53,63 @@ class MainTeleOp : CommandOpMode() {
         // Negate right x because ccw is positive
         val rotation = { -driver1.rightX }
 
-        var fieldCentric = false
+        var fieldCentric = true
         val fieldCentricProvider = { fieldCentric }
-        val assistedDrive = AssistedDrive(mecanum, localizer, forward, strafe, rotation, fieldCentricProvider)
-        val manualDrive   = ManualDrive(mecanum, localizer, forward, strafe, rotation, fieldCentricProvider)
+//        var obstacleAvoidance = true
+//        val obstacleAvoidanceProvider = { obstacleAvoidance }
 
-        mecanum.defaultCommand = manualDrive // TODO: Check if this should be default
-
-        // Press DPAD_UP to turn off field centrism
-        driver1
-            .getGamepadButton(GamepadKeys.Button.DPAD_UP)
-            .whenActive(Runnable{ fieldCentric = false })
-        // Press DPAD_DOWN to turn on field centrism
-        driver1
-            .getGamepadButton(GamepadKeys.Button.DPAD_UP)
-            .whenActive(Runnable{ fieldCentric = true })
-        // Press DPAD_LEFT to activate assisted driving
-        driver1
-            .getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-            .whenPressed(Runnable{ mecanum.defaultCommand = assistedDrive })
-        // Press DPAD_RIGHT to activate manual driving
-        driver1
-            .getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
-            .whenPressed(Runnable{ mecanum.defaultCommand = manualDrive   })
+        mecanum.defaultCommand = JoystickDrive(mecanum, localizer, forward, strafe, rotation, fieldCentricProvider) //obstacleAvoidanceProvider)
 
         /**
          * Lift
          */
         // Deposit and then retract lift and passthrough
-        val semiAutoDeposit = SequentialCommandGroup(
-            ApproachPoleAndDeposit(mecanum, lift, passthrough, intake, forward),
-            ReadyPickUp(lift, passthrough)
+        val semiAutoDepositLow = SequentialCommandGroup(
+                ReadyPoleDeposit(RobotConfig.PoleType.LOW, lift, passthrough),
+                ApproachPoleFromAngle(mecanum, vision, forward)
+            )
+
+        val semiAutoDepositMedium = SequentialCommandGroup(
+            ReadyPoleDeposit(RobotConfig.PoleType.MEDIUM, lift, passthrough),
+            ApproachPoleFromAngle(mecanum, vision, forward)
         )
 
-        // Press A to semi auto deposit the lift
-        driver1
-            .getGamepadButton(GamepadKeys.Button.A)
-            .whenActive(semiAutoDeposit)
-        // Press B to cancel auto deposit and reset just in case
-        // TODO: is resetting desired?
-        driver1
-            .getGamepadButton(GamepadKeys.Button.B)
-            .cancelWhenActive(semiAutoDeposit)
-            .whenActive(ReadyPickUp(lift, passthrough))
+        val semiAutoDepositHigh = SequentialCommandGroup(
+            ReadyPoleDeposit(RobotConfig.PoleType.HIGH, lift, passthrough),
+            ApproachPoleFromAngle(mecanum, vision, forward)
+        )
 
-        /**
-         * Intake
-         */
-        val approachCone = ApproachCone(mecanum, vision, intake, forward)
-        // Press X to approach cone
         driver1
-            .getGamepadButton(GamepadKeys.Button.X)
-            .whenActive(approachCone)
-        // Press Y to cancel cone approach
+            .getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
+            .whenActive(semiAutoDepositLow)
+
+        driver1
+            .getGamepadButton(GamepadKeys.Button.DPAD_UP)
+            .whenActive(semiAutoDepositMedium)
+
+        driver1
+            .getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
+            .whenActive(semiAutoDepositHigh)
+
         driver1
             .getGamepadButton(GamepadKeys.Button.Y)
+            .whenActive(SequentialCommandGroup(InstantCommand::))
+
+
+        /**
+         * Claw
+         */
+        val approachCone = ApproachCone(mecanum, vision, lift, passthrough, claw, forward)
+        // Press X to approach cone
+        driver1
+            .getGamepadButton(GamepadKeys.Button.A)
+            .whenPressed(approachCone)
+
+        driver1
+            .getGamepadButton(GamepadKeys.Button.X)
+            .cancelWhenActive(semiAutoDepositLow)
+            .cancelWhenActive(semiAutoDepositMedium)
+            .cancelWhenActive(semiAutoDepositHigh)
             .cancelWhenActive(approachCone)
 
         /****************************************************
@@ -141,14 +141,14 @@ class MainTeleOp : CommandOpMode() {
 
         // Adjust lift height
         // TODO: this doesn't remember changes to height
-        // Press LEFT_BUMPER to set lower height setpoint
-        driver2
-            .getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
-            .whenPressed(InstantCommand({ lift.setpoint -= teleOpSetPointAdj }, lift))
-        // Press RIGHT_BUMPER to set lower height setpoint
-        driver2
-            .getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
-            .whenPressed(InstantCommand({ lift.setpoint += teleOpSetPointAdj }, lift))
+        // Press LEFT_BUMPER to set lower height setpoint TODO FIX
+//        driver2
+//            .getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
+//            .whenPressed(InstantCommand({ lift.setpoint -= teleOpSetPointAdj }, lift))
+//        // Press RIGHT_BUMPER to set lower height setpoint
+//        driver2
+//            .getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
+//            .whenPressed(InstantCommand({ lift.setpoint += teleOpSetPointAdj }, lift))
 
 
         /**
@@ -170,14 +170,14 @@ class MainTeleOp : CommandOpMode() {
 
 
         /**
-         * Intake
+         * Claw
          */
         driver2
             .getGamepadButton(GamepadKeys.Button.X)
-            .toggleWhenActive(IntakePickUp(intake))
+            .toggleWhenActive(InstantCommand(claw::close, claw))
         driver2
             .getGamepadButton(GamepadKeys.Button.Y)
-            .whenPressed(IntakeDeposit(intake))
+            .whenPressed(InstantCommand(claw::open, claw))
 
         /****************************************************
          * Commands                                         *
@@ -194,10 +194,8 @@ class MainTeleOp : CommandOpMode() {
         telemetry.speak("Good luck and have fun")
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML) // TODO DO
         telemetry.addData("Drive mode", "Mode: %s | Field Centric: %s", mecanum::getDefaultCommand.name, fieldCentricProvider)
-        telemetry.addData("Lift setpoint", lift::setpoint)
+        //telemetry.addData("Lift setpoint", lift::setpoint) // TODO FIX
         telemetry.addData("", 0)
-        telemetry.update()
-
     }
 
     override fun run() {

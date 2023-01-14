@@ -54,7 +54,7 @@ dependencies {
 
     implementation 'org.ftclib.ftclib:core:2.0.1' // core
     implementation 'org.openftc:easyopencv:1.5.3'
-    implementation 'com.github.Eeshwar-Krishnan:PhotonFTC:v2.0.1'
+    implementation 'com.github.Eeshwar-Krishnan:PhotonFTC:v2.0.4'
     implementation 'org.openftc:apriltag:1.1.1'
     implementation 'com.acmerobotics.roadrunner:core:0.5.6'
 
@@ -62,7 +62,7 @@ dependencies {
     implementation 'org.ejml:ejml-all:0.41'
 
     //implementation 'eu.hansolo.fx:charts:17.1.27'
-    implementation fileTree(dir: 'C:/Program Files/javafx-sdk-19/lib', include: ['*.aar', '*.jar'], exclude: [])
+    //implementation fileTree(dir: 'C:/Program Files/javafx-sdk-19/lib', include: ['*.aar', '*.jar'], exclude: [])
 
     annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
 }

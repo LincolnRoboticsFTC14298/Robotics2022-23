@@ -10,6 +10,14 @@ operator fun SimpleMatrix.plus(M: SimpleMatrix): SimpleMatrix = this.plus(M)
 
 operator fun SimpleMatrix.minus(M: SimpleMatrix): SimpleMatrix = this.minus(M)
 
+operator fun DoubleArray.plus(doubleArray: DoubleArray) : DoubleArray = this.zip(doubleArray).map{ it.first + it.second}.toDoubleArray()
+
+operator fun DoubleArray.minus(doubleArray: DoubleArray) : DoubleArray = this.zip(doubleArray).map{ it.first - it.second}.toDoubleArray()
+
+fun arrayToColumnMatrix(array: DoubleArray) = SimpleMatrix(arrayOf(array)).transpose()
+fun arrayToRowMatrix(array: DoubleArray) = SimpleMatrix(arrayOf(array))
+
+
 fun vectorToDoubleArray(vector: Vector2d) =
     arrayOf(vector.x, vector.y).toDoubleArray()
 

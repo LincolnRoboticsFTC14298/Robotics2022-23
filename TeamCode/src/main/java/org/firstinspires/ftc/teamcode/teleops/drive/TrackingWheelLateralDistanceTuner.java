@@ -10,8 +10,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.RobotLog;
 
-import org.firstinspires.ftc.teamcode.subsystems.drive.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.subsystems.drive.localization.OdometryLocalizer;
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.drive.localization.OdometryLocalizer;
 
 /**
  * Opmode designed to assist the user in tuning the `StandardTrackingWheelLocalizer`'s
@@ -66,7 +66,6 @@ import org.firstinspires.ftc.teamcode.subsystems.drive.localization.OdometryLoca
  */
 @Config
 @TeleOp(group = "drive")
-@Disabled
 public class TrackingWheelLateralDistanceTuner extends LinearOpMode {
     public static int NUM_TURNS = 10;
 
