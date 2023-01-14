@@ -1,24 +1,26 @@
 package org.firstinspires.ftc.teamcode.vision.modules
 
-import com.qualcomm.robotcore.hardware.AnalogSensor
 import org.firstinspires.ftc.teamcode.vision.modulelib.AbstractPipelineModule
-import org.firstinspires.ftc.teamcode.vision.modules.scorers.Scorer
 import org.opencv.core.Mat
 import org.opencv.core.MatOfPoint
+import org.opencv.core.MatOfPoint2f
 import org.opencv.core.Point
-import org.opencv.imgproc.Imgproc.boundingRect
-import java.lang.Math.tan
+import org.opencv.imgproc.Imgproc.*
+import java.lang.Math.min
+import java.lang.Math.toRadians
+
 
 /**
  * Returns contours that pass the scorers by thresholding a weighted sum.
- * @param scorers Pair of weight and its module scorer
+ * @param cameraHeight must be in same units as returned distance
  */
 class ContourResults(
     private val contourModule: AbstractPipelineModule<List<MatOfPoint>>,
     private val cameraHeight: Double,
     private val FOVX: Double,
     private val FOVY: Double,
-    private val cameraPitch: Double = 0.0
+    private val cameraPitch: Double = 0.0,
+    private val useDistanceByWidth: Boolean = false
 ) : AbstractPipelineModule<List<ContourResults.AnalysisResult>>() {
 
     data class AnalysisResult(val point: Point, val angle: Double, val distance: Double)
@@ -41,12 +43,21 @@ class ContourResults(
             val aimingPoint = Point(Ax, Ay)
 
             // calculate angle and distance
-            val pitch = (Ay/2.0)*FOVY
-            val yaw = (Ax/2.0)*FOVX
+            val pitch = (Ay/2.0) * toRadians(FOVY)
+            val yaw = (Ax/2.0) * toRadians(FOVX)
             val distance = -cameraHeight/kotlin.math.tan(cameraPitch + pitch)
 
+            /// New variable
+            val contour2f = MatOfPoint2f(*contour.toArray())
+            val contourMinAreaRect = minAreaRect(contour2f)
+            val distanceByWidth = min(contourMinAreaRect.size.width, contourMinAreaRect.size.height) //TODO double check, finish formula
+
             // add to results
-            results.add(AnalysisResult(pixelPoint, yaw, distance))
+            if(useDistanceByWidth){
+                results.add(AnalysisResult(pixelPoint, yaw, distanceByWidth))
+            } else {
+                results.add(AnalysisResult(pixelPoint, yaw, distance))
+            }
         }
         return results
     }

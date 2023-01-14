@@ -12,11 +12,13 @@ import org.opencv.imgproc.Imgproc.drawContours
 open class GeneralConePipeline(
     private var displayMode: DisplayMode = DisplayMode.ALL_CONTOURS,
     private val FOVX: Double,
-    private val FOVY: Double
+    private val FOVY: Double,
+    private val cameraHeight: Double,
+    private val cameraPitch: Double = 0.0
 ) : ModularPipeline() {
 
-//    val camMat = Mat()
-//    val distCoeffs = Mat()
+//    private val camMat = Mat()
+//    private val distCoeffs = Mat()
 
     enum class DisplayMode {
         RAW_CAMERA_INPUT,
@@ -28,43 +30,42 @@ open class GeneralConePipeline(
     }
 
     // Modules //
-    val inputModule = InputModule()
-    //val undistort = UndistortLens(input, camMat, distCoeffs)
-    val labColorSpace = ColorConverter(inputModule, Imgproc.COLOR_RGB2Lab)
-    val redMask = Filter(labColorSpace, Scalar(0.0, 150.0, 100.0), Scalar(255.0, 200.0, 175.0))
-    val blueMask = Filter(labColorSpace, Scalar(0.0, 130.0, 30.0), Scalar(255.0, 180.0, 120.0))
-    val combinedMask = CombineMasks(redMask, blueMask)
-    val denoisedMask = Denoise(combinedMask)
-    val contours = Contours(denoisedMask)
+    private val inputModule = InputModule()
+    //private val undistort = UndistortLens(input, camMat, distCoeffs)
+    private val labColorSpace = ColorConverter(inputModule, Imgproc.COLOR_RGB2Lab)
+    private val redMask = Filter(labColorSpace, Scalar(0.0, 150.0, 100.0), Scalar(255.0, 200.0, 175.0))
+    private val blueMask = Filter(labColorSpace, Scalar(0.0, 130.0, 30.0), Scalar(255.0, 180.0, 120.0))
+    private val combinedMask = CombineMasks(redMask, blueMask)
+    private val denoisedMask = Denoise(combinedMask, 5, 5, 3, 3)
+    private val contours = Contours(denoisedMask)
 
-    val coneAspectRatio = 1.33
+    private val coneAspectRatio = 1.33
 
     // Stacked scorer //
-    val stackConvexity = Convexity(0.96)
-    val stackExtent = Extent(0.78) //TODO Make range?
-    val stackSolidity = Solidity(0.93)
-    val stackAspectRatio = ThresholdAspectRatio(coneAspectRatio + 0.4, 10.0)
-    val stackContours = FilterContours(contours, 0.1, Pair(1.0, stackConvexity), Pair(1.0, stackExtent), Pair(1.0, stackSolidity), Pair(5.0, stackAspectRatio)) //TODO change weights
+    private val stackConvexity = Convexity(0.96)
+    private val stackExtent = Extent(0.78) //TODO Make range?
+    private val stackSolidity = Solidity(0.93)
+    private val stackAspectRatio = ThresholdAspectRatio(coneAspectRatio + 0.4, 10.0)
+    private val stackContours = FilterContours(contours, 0.1, Pair(1.0, stackConvexity), Pair(1.0, stackExtent), Pair(1.0, stackSolidity), Pair(5.0, stackAspectRatio)) //TODO change weights
 
     // Single cone scorer //
-    val singleConeConvexity = Convexity(0.93)
-    val singleConeExtent = Extent(0.68)
-    val singleConeSolidity = Solidity(0.9)
-    val singleConeAspectRatio = ThresholdAspectRatio(coneAspectRatio - 0.3, coneAspectRatio + 0.3)
-    val singleConeContours = FilterContours(contours, 0.1, Pair(1.0, singleConeConvexity), Pair(1.0, singleConeExtent), Pair(1.0, singleConeSolidity), Pair(10.0, singleConeAspectRatio))
+    private val singleConeConvexity = Convexity(0.93)
+    private val singleConeExtent = Extent(0.68)
+    private val singleConeSolidity = Solidity(0.9)
+    private val singleConeAspectRatio = ThresholdAspectRatio(coneAspectRatio - 0.3, coneAspectRatio + 0.3)
+    private val singleConeContours = FilterContours(contours, 0.1, Pair(1.0, singleConeConvexity), Pair(1.0, singleConeExtent), Pair(1.0, singleConeSolidity), Pair(10.0, singleConeAspectRatio))
 
     //Single color single cone mask overlap //
-    val test = ContourToMask(singleConeContours)
-    val redOverlap = MaskOverlap(test, redMask)
-    val redSingleConeContours = Contours(redOverlap)
-    val blueOverlap = MaskOverlap(ContourToMask(singleConeContours), blueMask)
-    val blueSingleConeContours = Contours(blueOverlap)
+    private val redOverlap = MaskOverlap(ContourToMask(singleConeContours), blueMask)
+    private val redSingleConeContours = Contours(redOverlap)
+    private val blueOverlap = MaskOverlap(ContourToMask(singleConeContours), blueMask)
+    private val blueSingleConeContours = Contours(blueOverlap)
 
 
-    val stackResultsModule = ContourResults(stackContours, 0.0, FOVX, FOVY)
-    val singleConeResultsModule = ContourResults(singleConeContours, 0.0, FOVX, FOVY)
-    val redSingleConeResultsModule = ContourResults(redSingleConeContours, 0.0, FOVX, FOVY)
-    val blueSingleConeResultsModule = ContourResults(blueSingleConeContours, 0.0, FOVX, FOVY)
+    private val stackResultsModule = ContourResults(stackContours, cameraHeight, FOVX, FOVY, cameraPitch)
+    private val singleConeResultsModule = ContourResults(singleConeContours, cameraHeight, FOVX, FOVY, cameraPitch)
+    private val redSingleConeResultsModule = ContourResults(redSingleConeContours, cameraHeight, FOVX, FOVY, cameraPitch)
+    private val blueSingleConeResultsModule = ContourResults(blueSingleConeContours, cameraHeight, FOVX, FOVY, cameraPitch)
 
     // Data we care about and wish to access
     var stackResults = listOf<ContourResults.AnalysisResult>()
@@ -93,7 +94,8 @@ open class GeneralConePipeline(
             DisplayMode.RAW_COMBINED_MASK -> combinedMask.processFrame(input)
             DisplayMode.DENOISED_MASK -> denoisedMask.processFrame(input)
             DisplayMode.ALL_CONTOURS -> {
-                drawContours(input, contours.processFrame(input), -1, Scalar(255.0, 0.0, 255.0), 1) //Purple for stack contours
+                drawContours(input, contours.processFrame(input), -1, Scalar(0.0, 255.0, 0.0), 1) //red for other contours
+                drawContours(input, stackContours.processFrame(input), -1, Scalar(255.0, 0.0, 255.0), 1) //Purple for stack contours
                 drawContours(input, redSingleConeContours.processFrame(input), -1, Scalar(255.0, 0.0, 0.0), 1) //Red for single red cone contours
                 drawContours(input, blueSingleConeContours.processFrame(input), -1, Scalar(0.0, 0.0, 255.0), 1) //Blue for single blue cone contours
                 input
