@@ -34,17 +34,17 @@ class ApproachCone(
                 SequentialCommandGroup(
                     // Drive normally until a cone has been detected
                     // TODO: Default command doesn't update if it is changed
-                    ParallelDeadlineGroup(
-                        WaitUntilCommand { vision.getConeRelativePosition() != null },
-                        mecanum.defaultCommand
-                    ),
+//                    ParallelDeadlineGroup(
+//                        WaitUntilCommand { vision.getConeRelativePosition() != null },
+//                        mecanum.defaultCommand
+//                    ),
                     // Switch to auto approach the cone once a cone has been detected
-                    ApproachRelativePoint(
-                        mecanum,
-                        vision::getConeRelativePosition,
-                        RobotConfig.intakePosition,
-                        speed
-                    )
+//                    ApproachRelativePoint(
+//                        mecanum,
+//                        vision::getConeRelativePosition,
+//                        RobotConfig.intakePosition,
+//                        speed
+//                    )
                 )
             ),
             InstantCommand(vision::stopStreamingFrontCamera)

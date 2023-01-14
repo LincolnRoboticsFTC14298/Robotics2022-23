@@ -48,10 +48,11 @@ public class TestPipeline5 extends OpenCvPipeline {
         inRange(input, new Scalar(0, 163, 50), new Scalar(255, 255, 255), inputRed);
         inRange(input, new Scalar(0, 75, 137), new Scalar(200, 150, 255), inputBlue);
 
-        Core.bitwise_or(inputRed, inputBlue, input);
+        //Core.bitwise_or(inputRed, inputBlue, input);
+        input=inputBlue;
 
-        Imgproc.morphologyEx(input, input, Imgproc.MORPH_CLOSE, Mat.ones(5,5, CvType.CV_32F));
-        Imgproc.morphologyEx(input, input, Imgproc.MORPH_OPEN, Mat.ones(3,3, CvType.CV_32F));
+        //Imgproc.morphologyEx(input, input, Imgproc.MORPH_CLOSE, Mat.ones(5,5, CvType.CV_32F));
+        //Imgproc.morphologyEx(input, input, Imgproc.MORPH_OPEN, Mat.ones(3,3, CvType.CV_32F));
 
         List<MatOfPoint> contours = new ArrayList<>();
         Mat hierarchy = new Mat();

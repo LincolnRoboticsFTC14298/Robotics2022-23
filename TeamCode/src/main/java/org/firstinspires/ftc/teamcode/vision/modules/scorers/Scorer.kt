@@ -4,4 +4,5 @@ import org.opencv.core.MatOfPoint
 
 interface Scorer {
     fun score(contour: MatOfPoint) : Double
+    //add index: Int parameter for logging potentially
 }

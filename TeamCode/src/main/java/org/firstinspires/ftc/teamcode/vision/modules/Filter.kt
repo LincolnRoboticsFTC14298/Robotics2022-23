@@ -10,7 +10,7 @@ class Filter (
     private val inputModule: AbstractPipelineModule<Mat>,
     private val lowerBound: Scalar,
     private val upperBound: Scalar
-    ) : AbstractPipelineModule<Mat>() {
+) : AbstractPipelineModule<Mat>() {
 
     private lateinit var output: Mat
 

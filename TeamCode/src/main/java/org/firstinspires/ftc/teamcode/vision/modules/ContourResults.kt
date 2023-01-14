@@ -6,8 +6,8 @@ import org.opencv.core.MatOfPoint
 import org.opencv.core.MatOfPoint2f
 import org.opencv.core.Point
 import org.opencv.imgproc.Imgproc.*
-import java.lang.Math.min
-import java.lang.Math.toRadians
+import java.lang.Math.*
+import kotlin.math.pow
 
 
 /**
@@ -19,7 +19,7 @@ class ContourResults(
     private val cameraHeight: Double,
     private val FOVX: Double,
     private val FOVY: Double,
-    private val cameraPitch: Double = 0.0,
+    private val cameraPitch: Double = 0.0, // negative pitch is down, positive is up
     private val useDistanceByWidth: Boolean = false
 ) : AbstractPipelineModule<List<ContourResults.AnalysisResult>>() {
 
@@ -35,7 +35,7 @@ class ContourResults(
             val boundingBox = boundingRect(contour)
             val pixelX = boundingBox.x+(boundingBox.width/2.0)
             val pixelY = (boundingBox.y+boundingBox.height).toDouble()
-            val pixelPoint = Point(pixelX, pixelY) // find pixel location of bottom middle of cone
+            val pixelPoint = Point(pixelX, pixelY) // find pixel location of bottom middle of contour bounding box
 
             // adjust to aiming coordinate space
             val Ax = (pixelPoint.x - (rawInput.size().width/2)) / (rawInput.size().width/2.0)
@@ -43,9 +43,9 @@ class ContourResults(
             val aimingPoint = Point(Ax, Ay)
 
             // calculate angle and distance
-            val pitch = (Ay/2.0) * toRadians(FOVY)
-            val yaw = (Ax/2.0) * toRadians(FOVX)
-            val distance = -cameraHeight/kotlin.math.tan(cameraPitch + pitch)
+            val pitch = Ay * toRadians(FOVY) / 2.0
+            val yaw = Ax * toRadians(FOVX) / 2.0
+            val distance = (-cameraHeight / kotlin.math.tan(cameraPitch + pitch)) / kotlin.math.cos(yaw)
 
             /// New variable
             val contour2f = MatOfPoint2f(*contour.toArray())

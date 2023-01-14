@@ -54,15 +54,16 @@ public class TestPipeline4 extends OpenCvPipeline {
         Mat inputBlue = new Mat();
         Mat inputPole = new Mat();
 
-        inRange(input, new Scalar(0, 150, 100), new Scalar(255, 200, 175), inputRed);
-        inRange(input, new Scalar(0, 130, 30), new Scalar(255, 180, 120), inputBlue);
+        inRange(input, new Scalar(0, 154, 110), new Scalar(255, 210, 190), inputRed);
+        //inRange(input, new Scalar(0, 120, 30), new Scalar(255, 180, 110), inputBlue);
+        inRange(input, new Scalar(0, 75, 137), new Scalar(200, 150, 255), inputBlue);
         inRange(input, new Scalar(0, 110, 150), new Scalar(255, 150, 200), inputPole);
         //Core.bitwise_or(inputRed, inputBlue, input);
-        input=inputPole;
+        input=inputBlue;
 
         //morphology
-        Imgproc.morphologyEx(input, input, Imgproc.MORPH_CLOSE, Mat.ones(5,3, CvType.CV_32F));
-        Imgproc.morphologyEx(input, input, Imgproc.MORPH_OPEN, Mat.ones(3,1, CvType.CV_32F));
+        Imgproc.morphologyEx(input, input, Imgproc.MORPH_CLOSE, Mat.ones(5,5, CvType.CV_32F));
+        Imgproc.morphologyEx(input, input, Imgproc.MORPH_OPEN, Mat.ones(3,3, CvType.CV_32F));
 
         //find and draw contours
         List<MatOfPoint> contours = new ArrayList<>();
