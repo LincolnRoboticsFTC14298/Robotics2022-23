@@ -8,7 +8,11 @@ import org.opencv.imgproc.Imgproc
 
 
 class Denoise (
-    private val inputModule: AbstractPipelineModule<Mat>
+    private val inputModule: AbstractPipelineModule<Mat>,
+    private val MORPH_CLOSE_ROWS: Int,
+    private val MORPH_CLOSE_COLUMNS: Int,
+    private val MORPH_OPEN_ROWS: Int,
+    private val MORPH_OPEN_COLUMNS: Int,
 ) : AbstractPipelineModule<Mat>() {
 
     private lateinit var output: Mat
@@ -23,8 +27,8 @@ class Denoise (
     }
 
     override fun processFrameForCache(rawInput: Mat): Mat {
-        Imgproc.morphologyEx(inputModule.processFrame(rawInput), output, Imgproc.MORPH_CLOSE, Mat.ones(5, 5, CvType.CV_32F))
-        Imgproc.morphologyEx(output, output, Imgproc.MORPH_OPEN, Mat.ones(3, 3, CvType.CV_32F))
+        Imgproc.morphologyEx(inputModule.processFrame(rawInput), output, Imgproc.MORPH_CLOSE, Mat.ones(MORPH_CLOSE_ROWS, MORPH_CLOSE_COLUMNS, CvType.CV_32F))
+        Imgproc.morphologyEx(output, output, Imgproc.MORPH_OPEN, Mat.ones(MORPH_OPEN_ROWS, MORPH_OPEN_COLUMNS, CvType.CV_32F))
         return output
     }
 

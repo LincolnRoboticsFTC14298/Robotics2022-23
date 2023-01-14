@@ -31,11 +31,11 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestPipeline4 extends OpenCvPipeline {
+public class TestPipeline4point5 extends OpenCvPipeline {
 
     Telemetry telemetry;
 
-    public TestPipeline4(Telemetry telemetry) {
+    public TestPipeline4point5(Telemetry telemetry) {
         this.telemetry = telemetry;
     }
 
@@ -53,7 +53,7 @@ public class TestPipeline4 extends OpenCvPipeline {
 
         inRange(input, new Scalar(0, 150, 100), new Scalar(255, 200, 175), inputRed);
         inRange(input, new Scalar(0, 130, 30), new Scalar(255, 180, 120), inputBlue);
-        inRange(input, new Scalar(0, 110, 150), new Scalar(255, 150, 200), inputPole);
+        inRange(input, new Scalar(0, 130, 160), new Scalar(255, 160, 200), inputPole);
         //Core.bitwise_or(inputRed, inputBlue, input);
         input=inputPole;
 
@@ -104,17 +104,17 @@ public class TestPipeline4 extends OpenCvPipeline {
             hullList.add(convexHull);
 
 
-            double hullPerimeter = arcLength(new MatOfPoint2f(convexHull.toArray()),true);
+            double hullPerimeter = arcLength(new MatOfPoint2f(convexHull.toArray()), true);
             double hullArea = contourArea(convexHull);
 
             double solidity = contourArea / hullArea;
-            double aspectRatio = height/width;
+            double aspectRatio = height / width;
             double extent = contourArea / (boundingBox.width * boundingBox.height);
             double convexity = hullPerimeter / contourPerimeter;
 
-            String testScorer = "extent";
-            telemetry.addData("centroid #" + (i+1), centroid);
-            telemetry.addData(testScorer + " #" + (i+1), extent);
+            String testScorer = "solidity";
+            telemetry.addData("centroid #" + (i + 1), centroid);
+            telemetry.addData(testScorer + " #" + (i + 1), solidity);
 
             //rectangle(realInput, boundingBox, new Scalar(255,0,0));
         }

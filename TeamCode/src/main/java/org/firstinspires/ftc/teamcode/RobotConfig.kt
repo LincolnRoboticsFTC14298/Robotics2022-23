@@ -181,6 +181,11 @@ object RobotConfig {
 
     const val potentiometerOffset = 0.0 // degrees
 
+    /**
+     * Vision
+     */
+    const val webcamHeight = 2.0
+    const val phoneCamHeight = 0.0
 
 
 
