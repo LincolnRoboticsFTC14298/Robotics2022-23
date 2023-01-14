@@ -5,8 +5,7 @@ import org.opencv.core.Mat
 import org.opencv.core.MatOfPoint
 import org.opencv.core.MatOfPoint2f
 import org.opencv.core.Point
-import org.opencv.imgproc.Imgproc.boundingRect
-import org.opencv.imgproc.Imgproc.minAreaRect
+import org.opencv.imgproc.Imgproc.*
 import java.lang.Math.toRadians
 
 
@@ -51,13 +50,15 @@ class ContourResults(
             var SrcMtx: MatOfPoint
             /// New variable
             val contour2f = MatOfPoint2f(*contour.toArray())
-            val minAreaRect = minAreaRect(contour2f)
-            val distanceByWidth = 0.0 //TODO
+            val contourMinAreaRect = minAreaRect(contour2f)
+            val contourBoxPoints = Mat()
+            boxPoints(contourMinAreaRect, contourBoxPoints)
+            val distanceByWidth = contourBoxPoints.width() //TODO double check, finish formula
 
 
             // add to results
             if(useDistanceByWidth){
-                results.add(AnalysisResult(pixelPoint, yaw, distanceByWidth))
+                results.add(AnalysisResult(pixelPoint, yaw, distanceByWidth.toDouble()))
             } else {
                 results.add(AnalysisResult(pixelPoint, yaw, distance))
             }
