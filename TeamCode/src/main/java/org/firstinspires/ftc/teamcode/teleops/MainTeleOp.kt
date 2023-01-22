@@ -91,9 +91,9 @@ class MainTeleOp : CommandOpMode() {
             .getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
             .whenActive(semiAutoDepositHigh)
 
-        driver1
-            .getGamepadButton(GamepadKeys.Button.Y)
-            .whenActive(SequentialCommandGroup(InstantCommand::))
+//        driver1
+//            .getGamepadButton(GamepadKeys.Button.Y)
+//            .whenActive(SequentialCommandGroup(InstantCommand::))
 
 
         /**
@@ -162,11 +162,11 @@ class MainTeleOp : CommandOpMode() {
             .getGamepadButton(GamepadKeys.Button.B)
             .whenPressed(InstantCommand(passthrough::deposit, passthrough))
 
-        // Adjust passthrough deposit location
-        Trigger(TriggerReader(driver2, GamepadKeys.Trigger.LEFT_TRIGGER)::isDown)
-            .whenActive(Runnable{ passthrough.depositOffset -= teleOpDepositAdj })
-        Trigger(TriggerReader(driver2, GamepadKeys.Trigger.RIGHT_TRIGGER)::isDown)
-            .whenActive(Runnable{ passthrough.depositOffset += teleOpDepositAdj })
+//        // Adjust passthrough deposit location
+//        Trigger(TriggerReader(driver2, GamepadKeys.Trigger.LEFT_TRIGGER)::isDown)
+//            .whenActive(Runnable{ passthrough.depositOffset -= teleOpDepositAdj })
+//        Trigger(TriggerReader(driver2, GamepadKeys.Trigger.RIGHT_TRIGGER)::isDown)
+//            .whenActive(Runnable{ passthrough.depositOffset += teleOpDepositAdj })
 
 
         /**
