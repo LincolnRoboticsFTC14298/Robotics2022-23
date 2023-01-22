@@ -200,13 +200,15 @@ object RobotConfig {
     const val leftPassthroughName = "leftPassthrough"
     const val rightPassthroughName = "rightPassthrough"
 
-    const val passthroughMinDegree = 0.0 // degrees
-    const val passthroughMaxDegree = 0.0 // degrees
+    const val passthroughMinDegree = -45.0 // degrees
+    const val passthroughMaxDegree = 180.0 // degrees
 
     @JvmField
-    var passthroughPickUpAngle = -15.0 // degrees
+    var passthroughPickUpAngle = -45.0 // degrees
     @JvmField
     var passthroughDepositAngle = 180.0 // degrees
+    @JvmField
+    var passthroughJunctionAngle = -35.0
 
     @JvmField
     var passthroughMaxVel = 0.0
