@@ -4,6 +4,7 @@ import com.arcrobotics.ftclib.command.InstantCommand
 import com.arcrobotics.ftclib.command.SequentialCommandGroup
 import com.arcrobotics.ftclib.command.WaitUntilCommand
 import org.firstinspires.ftc.teamcode.RobotConfig
+import org.firstinspires.ftc.teamcode.RobotConfig.passthroughDepositAngle
 import org.firstinspires.ftc.teamcode.RobotConfig.poleDepositAnticipationTime
 import org.firstinspires.ftc.teamcode.subsystems.Lift
 import org.firstinspires.ftc.teamcode.subsystems.Passthrough
@@ -17,7 +18,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Passthrough
  */
 class ReadyPoleDeposit(
     pole: RobotConfig.PoleType,
-    lift: Lift, passthrough: Passthrough
+    lift: Lift,
+    passthrough: Passthrough
 ) : SequentialCommandGroup() {
 
     init{
@@ -26,7 +28,7 @@ class ReadyPoleDeposit(
             InstantCommand({ lift.setHeight(pole) }, lift),
             // Ensures passthrough and lift finished simultaneously by
             // starting passthrough deposit at time from finish
-            WaitUntilCommand { lift.timeFromTarget() <= poleDepositAnticipationTime },
+            WaitUntilCommand { lift.timeFromTarget() <= passthrough.timeToTarget(passthroughDepositAngle) },
             // Rotate passthrough to deposit position
             InstantCommand(passthrough::deposit, passthrough),
             // Wait until lift and passthrough are done
