@@ -17,6 +17,7 @@ import org.firstinspires.ftc.teamcode.RobotConfig.passthroughMaxDegree
 import org.firstinspires.ftc.teamcode.RobotConfig.passthroughMinDegree
 import org.firstinspires.ftc.teamcode.RobotConfig.passthroughPickUpAngle
 import org.firstinspires.ftc.teamcode.RobotConfig.leftPassthroughName
+import org.firstinspires.ftc.teamcode.RobotConfig.passthroughJunctionAngle
 import org.firstinspires.ftc.teamcode.RobotConfig.passthroughMaxAccel
 import org.firstinspires.ftc.teamcode.RobotConfig.passthroughMaxVel
 import org.firstinspires.ftc.teamcode.RobotConfig.passthroughTimeTolerance
@@ -50,8 +51,6 @@ class Passthrough(hwMap: HardwareMap) : SubsystemBase() {
         passthroughMaxDegree
     )
 
-    var depositOffset = 0.0
-
     private var timer = ElapsedTime()
     private lateinit var motionProfile: MotionProfile
 
@@ -83,11 +82,15 @@ class Passthrough(hwMap: HardwareMap) : SubsystemBase() {
         }
     }
 
+    fun junctionDeposit() {
+        setpoint = passthroughJunctionAngle
+    }
+
     /**
      * Rotate servo to drop off position.
      */
     fun deposit() {
-        setpoint = passthroughDepositAngle + depositOffset
+        setpoint = passthroughDepositAngle
     }
 
     /**
@@ -95,6 +98,11 @@ class Passthrough(hwMap: HardwareMap) : SubsystemBase() {
      */
     fun pickUp() {
         setpoint = passthroughPickUpAngle
+    }
+
+    fun setPosition(position: Double) {
+        servoRight.position = position
+        servoLeft.position = position
     }
 
     /**
@@ -118,6 +126,16 @@ class Passthrough(hwMap: HardwareMap) : SubsystemBase() {
      */
     fun atTarget(): Boolean {
         return timer.seconds() - motionProfile.duration() > passthroughTimeTolerance
+    }
+
+    fun timeToTarget(angle: Double): Double {
+        val testProfile = MotionProfileGenerator.generateSimpleMotionProfile(
+            MotionState(getAngleEstimate(), 0.0, 0.0),
+            MotionState(angle, 0.0, 0.0),
+            passthroughMaxVel,
+            passthroughMaxAccel
+        )
+        return testProfile.duration()
     }
 
     /**
