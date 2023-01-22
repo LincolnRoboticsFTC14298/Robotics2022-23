@@ -18,35 +18,32 @@ class ApproachConeFromAngle(
 ) : SequentialCommandGroup() {
 
     init {
-        val result = null //vision.getNearestCone()
-        if (result != null) {
-            addCommands(
-                InstantCommand(vision::startStreamingFrontCamera),
-                SequentialCommandGroup(
-                    ParallelDeadlineGroup(
-                        // Waiting for intake to get a cone
-                        WaitUntilCommand { claw.isConeInside() },
-                        // Driving
-                        SequentialCommandGroup(
-                            // Drive normally until a cone has been detected
-                            ParallelDeadlineGroup(
-                                WaitUntilCommand { false },//vision.getNearestCone() != null },
-                                mecanum.defaultCommand
-                            ),
-                            // Switch to auto approach the cone once a cone has been detected
-                            WaitUntilCommand{ claw.isConeInside() },
-                            ApproachAngle(
-                                mecanum,
-                                {0.0},//vision::getNearestCone,
-                                speed
-                            )
+        addCommands(
+            InstantCommand(vision::startStreamingFrontCamera),
+            SequentialCommandGroup(
+                ParallelDeadlineGroup(
+                    // Waiting for intake to get a cone
+                    WaitUntilCommand { claw.isConeInside() },
+                    // Driving
+                    SequentialCommandGroup(
+                        // Drive normally until a cone has been detected
+                        ParallelDeadlineGroup(
+                            WaitUntilCommand { vision.getConeAngle() != null },
+                            mecanum.defaultCommand
                         ),
+                        // Switch to auto approach the cone once a cone has been detected
+                        WaitUntilCommand{ claw.isConeInside() },
+                        ApproachAngle(
+                            mecanum,
+                            vision::getConeAngle,
+                            speed
+                        )
                     ),
-                    ClawPickUp(claw)
                 ),
-                InstantCommand(vision::stopStreamingFrontCamera)
-            )
-        }
+                ClawPickUp(claw)
+            ),
+            InstantCommand(vision::stopStreamingFrontCamera)
+        )
         addRequirements(mecanum, vision, claw)
     }
 }

@@ -14,28 +14,24 @@ class ApproachPoleFromAngle(
 ) : SequentialCommandGroup() {
 
     init {
-        val result = null//vision.getNearesetPole()
-        if (result != null) {
-            addCommands(
-                InstantCommand(vision::startStreamingRearCamera),
-                SequentialCommandGroup(
-                    // Drive normally until a cone has been detected
-                    // TODO: Default command doesn't update if it is changed
-                    ParallelDeadlineGroup(
-                        WaitUntilCommand { false },//vision.getNeaerstPole() != null },
-                        mecanum.defaultCommand
-                    ),
-                    ApproachAngle(
-                        mecanum,
-                        {0.0},//vision::getNeaerstPole,
-                        speed
-                    )
+        addCommands(
+            InstantCommand(vision::startStreamingRearCamera),
+            SequentialCommandGroup(
+                // Drive normally until a cone has been detected
+                // TODO: Default command doesn't update if it is changed
+                ParallelDeadlineGroup(
+                    WaitUntilCommand { vision.getPoleAngle() != null },
+                    mecanum.defaultCommand
                 ),
-                InstantCommand(vision::stopStreamingRearCamera)
+                ApproachAngle(
+                    mecanum,
+                    vision::getPoleAngle,
+                    speed
+                )
+            ),
+            InstantCommand(vision::stopStreamingRearCamera)
 
-            )
-        }
+        )
         addRequirements(mecanum, vision)
-
     }
 }
