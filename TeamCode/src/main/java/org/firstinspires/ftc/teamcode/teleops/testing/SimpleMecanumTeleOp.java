@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @TeleOp
-@Disabled
 public class SimpleMecanumTeleOp extends LinearOpMode
 {
     @Override
@@ -30,7 +29,7 @@ public class SimpleMecanumTeleOp extends LinearOpMode
         while (opModeIsActive())
         {
             double y = -gamepad1.left_stick_y;
-            double x = gamepad1.left_stick_x * 1.1;
+            double x = gamepad1.left_stick_x;
             double rx = gamepad1.right_stick_x;
 
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
