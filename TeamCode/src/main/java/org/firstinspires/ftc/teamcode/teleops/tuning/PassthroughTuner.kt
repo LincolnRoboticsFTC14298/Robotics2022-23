@@ -33,8 +33,9 @@ class PassthroughTuner() : OpMode() {
             passthrough.setPosition(0.0)
         }
 
-        telemetry.addData("Deposit Angle (Degrees)", RobotConfig.passthroughDepositAngle)
-        telemetry.addData("Pick Up Angle (Degrees)", RobotConfig.passthroughPickUpAngle)
+        telemetry.addData("Time to deposit", passthrough.timeToTarget(RobotConfig.passthroughDepositAngle))
+        telemetry.addData("Time to junction deposit", passthrough.timeToTarget(RobotConfig.passthroughJunctionAngle))
+        telemetry.addData("Time to pick up", passthrough.timeToTarget(RobotConfig.passthroughPickUpAngle))
         passthrough.fetchTelemetry(telemetry)
         telemetry.update()
     }
