@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.subsystems.Lift
 
 @TeleOp
-class LiftFeedforwardTuner : OpMode() {
+class ManualLiftFeedforwardTuner : OpMode() {
 
     lateinit var lift: Lift
 

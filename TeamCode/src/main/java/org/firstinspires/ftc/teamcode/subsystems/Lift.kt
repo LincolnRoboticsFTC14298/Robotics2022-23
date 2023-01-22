@@ -126,25 +126,17 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
         checkEncoder()
 
         // Get current state estimates using kalman filter//
-        val dt = timer.time()
         val u = doubleArrayOf(desiredState.x-state[0], desiredState.v-state[1], desiredState.a-state[2]) // Subtract desired state with previous state estimate
-        filter.predict(arrayToColumnMatrix(u), dt)
-
-        val z = doubleArrayOf(getRawExtensionLength(), getRawVelocity())
-        Log.v("Raw state", z.toString())
-        filter.update(arrayToColumnMatrix(z))
-
-        state = filter.stateEstimate.ddrm.data
-        Log.v("Estimated state", state.toString())
+        updateFilter(arrayToColumnMatrix(u))
 
         setPower(controller.update(getExtensionLength(), getVelocity()))
 
         timer.reset()
     }
 
-    fun testFilter() {
+    fun updateFilter(u: SimpleMatrix?) {
         val dt = timer.time()
-        filter.predict(null, dt)
+        filter.predict(u, dt)
 
         val z = doubleArrayOf(getRawExtensionLength(), getRawVelocity())
         Log.v("Raw state", z.toString())
@@ -160,7 +152,7 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
      * Resets encoder position if necessary
      */
     private var checkLimit = false
-    private fun checkEncoder() {
+    fun checkEncoder() {
         if (checkLimit && getExtensionLength() <= withinSwitchRange) {
             if (limit.isPressed) {
                 motorGroup.encoder.reset()
@@ -208,35 +200,35 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
     /**
      * @return Distance the lift has extended relative to retracted state in cm.
      */
-    private fun getExtensionLength(): Double {
+    fun getExtensionLength(): Double {
         return state[0]
     }
 
     /**
      * @return Velocity of the lift in cm / s.
      */
-    private fun getVelocity(): Double {
+    fun getVelocity(): Double {
         return state[1]
     }
 
     /**
      * @return Acceleration of the lift in cm / s2.
      */
-    private fun getAcceleration(): Double {
+    fun getAcceleration(): Double {
         return state[2]
     }
 
     /**
      * @return Raw lift position has extended relative to retracted state in cm.
      */
-    private fun getRawExtensionLength(): Double {
+    fun getRawExtensionLength(): Double {
         return motorGroup.distance
     }
 
     /**
      * @return Raw velocity of the lift in cm / s.
      */
-    private fun getRawVelocity(): Double {
+    fun getRawVelocity(): Double {
         return motorGroup.correctedVelocity * liftDPP
     }
 

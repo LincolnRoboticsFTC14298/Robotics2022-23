@@ -24,7 +24,7 @@ class LiftDistancePerPulseTuner() : OpMode() {
     override fun loop() {
         val power = gamepad1.left_stick_x * 0.6
         lift.setPower(power)
-        lift.testFilter()
+        lift.updateFilter(null)
         telemetry.addData("power", power)
         lift.fetchTelemetry(telemetry)
         telemetry.update()

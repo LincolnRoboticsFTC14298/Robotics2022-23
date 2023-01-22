@@ -19,7 +19,7 @@ class LiftKalmanTest() : OpMode() {
     override fun loop() {
         val power = gamepad1.left_stick_x * 0.6
         lift.setPower(power)
-        lift.testFilter()
+        lift.updateFilter(null)
         lift.fetchTelemetry(telemetry)
         telemetry.addData("power", power)
         telemetry.update()
