@@ -29,7 +29,6 @@ class ApproachConeFromAngle(
                         // Driving
                         SequentialCommandGroup(
                             // Drive normally until a cone has been detected
-                            // TODO: Default command doesn't update if it is changed
                             ParallelDeadlineGroup(
                                 WaitUntilCommand { false },//vision.getNearestCone() != null },
                                 mecanum.defaultCommand
