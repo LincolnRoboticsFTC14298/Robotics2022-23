@@ -7,7 +7,6 @@ import org.firstinspires.ftc.teamcode.RobotConfig
 import org.firstinspires.ftc.teamcode.subsystems.Passthrough
 
 @TeleOp
-@Disabled
 class PassthroughTuner() : OpMode() {
 
     lateinit var passthrough: Passthrough
@@ -18,24 +17,20 @@ class PassthroughTuner() : OpMode() {
 
     override fun loop() {
 
+        if (gamepad1.dpad_down) {
+            passthrough.pickUp()
+        }
+
+        if (gamepad1.dpad_right) {
+            passthrough.junctionDeposit()
+        }
+
+        if (gamepad1.dpad_up) {
+            passthrough.deposit()
+        }
+
         if (gamepad1.a) {
-            RobotConfig.passthroughDepositAngle -= 1.0
-            passthrough.deposit()
-        }
-
-        if (gamepad1.b) {
-            RobotConfig.passthroughDepositAngle += 1.0
-            passthrough.deposit()
-        }
-
-        if (gamepad1.x) {
-            RobotConfig.passthroughPickUpAngle -= 1.0
-            passthrough.pickUp()
-        }
-
-        if (gamepad1.y) {
-            RobotConfig.passthroughPickUpAngle += 1.0
-            passthrough.pickUp()
+            passthrough.setPosition(0.0)
         }
 
         telemetry.addData("Deposit Angle (Degrees)", RobotConfig.passthroughDepositAngle)
