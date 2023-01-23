@@ -10,7 +10,7 @@ class ParticleFilter(
     private val motionProcessModel: ProcessModel,
     private val motionNoiseStandardDeviations: SimpleMatrix,
     private val probabilisticMeasurementModel: ProbabilisticMeasurementModel
-) : Filter {
+) : Filter<SimpleMatrix, SimpleMatrix> {
 
     override var stateEstimate: SimpleMatrix = SimpleMatrix(0, 0)
         get() = getAverage()
