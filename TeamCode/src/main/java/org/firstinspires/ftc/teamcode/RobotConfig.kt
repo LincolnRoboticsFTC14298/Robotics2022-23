@@ -223,6 +223,13 @@ object RobotConfig {
     const val webcamHeight = 2.0
     const val phoneCamHeight = 0.0
 
+    const val WEBCAM_FOVX = 60.0
+    const val WEBCAM_FOVY = 60.0
+
+    const val PHONE_FOVX = 60.0
+    const val PHONE_FOVY = 60.0
+
+
 
 
     /****************************************************
