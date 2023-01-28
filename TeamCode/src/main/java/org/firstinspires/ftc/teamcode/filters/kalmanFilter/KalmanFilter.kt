@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.filters.kalmanFilter
 
 import org.ejml.simple.SimpleMatrix
 import org.firstinspires.ftc.teamcode.filters.Filter
-import org.firstinspires.ftc.teamcode.filters.MeasurementModel
 import org.firstinspires.ftc.teamcode.util.times
 
 class KalmanFilter(
