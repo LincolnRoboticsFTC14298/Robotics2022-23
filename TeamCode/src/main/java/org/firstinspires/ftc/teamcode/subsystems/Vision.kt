@@ -50,6 +50,18 @@ class Vision(
                  */
             }
         })
+
+        webCam.openCameraDeviceAsync(object : AsyncCameraOpenListener {
+            override fun onOpened() {
+                startStreamingRearCamera()
+            }
+
+            override fun onError(errorCode: Int) {
+                /*
+                 * This will be called if the camera could not be opened
+                 */
+            }
+        })
     }
 
 
@@ -131,13 +143,6 @@ class Vision(
      * @return List of pixel info for landmarks form pipeline
      */
     fun getLandmarkInfo(): List<Point> {
-        TODO("Implement")
-    }
-
-    /**
-     * @return Returns global position from pixel space
-     */
-    fun pixelToGlobalPosition(pixel: Point, realHeight: Double, position: Pose2d) : Vector2d {
         TODO("Implement")
     }
 
