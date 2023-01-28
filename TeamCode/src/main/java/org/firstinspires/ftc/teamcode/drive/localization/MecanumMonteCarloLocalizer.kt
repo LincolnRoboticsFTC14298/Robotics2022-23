@@ -7,21 +7,18 @@ import com.qualcomm.robotcore.util.ElapsedTime
 import org.ejml.simple.SimpleMatrix
 import org.firstinspires.ftc.teamcode.filters.particleFilter.ParticleFilter
 import org.firstinspires.ftc.teamcode.subsystems.Vision
-import org.firstinspires.ftc.teamcode.util.matrixToPose
-import org.firstinspires.ftc.teamcode.util.vectorToDoubleArray
 
 // TODO: Multiple instances of localizer will be created please fix oh god.
 class MecanumMonteCarloLocalizer(hwMap: HardwareMap, private val vision: Vision) : Localizer {
 
     private val odometryLocalizer = OdometryLocalizer(hwMap)
-    private val visionMeasurementModel = VisionMeasurementModel(vision)
+    private val visionMeasurementModel = VisionMeasurementModel()
 
     private val particleFilter = ParticleFilter(50, odometryLocalizer, SimpleMatrix(arrayOf(doubleArrayOf(0.01, 0.01, 0.01))), visionMeasurementModel)
 
     private val timer = ElapsedTime()
 
     override var poseEstimate: Pose2d = Pose2d()
-        get() = matrixToPose(particleFilter.stateEstimate)
 
     override var poseVelocity: Pose2d? = Pose2d()
         get() = odometryLocalizer.poseVelocity
