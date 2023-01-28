@@ -56,10 +56,10 @@ open class GeneralConePipeline(
     private val singleConeContours = FilterContours(contours, 0.1, Pair(1.0, singleConeConvexity), Pair(1.0, singleConeExtent), Pair(1.0, singleConeSolidity), Pair(10.0, singleConeAspectRatio))
 
     //Single color single cone mask overlap //
-    private val redOverlap = MaskOverlap(ContourToMask(singleConeContours), blueMask)
-    private val redSingleConeContours = Contours(redOverlap)
-    private val blueOverlap = MaskOverlap(ContourToMask(singleConeContours), blueMask)
-    private val blueSingleConeContours = Contours(blueOverlap)
+    private val redOverlapMask = MaskOverlap(ContourToMask(singleConeContours), redMask)
+    private val redSingleConeContours = Contours(redOverlapMask)
+    private val blueOverlapMask = MaskOverlap(ContourToMask(singleConeContours), blueMask)
+    private val blueSingleConeContours = Contours(blueOverlapMask)
 
 
     private val stackResultsModule = ContourResults(stackContours, cameraHeight, FOVX, FOVY, cameraPitch)
