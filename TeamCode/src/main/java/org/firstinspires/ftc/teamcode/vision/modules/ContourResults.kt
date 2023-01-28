@@ -6,8 +6,9 @@ import org.opencv.core.MatOfPoint
 import org.opencv.core.MatOfPoint2f
 import org.opencv.core.Point
 import org.opencv.imgproc.Imgproc.*
-import java.lang.Math.min
 import java.lang.Math.toRadians
+import kotlin.math.min
+import kotlin.math.tan
 
 
 /**
@@ -45,7 +46,7 @@ class ContourResults(
             // calculate angle and distance
             val pitch = (Ay/2.0) * toRadians(FOVY)
             val yaw = (Ax/2.0) * toRadians(FOVX)
-            val distance = -cameraHeight/kotlin.math.tan(cameraPitch + pitch)
+            val distance = -cameraHeight/ tan(cameraPitch + pitch)
 
             /// New variable
             val contour2f = MatOfPoint2f(*contour.toArray())
