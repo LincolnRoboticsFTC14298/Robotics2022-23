@@ -14,6 +14,8 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.sqrt
 
+
+// TODO add distance
 class ApproachAngle(
     private val mecanum: Mecanum,
     private val targetAngle: () -> Double?,
@@ -54,7 +56,14 @@ class ApproachAngle(
             // TODO CHECK
             val omega = controller.update(target!!) * DriveConstants.kV * DriveConstants.TRACK_WIDTH
 
-            mecanum.drive.setDriveSignal(DriveSignal(Pose2d(speed.invoke(), 0.0, omega)))
+            val dt = loopTimer.seconds()
+            val currentVel = mecanum.getVelocityEstimate()!!.vec().norm()
+            val maxVelFromLast = currentVel + DriveConstants.MAX_ACCEL * dt
+            val minVelFromLast = currentVel - DriveConstants.MAX_ACCEL * dt
+            // Choose the minimum possible speed and obtain the max of the physically possible velocity
+            val velocity = max(minVelFromLast, minOf(maxVelFromLast, speed.invoke() * DriveConstants.MAX_VEL))
+
+            mecanum.drive.setDriveSignal(DriveSignal(Pose2d(velocity, 0.0, omega)))
         }
 
         loopTimer.reset()

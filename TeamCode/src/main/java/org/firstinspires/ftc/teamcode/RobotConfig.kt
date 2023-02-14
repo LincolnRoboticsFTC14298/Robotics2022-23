@@ -6,6 +6,10 @@ import com.acmerobotics.roadrunner.geometry.Vector2d
 import org.firstinspires.ftc.teamcode.subsystems.*
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive
 import org.firstinspires.ftc.teamcode.drive.localization.OdometryLocalizer
+import org.opencv.core.CvType
+import org.opencv.core.Mat
+import org.opencv.core.MatOfDouble
+import java.lang.Math.toRadians
 
 @Config
 object RobotConfig {
@@ -14,7 +18,6 @@ object RobotConfig {
      * Field                                            *
      ****************************************************/
 
-    // TODO CONVERT TO FEET YOU DWEEEB
     const val tileSize = 23.5 // in
 
 
@@ -220,8 +223,20 @@ object RobotConfig {
     /**
      * Vision
      */
-    const val webcamHeight = 2.0
-    const val phoneCamHeight = 0.0
+    enum class CameraData(val pitch: Double, val height: Double, val relativePosition: Vector2d, val FOVX: Double, val FOVY: Double, val fx: Double, val fy: Double, val cx: Double, val cy: Double, val distCoeffs: MatOfDouble) {
+        PHONECAM(0.0, 2.0, Vector2d(-5.0, 0.0), toRadians(60.0), toRadians(60.0), 0.0, 0.0, 0.0, 0.0, MatOfDouble(0.0, 0.0, 0.0, 0.0, 0.0)),
+        LOGITECH_C920(0.0, 3.0, Vector2d(5.0, 0.0), toRadians(60.0), toRadians(60.0), 578.272, 578.272, 402.145, 221.506, MatOfDouble(0.0, 0.0, 0.0, 0.0, 0.0));
+
+        fun getCameraMatrix(): Mat {
+            val cameraMat = Mat(3, 3, CvType.CV_64FC1)
+            val cameraData = doubleArrayOf(fx, 0.0, cx, 0.0, fy, cy, 0.0, 0.0, 1.0)
+            cameraMat.put(0, 0, *cameraData)
+            return cameraMat
+        }
+    }
+
+
+
 
 
 

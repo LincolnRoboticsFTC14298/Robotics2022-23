@@ -10,12 +10,12 @@ class ParticleFilter(
     private val motionProcessModel: ProcessModel,
     private val motionNoiseStandardDeviations: SimpleMatrix,
     private val probabilisticMeasurementModel: ProbabilisticMeasurementModel
-) : Filter {
+) : Filter<SimpleMatrix, SimpleMatrix> {
 
     override var stateEstimate: SimpleMatrix = SimpleMatrix(0, 0)
         get() = getAverage()
 
-    private lateinit var particles: Array<SimpleMatrix>
+    lateinit var particles: Array<SimpleMatrix>
 
     private val random = Random()
 
@@ -67,8 +67,7 @@ class ParticleFilter(
         val randomStart = random.nextDouble() / numberOfParticles.toDouble()
         var currentCumulativeWeight = weights[0]
         var currentWeightIndex = 0
-        return Array(numberOfParticles) {
-            m ->
+        return Array(numberOfParticles) { m ->
             val u = randomStart + m / numberOfParticles.toDouble()
             while (u*totalWeight > currentCumulativeWeight) { // March until in the indicator u is in the correct weight box
                 currentWeightIndex += 1
@@ -87,7 +86,7 @@ class ParticleFilter(
     }
 
     private fun generateGaussianNoiseVector(mean: SimpleMatrix, standardDeviations: SimpleMatrix) : SimpleMatrix {
-        val gaussianVector = SimpleMatrix(arrayOf(DoubleArray(mean.numRows()) { random.nextGaussian() }))
+        val gaussianVector = SimpleMatrix(arrayOf(DoubleArray(mean.numRows()) { random.nextGaussian() })).transpose()
         return mean + standardDeviations.elementMult(gaussianVector)
     }
 

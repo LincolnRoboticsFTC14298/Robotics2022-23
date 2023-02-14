@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.vision
 
+import org.firstinspires.ftc.teamcode.RobotConfig
 import org.firstinspires.ftc.teamcode.vision.modulelib.InputModule
 import org.firstinspires.ftc.teamcode.vision.modulelib.ModularPipeline
 import org.firstinspires.ftc.teamcode.vision.modules.*
@@ -14,14 +15,8 @@ import org.opencv.imgproc.Imgproc.drawContours
 
 open class PolePipeline(
     private var displayMode: DisplayMode = DisplayMode.ALL_CONTOURS,
-    private val FOVX: Double,
-    private val FOVY: Double,
-    private val cameraHeight: Double,
-    private val cameraPitch: Double = 0.0
+    camera: RobotConfig.CameraData
 ) : ModularPipeline() {
-
-//    val camMat = Mat()
-//    val distCoeffs = Mat()
 
     enum class DisplayMode {
         RAW_CAMERA_INPUT,
@@ -32,7 +27,7 @@ open class PolePipeline(
 
     // Modules //
     val inputModule = InputModule()
-    //val undistort = UndistortLens(input, camMat, distCoeffs)
+    //val undistort = UndistortLens(input, camera)
     val labColorSpace = ColorConverter(inputModule, Imgproc.COLOR_RGB2Lab)
     val poleMask = Filter(labColorSpace, Scalar(0.0, 110.0, 150.0), Scalar(255.0, 150.0, 200.0))
     val denoisedMask = Denoise(poleMask, 5, 3, 3, 1)
@@ -45,16 +40,20 @@ open class PolePipeline(
     val poleAspectRatio = ThresholdAspectRatio(3.5, 50.0)
     val poleContours = FilterContours(contours, 0.1, Pair(5.0, poleConvexity), Pair(0.5, poleExtent), Pair(1.0, poleSolidity), Pair(5.0, poleAspectRatio))
 
-    val poleResultsModule = ContourResults(poleContours, cameraHeight, FOVX, FOVY, cameraPitch, true)
+    val poleResultsModule = ContourResults(poleContours, camera, true)
 
     // Data we care about and wish to access
     var poleResults = listOf<ContourResults.AnalysisResult>()
+
+    val conePipeline = GeneralConePipeline(GeneralConePipeline.DisplayMode.ALL_CONTOURS, camera)
 
     init {
         addEndModules(poleResultsModule)
     }
 
     override fun processFrameForCache(input: Mat) : Mat {
+
+        conePipeline.processFrame(input)
 
         // Get the data we want (yipee)
         poleResults = poleResultsModule.processFrame(input)
@@ -77,5 +76,7 @@ open class PolePipeline(
         val nextOrdinal = (displayMode.ordinal + 1) % modes.size
         displayMode = modes[nextOrdinal]
     }
+
+    // TODO methods to check if single cone part of pole or not
 
 }

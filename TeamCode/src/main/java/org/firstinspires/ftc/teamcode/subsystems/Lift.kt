@@ -55,7 +55,7 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
 
     private val batteryVoltageSensor = hwMap.voltageSensor.iterator().next()
 
-    private val limit = hwMap.get(TouchSensor::class.java, magnetLimitName);
+    private val limit = hwMap.get(TouchSensor::class.java, magnetLimitName)
 
     private val controller = PIDFController(liftCoeffs, liftKStatic, liftKV, liftKA)
     private lateinit var motionProfile: MotionProfile
@@ -192,9 +192,10 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
 
     /**
      * Returns the position of where the passthrough is attached in tangent space.
+     * TODO: Add starting x
      */
     fun getRelativePosition(): Pose2d {
-        return Pose2d(-motorGroup.distance * cos(toRadians(60.0)), 0.0, 0.0)
+        return Pose2d(getExtensionLength() * cos(toRadians(60.0)), 0.0, 0.0)
     }
 
     /**

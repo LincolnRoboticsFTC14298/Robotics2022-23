@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.filters.kalmanFilter
 
 import org.ejml.simple.SimpleMatrix
 import org.firstinspires.ftc.teamcode.filters.Filter
-import org.firstinspires.ftc.teamcode.filters.MeasurementModel
 import org.firstinspires.ftc.teamcode.util.times
 
 class KalmanFilter(
@@ -10,18 +9,19 @@ class KalmanFilter(
     private val measurementModel: KalmanMeasurementModel,
     initialStateEstimate: SimpleMatrix,
     private var covariance: SimpleMatrix
-) : Filter {
+) : Filter<SimpleMatrix, SimpleMatrix> {
+
     override var stateEstimate: SimpleMatrix = initialStateEstimate
 
     lateinit var K: SimpleMatrix
+        private set
 
     fun predict(u: SimpleMatrix?, dt: Double) {
-        // Predict estimate
-        val previousStateEstimate = stateEstimate.copy() // TODO is copy necessary?
-        stateEstimate = processModel.predictState(stateEstimate, u, dt)
-
         // Prediction covariance
-        val F = processModel.getStateTransitionMatrix(previousStateEstimate, u, dt)
+        val F = processModel.getStateTransitionMatrix(stateEstimate, u, dt)
+
+        // Predict Estimate
+        stateEstimate = processModel.predictState(stateEstimate, u, dt)
 
         covariance = F * covariance * F.transpose() + processModel.getProcessNoise(dt)
     }

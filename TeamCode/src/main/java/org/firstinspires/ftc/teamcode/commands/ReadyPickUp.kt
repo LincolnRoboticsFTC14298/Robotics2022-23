@@ -18,7 +18,7 @@ class ReadyPickUp(lift: Lift, claw: Claw, passthrough: Passthrough) : Sequential
         addCommands(
             InstantCommand(lift::retract, lift),
             InstantCommand(passthrough::pickUp, passthrough),
-            WaitUntilCommand { passthrough.getAngleEstimate() <= 90.0 }, // TODO it can be > 90
+            WaitUntilCommand { passthrough.getAngleEstimate() <= 90.0 }, // TODO It can technically be > 90
             InstantCommand(claw::open, claw)
         )
         addRequirements(lift, claw, passthrough)

@@ -90,7 +90,7 @@ class ApproachRelativePoint(
             val maxVelFromLast = currentVel + MAX_ACCEL * dt
             val minVelFromLast = currentVel - MAX_ACCEL * dt
             // Choose the minimum possible speed and obtain the max of the physically possible velocity
-            val velocity = max(minVelFromLast, speed.invoke() * minOf(maxVelFromLast, maxVelToStop, MAX_VEL))
+            val velocity = max(minVelFromLast, minOf(maxVelFromLast, speed.invoke() * MAX_VEL))
             // Rotate driveInput by heading to go from tangent space to global space
             val velVector = (direction * velocity).rotated(mecanum.getPoseEstimate().heading)
 

@@ -1,9 +1,9 @@
 package org.firstinspires.ftc.teamcode.filters.kalmanFilter
 
 import org.ejml.simple.SimpleMatrix
-import org.firstinspires.ftc.teamcode.filters.MeasurementModel
 
-interface KalmanMeasurementModel : MeasurementModel {
+interface KalmanMeasurementModel {
+    fun predictObservation(state: SimpleMatrix): SimpleMatrix
     fun getObservationMatrix(state: SimpleMatrix): SimpleMatrix
     fun getObservationNoise(): SimpleMatrix
 }
