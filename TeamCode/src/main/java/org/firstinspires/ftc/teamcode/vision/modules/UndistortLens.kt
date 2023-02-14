@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.vision.modules
 
+import org.firstinspires.ftc.teamcode.RobotConfig
 import org.firstinspires.ftc.teamcode.vision.modulelib.AbstractPipelineModule
 import org.opencv.calib3d.Calib3d
 import org.opencv.core.Mat
@@ -7,8 +8,7 @@ import org.opencv.core.Mat
 
 class UndistortLens (
     private val inputModule: AbstractPipelineModule<Mat>,
-    private val cameraMatrix: Mat,
-    private val distCoeffs: Mat
+    private val camera: RobotConfig.CameraData
 ) : AbstractPipelineModule<Mat>() {
 
     private lateinit var output: Mat
@@ -23,7 +23,7 @@ class UndistortLens (
     }
 
     override fun processFrameForCache(rawInput: Mat): Mat {
-        Calib3d.undistort(inputModule.processFrame(rawInput), output, cameraMatrix, distCoeffs)
+        Calib3d.undistort(inputModule.processFrame(rawInput), output, camera.getCameraMatrix(), camera.distCoeffs)
         return output
     }
 

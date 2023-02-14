@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.vision
 
+import org.firstinspires.ftc.teamcode.RobotConfig
 import org.firstinspires.ftc.teamcode.vision.modulelib.InputModule
 import org.firstinspires.ftc.teamcode.vision.modulelib.ModularPipeline
 import org.firstinspires.ftc.teamcode.vision.modules.*
@@ -11,14 +12,9 @@ import org.opencv.imgproc.Imgproc.drawContours
 
 open class GeneralConePipeline(
     private var displayMode: DisplayMode = DisplayMode.ALL_CONTOURS,
-    private val FOVX: Double,
-    private val FOVY: Double,
-    private val cameraHeight: Double,
-    private val cameraPitch: Double = 0.0
+    camera: RobotConfig.CameraData
 ) : ModularPipeline() {
 
-//    private val camMat = Mat()
-//    private val distCoeffs = Mat()
 
     enum class DisplayMode {
         RAW_CAMERA_INPUT,
@@ -31,7 +27,7 @@ open class GeneralConePipeline(
 
     // Modules //
     private val inputModule = InputModule()
-    //private val undistort = UndistortLens(input, camMat, distCoeffs)
+    //private val undistort = UndistortLens(input, camera)
     private val labColorSpace = ColorConverter(inputModule, Imgproc.COLOR_RGB2Lab)
     private val redMask = Filter(labColorSpace, Scalar(0.0, 150.0, 100.0), Scalar(255.0, 200.0, 175.0))
     private val blueMask = Filter(labColorSpace, Scalar(0.0, 130.0, 30.0), Scalar(255.0, 180.0, 120.0))
@@ -62,10 +58,10 @@ open class GeneralConePipeline(
     private val blueSingleConeContours = Contours(blueOverlapMask)
 
 
-    private val stackResultsModule = ContourResults(stackContours, cameraHeight, FOVX, FOVY, cameraPitch)
-    private val singleConeResultsModule = ContourResults(singleConeContours, cameraHeight, FOVX, FOVY, cameraPitch)
-    private val redSingleConeResultsModule = ContourResults(redSingleConeContours, cameraHeight, FOVX, FOVY, cameraPitch)
-    private val blueSingleConeResultsModule = ContourResults(blueSingleConeContours, cameraHeight, FOVX, FOVY, cameraPitch)
+    private val stackResultsModule = ContourResults(stackContours, camera)
+    private val singleConeResultsModule = ContourResults(singleConeContours, camera)
+    private val redSingleConeResultsModule = ContourResults(redSingleConeContours, camera)
+    private val blueSingleConeResultsModule = ContourResults(blueSingleConeContours, camera)
 
     // Data we care about and wish to access
     var stackResults = listOf<ContourResults.AnalysisResult>()

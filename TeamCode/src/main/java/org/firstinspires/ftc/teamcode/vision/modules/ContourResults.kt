@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.vision.modules
 
+import org.firstinspires.ftc.teamcode.RobotConfig
 import org.firstinspires.ftc.teamcode.vision.modulelib.AbstractPipelineModule
 import org.opencv.core.Mat
 import org.opencv.core.MatOfPoint
@@ -17,10 +18,7 @@ import kotlin.math.tan
  */
 class ContourResults(
     private val contourModule: AbstractPipelineModule<List<MatOfPoint>>,
-    private val cameraHeight: Double,
-    private val FOVX: Double,
-    private val FOVY: Double,
-    private val cameraPitch: Double = 0.0,
+    private val camera: RobotConfig.CameraData,
     private val useDistanceByWidth: Boolean = false
 ) : AbstractPipelineModule<List<ContourResults.AnalysisResult>>() {
 
@@ -44,9 +42,9 @@ class ContourResults(
             val aimingPoint = Point(Ax, Ay)
 
             // calculate angle and distance
-            val pitch = (Ay/2.0) * toRadians(FOVY)
-            val yaw = (Ax/2.0) * toRadians(FOVX)
-            val distance = -cameraHeight/ tan(cameraPitch + pitch)
+            val pitch = (Ay/2.0) * camera.FOVX
+            val yaw = (Ax/2.0) * camera.FOVY
+            val distance = -camera.height / tan(camera.pitch + pitch)
 
             /// New variable
             val contour2f = MatOfPoint2f(*contour.toArray())

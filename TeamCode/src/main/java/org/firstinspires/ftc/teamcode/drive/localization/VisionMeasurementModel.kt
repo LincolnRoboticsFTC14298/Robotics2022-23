@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.vision.modules.ContourResults.AnalysisResu
 import org.opencv.core.Point
 import kotlin.math.*
 
-class VisionMeasurementModel : ProbabilisticMeasurementModel {
+class VisionMeasurementModel(private val camera: RobotConfig.CameraData) : ProbabilisticMeasurementModel {
     override fun calculateProbability(z: SimpleMatrix, state: SimpleMatrix): Double {
         var probability = 1.0
 
@@ -39,7 +39,7 @@ class VisionMeasurementModel : ProbabilisticMeasurementModel {
             // TODO Pixel/Projection
 
             // Only add if pole within camera FOV
-            if (abs(yaw) <= RobotConfig.WEBCAM_FOVX/2.0)
+            if (abs(yaw) <= camera.FOVX/2.0)
                 polesInSight.add(AnalysisResult(Point(0.0, 0.0), yaw, dist))
         }
 
