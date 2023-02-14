@@ -33,7 +33,6 @@ class BasicTeleOp : CommandOpMode() {
         val passthrough = Passthrough(hardwareMap)
         val vision = Vision(hardwareMap)
         //val localizer = MecanumMonteCarloLocalizer(hardwareMap, vision, Pose2d(), arrayToRowMatrix(doubleArrayOf()))
-        val localizer = OdometryLocalizer(hardwareMap)
         val mecanum = Mecanum(hardwareMap)
 
         register(lift, claw, passthrough, mecanum, vision)
@@ -53,7 +52,6 @@ class BasicTeleOp : CommandOpMode() {
 
         mecanum.defaultCommand = JoystickDrive(
             mecanum,
-            localizer,
             forward,
             strafe,
             rotation,

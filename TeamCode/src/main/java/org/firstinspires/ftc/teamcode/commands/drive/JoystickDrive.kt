@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.commands.drive
 
 import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.acmerobotics.roadrunner.geometry.Vector2d
+import com.acmerobotics.roadrunner.localization.Localizer
 import com.arcrobotics.ftclib.command.CommandBase
 import org.firstinspires.ftc.teamcode.RobotConfig
 import org.firstinspires.ftc.teamcode.subsystems.Mecanum
@@ -13,7 +14,6 @@ import org.firstinspires.ftc.teamcode.drive.localization.MecanumMonteCarloLocali
  */
 class JoystickDrive(
     private val mecanum: Mecanum,
-    private val localizer: MecanumMonteCarloLocalizer,
     private val forward: () -> Double,
     private val strafe: () -> Double,
     private val rotation: () -> Double,
@@ -26,14 +26,14 @@ class JoystickDrive(
     }
 
     override fun execute() {
-        val poseEstimate: Pose2d = localizer.poseEstimate
+        val poseEstimate: Pose2d = mecanum.getPoseEstimate()
 
         // Create a vector from the gamepad x/y inputs
         var input = Vector2d(forward.invoke(), strafe.invoke())
 
         if (fieldCentric.invoke()) {
             // Then, rotate that vector by the inverse of that heading
-            input = input.rotated(-localizer.poseEstimate.heading)
+            input = input.rotated(-mecanum.getPoseEstimate().heading)
         }
 
         var power = input

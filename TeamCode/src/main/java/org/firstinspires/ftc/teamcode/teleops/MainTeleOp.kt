@@ -61,7 +61,7 @@ class MainTeleOp : CommandOpMode() {
 //        var obstacleAvoidance = true
 //        val obstacleAvoidanceProvider = { obstacleAvoidance }
 
-        mecanum.defaultCommand = JoystickDrive(mecanum, localizer, forward, strafe, rotation, fieldCentricProvider) //obstacleAvoidanceProvider)
+        mecanum.defaultCommand = JoystickDrive(mecanum, forward, strafe, rotation, fieldCentricProvider) //obstacleAvoidanceProvider)
 
         /**
          * Lift
