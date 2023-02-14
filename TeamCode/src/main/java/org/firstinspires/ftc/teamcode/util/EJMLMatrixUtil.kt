@@ -18,11 +18,12 @@ fun arrayToColumnMatrix(array: DoubleArray) = SimpleMatrix(arrayOf(array)).trans
 fun arrayToRowMatrix(array: DoubleArray) = SimpleMatrix(arrayOf(array))
 
 
-fun vectorToDoubleArray(vector: Vector2d) =
-    arrayOf(vector.x, vector.y).toDoubleArray()
+fun vectorToMatrix(vector: Vector2d) =
+    SimpleMatrix(arrayOf(doubleArrayOf(vector.x, vector.y))).transpose()
 
-fun poseToDoubleArray(pose: Pose2d) =
-    arrayOf(pose.x, pose.y, pose.heading).toDoubleArray()
+fun poseToMatrix(pose: Pose2d) =
+    SimpleMatrix(arrayOf(doubleArrayOf(pose.x, pose.y, pose.heading))).transpose()
+
 
 fun matrixToVector(matrix: SimpleMatrix) =
     Vector2d(matrix.get(0), matrix.get(1))
