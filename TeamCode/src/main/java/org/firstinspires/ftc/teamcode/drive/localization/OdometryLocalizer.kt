@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.RobotConfig.rightEncoderName
 import org.firstinspires.ftc.teamcode.filters.ProcessModel
 import org.firstinspires.ftc.teamcode.util.Encoder
 import org.firstinspires.ftc.teamcode.util.matrixToPose
-import org.firstinspires.ftc.teamcode.util.poseToDoubleArray
+import org.firstinspires.ftc.teamcode.util.poseToMatrix
 
 /*
  * Sample tracking wheel localizer implementation assuming the standard configuration:
@@ -135,7 +135,7 @@ class OdometryLocalizer(
             val noisyWheelDeltas = u.ddrm.data.toList()
             val robotPoseDelta = calculatePoseDelta(noisyWheelDeltas)
             val newPose = Kinematics.relativeOdometryUpdate(pose, robotPoseDelta)
-            SimpleMatrix(arrayOf(poseToDoubleArray(newPose))).transpose()
+            poseToMatrix(newPose)
         } else {
             previousState
         }
