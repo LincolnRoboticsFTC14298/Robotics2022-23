@@ -7,6 +7,7 @@ import com.arcrobotics.ftclib.command.button.Trigger
 import com.arcrobotics.ftclib.gamepad.GamepadEx
 import com.arcrobotics.ftclib.gamepad.GamepadKeys
 import com.arcrobotics.ftclib.gamepad.TriggerReader
+import com.arcrobotics.ftclib.kinematics.Odometry
 import com.outoftheboxrobotics.photoncore.PhotonCore
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.RobotConfig
@@ -17,6 +18,7 @@ import org.firstinspires.ftc.teamcode.commands.drive.JoystickDrive
 import org.firstinspires.ftc.teamcode.subsystems.*
 import org.firstinspires.ftc.teamcode.subsystems.Mecanum
 import org.firstinspires.ftc.teamcode.drive.localization.MecanumMonteCarloLocalizer
+import org.firstinspires.ftc.teamcode.drive.localization.OdometryLocalizer
 
 
 class MainTeleOp : CommandOpMode() {
@@ -32,7 +34,8 @@ class MainTeleOp : CommandOpMode() {
         val claw = Claw(hardwareMap)
         val passthrough = Passthrough(hardwareMap)
         val vision = Vision(hardwareMap)
-        val localizer = MecanumMonteCarloLocalizer(hardwareMap, vision)
+        //val localizer = MecanumMonteCarloLocalizer(hardwareMap, vision)
+        val localizer = OdometryLocalizer(hardwareMap)
         val mecanum = Mecanum(hardwareMap, localizer)
 
         register(lift, claw, passthrough, mecanum, vision)

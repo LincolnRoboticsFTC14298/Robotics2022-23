@@ -1,9 +1,7 @@
 package org.firstinspires.ftc.teamcode.teleops
 
-import com.arcrobotics.ftclib.command.CommandOpMode
-import com.arcrobotics.ftclib.command.InstantCommand
-import com.arcrobotics.ftclib.command.SequentialCommandGroup
-import com.arcrobotics.ftclib.command.WaitUntilCommand
+import com.acmerobotics.roadrunner.geometry.Pose2d
+import com.arcrobotics.ftclib.command.*
 import com.arcrobotics.ftclib.command.button.Trigger
 import com.arcrobotics.ftclib.gamepad.GamepadEx
 import com.arcrobotics.ftclib.gamepad.GamepadKeys
@@ -15,7 +13,10 @@ import org.firstinspires.ftc.teamcode.RobotConfig
 import org.firstinspires.ftc.teamcode.commands.*
 import org.firstinspires.ftc.teamcode.commands.drive.JoystickDrive
 import org.firstinspires.ftc.teamcode.drive.localization.MecanumMonteCarloLocalizer
+import org.firstinspires.ftc.teamcode.drive.localization.OdometryLocalizer
 import org.firstinspires.ftc.teamcode.subsystems.*
+import org.firstinspires.ftc.teamcode.util.arrayToRowMatrix
+import java.time.Instant
 
 @TeleOp
 class BasicTeleOp : CommandOpMode() {
@@ -31,8 +32,9 @@ class BasicTeleOp : CommandOpMode() {
         val claw = Claw(hardwareMap)
         val passthrough = Passthrough(hardwareMap)
         val vision = Vision(hardwareMap)
-        val localizer = MecanumMonteCarloLocalizer(hardwareMap, vision)
-        val mecanum = Mecanum(hardwareMap, localizer)
+        //val localizer = MecanumMonteCarloLocalizer(hardwareMap, vision, Pose2d(), arrayToRowMatrix(doubleArrayOf()))
+        val localizer = OdometryLocalizer(hardwareMap)
+        val mecanum = Mecanum(hardwareMap)
 
         register(lift, claw, passthrough, mecanum, vision)
 
@@ -48,7 +50,6 @@ class BasicTeleOp : CommandOpMode() {
         val rotation = { -driver1.rightX }
 
         var fieldCentric = false
-        val fieldCentricProvider = { fieldCentric }
 
         mecanum.defaultCommand = JoystickDrive(
             mecanum,
@@ -56,7 +57,7 @@ class BasicTeleOp : CommandOpMode() {
             forward,
             strafe,
             rotation,
-            fieldCentricProvider
+            { fieldCentric }
         )
 
         // Deposit settings
