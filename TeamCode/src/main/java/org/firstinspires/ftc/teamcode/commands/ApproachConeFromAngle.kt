@@ -19,7 +19,7 @@ class ApproachConeFromAngle(
 
     init {
         addCommands(
-            InstantCommand(vision::startStreamingFrontCamera),
+            InstantCommand(vision::startStreamingRearCamera),
             SequentialCommandGroup(
                 ParallelDeadlineGroup(
                     // Waiting for intake to get a cone
@@ -42,7 +42,7 @@ class ApproachConeFromAngle(
                 ),
                 ClawPickUp(claw)
             ),
-            InstantCommand(vision::stopStreamingFrontCamera)
+            InstantCommand(vision::stopStreamingRearCamera)
         )
         addRequirements(mecanum, vision, claw)
     }

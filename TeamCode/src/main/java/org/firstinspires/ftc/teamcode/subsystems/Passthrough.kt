@@ -110,8 +110,8 @@ class Passthrough(hwMap: HardwareMap) : SubsystemBase() {
      */
     fun getRelativePosition(): Pose2d {
         val currAngle = getAngleEstimate()
-        val heading = if (currAngle <= 90.0) 0.0 else -180.0
-        return Pose2d(-cos(toRadians(currAngle)), 0.0, heading)
+        val heading = if (currAngle <= 90.0) -180.0 else 0.0
+        return Pose2d(-cos(toRadians(currAngle)), 0.0, heading) // TODO: Include offset and passthrough length
     }
 
     /**

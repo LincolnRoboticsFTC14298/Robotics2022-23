@@ -15,7 +15,7 @@ class ApproachPoleFromAngle(
 
     init {
         addCommands(
-            InstantCommand(vision::startStreamingRearCamera),
+            InstantCommand(vision::startStreamingFrontCamera),
             SequentialCommandGroup(
                 // Drive normally until a cone has been detected
                 // TODO: Default command doesn't update if it is changed
@@ -29,7 +29,7 @@ class ApproachPoleFromAngle(
                     speed
                 )
             ),
-            InstantCommand(vision::stopStreamingRearCamera)
+            InstantCommand(vision::stopStreamingFrontCamera)
 
         )
         addRequirements(mecanum, vision)
