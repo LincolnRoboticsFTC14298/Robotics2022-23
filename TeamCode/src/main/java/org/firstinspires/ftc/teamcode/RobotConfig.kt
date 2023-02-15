@@ -121,9 +121,9 @@ object RobotConfig {
     /**
      * [OdometryLocalizer]
      */
-    const val leftEncoderName = "leftEncoder"
+    const val leftEncoderName = "leftEncoder" // Must be ports 0 and 3
     const val rightEncoderName = "rightEncoder"
-    const val frontEncoderName = "frontEncoder"
+    const val frontEncoderName = "frontEncoder" // port 1 or 2
 
     var TICKS_PER_REV = 0.0
     var WHEEL_RADIUS = 2.0 // in
@@ -211,6 +211,8 @@ object RobotConfig {
     const val passthroughMinDegree = -45.0 // degrees
     const val passthroughMaxDegree = 180.0 // degrees
 
+    const val passthroughOffsetDistanceFromLift = 0.0
+
     @JvmField
     var passthroughPickUpAngle = -45.0 // degrees
     @JvmField
@@ -220,6 +222,7 @@ object RobotConfig {
 
     @JvmField
     var passthroughMaxVel = 0.0
+    @JvmField
     var passthroughMaxAccel = 0.0
 
     @JvmField
@@ -239,6 +242,8 @@ object RobotConfig {
             return cameraMat
         }
     }
+
+    const val stackToPoleMaximumDistance = 5.0
 
 
 

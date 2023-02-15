@@ -20,6 +20,7 @@ import org.firstinspires.ftc.teamcode.RobotConfig.leftPassthroughName
 import org.firstinspires.ftc.teamcode.RobotConfig.passthroughJunctionAngle
 import org.firstinspires.ftc.teamcode.RobotConfig.passthroughMaxAccel
 import org.firstinspires.ftc.teamcode.RobotConfig.passthroughMaxVel
+import org.firstinspires.ftc.teamcode.RobotConfig.passthroughOffsetDistanceFromLift
 import org.firstinspires.ftc.teamcode.RobotConfig.passthroughTimeTolerance
 import org.firstinspires.ftc.teamcode.RobotConfig.rightPassthroughName
 import java.lang.Math.toRadians
@@ -111,7 +112,13 @@ class Passthrough(hwMap: HardwareMap) : SubsystemBase() {
     fun getRelativePosition(): Pose2d {
         val currAngle = getAngleEstimate()
         val heading = if (currAngle <= 90.0) -180.0 else 0.0
-        return Pose2d(-cos(toRadians(currAngle)), 0.0, heading) // TODO: Include offset and passthrough length
+        return Pose2d(-cos(toRadians(currAngle)) + passthroughOffsetDistanceFromLift, 0.0, heading)
+    }
+
+    fun getFutureRelativePosition(): Pose2d {
+        val desiredAngle = setpoint
+        val heading = if (desiredAngle <= 90.0) -180.0 else 0.0
+        return Pose2d(-cos(toRadians(desiredAngle)) + passthroughOffsetDistanceFromLift, 0.0, heading)
     }
 
     /**

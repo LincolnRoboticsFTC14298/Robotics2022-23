@@ -32,7 +32,7 @@ class ApproachPoleAndDeposit(
                     ApproachPoint(
                         mecanum,
                         nearestPole::vector,
-                        lift.getRelativePosition() + passthrough.getRelativePosition(),
+                        lift.getFutureRelativePosition() + passthrough.getFutureRelativePosition(),
                         speed
                     )
                 ),

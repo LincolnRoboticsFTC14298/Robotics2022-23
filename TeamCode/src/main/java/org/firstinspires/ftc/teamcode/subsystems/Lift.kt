@@ -27,6 +27,7 @@ import org.firstinspires.ftc.teamcode.RobotConfig.liftKV
 import org.firstinspires.ftc.teamcode.RobotConfig.liftMaxAccel
 import org.firstinspires.ftc.teamcode.RobotConfig.liftMaxExtension
 import org.firstinspires.ftc.teamcode.RobotConfig.liftMaxVel
+import org.firstinspires.ftc.teamcode.RobotConfig.liftOffsetDistanceFromCenter
 import org.firstinspires.ftc.teamcode.RobotConfig.liftTargetErrorTolerance
 import org.firstinspires.ftc.teamcode.RobotConfig.magnetLimitName
 import org.firstinspires.ftc.teamcode.RobotConfig.poleLiftOffset
@@ -192,10 +193,13 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
 
     /**
      * Returns the position of where the passthrough is attached in tangent space.
-     * TODO: Add starting x
      */
     fun getRelativePosition(): Pose2d {
-        return Pose2d(getExtensionLength() * cos(toRadians(60.0)), 0.0, 0.0)
+        return Pose2d(getExtensionLength() * cos(toRadians(60.0)) + liftOffsetDistanceFromCenter, 0.0, 0.0)
+    }
+
+    fun getFutureRelativePosition(): Pose2d {
+        return Pose2d(setpoint * cos(toRadians(60.0)) + liftOffsetDistanceFromCenter, 0.0, 0.0)
     }
 
     /**
