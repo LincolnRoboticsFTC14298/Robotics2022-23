@@ -1,34 +1,48 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
-import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.acmerobotics.roadrunner.geometry.Vector2d
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.teamcode.RobotConfig
+import org.firstinspires.ftc.teamcode.RobotConfig.stackToPoleMaximumDistance
+import org.firstinspires.ftc.teamcode.teleops.testing.AprilTagDemo
 import org.firstinspires.ftc.teamcode.vision.AprilTagDetectionPipeline
 import org.firstinspires.ftc.teamcode.vision.GeneralConePipeline
 import org.firstinspires.ftc.teamcode.vision.PolePipeline
 import org.firstinspires.ftc.teamcode.vision.modules.ContourResults
+import org.openftc.apriltag.AprilTagDetection
 import org.openftc.easyopencv.OpenCvCamera.AsyncCameraOpenListener
 import org.openftc.easyopencv.OpenCvCameraFactory
 import org.openftc.easyopencv.OpenCvCameraRotation
 import org.openftc.easyopencv.OpenCvInternalCamera
 import org.openftc.easyopencv.OpenCvPipeline
+import kotlin.math.cos
 
 /**
  * Manages all the pipelines and cameras.
  */
 class Vision(
-    hwMap: HardwareMap
+    hwMap: HardwareMap,
+    startPipeline: FrontPipeline = FrontPipeline.POLE
 ) : SubsystemBase() {
 
     val cameraMonitorViewId: Int = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName())
     val webCam = OpenCvCameraFactory.getInstance().createWebcam(hwMap.get(WebcamName::class.java, "Webcam 1"), cameraMonitorViewId)
     val phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId)
 
-    enum class RearPipeline(var pipeline: OpenCvPipeline) {
-        APRIL_TAG(AprilTagDetectionPipeline(0.166,  RobotConfig.CameraData.LOGITECH_C920)),
+    enum class AprilTagResult(var id: Int) {
+        PARK_LEFT(5),
+        PARK_MIDDLE(15),
+        PARK_RIGHT(9);
+
+        companion object {
+            fun find(id: Int): AprilTagResult? = AprilTagResult.values().find { it.id == id }
+        }
+    }
+
+    enum class FrontPipeline(var pipeline: OpenCvPipeline) {
+        APRIL_TAG(AprilTagDetectionPipeline(1.18,  RobotConfig.CameraData.LOGITECH_C920)),
         POLE(PolePipeline(PolePipeline.DisplayMode.ALL_CONTOURS, RobotConfig.CameraData.LOGITECH_C920))
     }
 
@@ -36,6 +50,8 @@ class Vision(
 
     init {
         name = "Vision Subsystem"
+
+        phoneCam.setPipeline(conePipeline)
 
         // Open cameras asynchronously and load the pipelines
         phoneCam.openCameraDeviceAsync(object : AsyncCameraOpenListener {
@@ -50,6 +66,8 @@ class Vision(
             }
         })
 
+        webCam.setPipeline(startPipeline.pipeline)
+
         webCam.openCameraDeviceAsync(object : AsyncCameraOpenListener {
             override fun onOpened() {
                 startStreamingRearCamera()
@@ -61,6 +79,47 @@ class Vision(
                  */
             }
         })
+    }
+
+    var numFramesWithoutDetection = 0
+
+    private val DECIMATION_HIGH = 3f
+    private val DECIMATION_LOW = 2f
+    private val THRESHOLD_HIGH_DECIMATION_RANGE_FEET = 3.0f
+    private val THRESHOLD_NUM_FRAMES_NO_DETECTION_BEFORE_LOW_DECIMATION = 4
+    fun updateAprilTag() : AprilTagResult? {
+        // Calling getDetectionsUpdate() will only return an object if there was a new frame
+        // processed since the last time we called it. Otherwise, it will return null. This
+        // enables us to only run logic when there has been a new frame, as opposed to the
+        // getLatestDetections() method which will always return an object.
+        val aprilTagDetectionPipeline = (FrontPipeline.APRIL_TAG.pipeline as AprilTagDetectionPipeline)
+        val detections: ArrayList<AprilTagDetection> = aprilTagDetectionPipeline.detectionsUpdate
+
+        // If there's been a new frame...
+        if (detections != null) {
+
+            // If we don't see any tags
+            if (detections.size == 0) {
+                numFramesWithoutDetection++
+
+                // If we haven't seen a tag for a few frames, lower the decimation
+                // so we can hopefully pick one up if we're e.g. far back
+                if (numFramesWithoutDetection >= THRESHOLD_NUM_FRAMES_NO_DETECTION_BEFORE_LOW_DECIMATION) {
+                    aprilTagDetectionPipeline.setDecimation(DECIMATION_LOW)
+                }
+            } else {
+                numFramesWithoutDetection = 0
+
+                // If the target is within 1 meter, turn on high decimation to
+                // increase the frame rate
+                if (detections[0].pose.z < THRESHOLD_HIGH_DECIMATION_RANGE_FEET) {
+                    aprilTagDetectionPipeline.setDecimation(DECIMATION_HIGH)
+                }
+                return AprilTagResult.find(detections.minBy{it.pose.z}.id)
+            }
+        }
+
+        return null
     }
 
 
@@ -97,56 +156,70 @@ class Vision(
      * Sets the rear pipeline.
      * @param pipeline     From the [RearPipeline] pipeline options.
      */
-    fun setRearPipeline(pipeline: RearPipeline) {
-        // backCamera.setPipeline(pipeline.pipeline)
-    }
-
-    fun getConePosition(): Vector2d? {
-        TODO("Implement")
+    fun setFrontPipeline(pipeline: FrontPipeline) {
+        webCam.setPipeline(pipeline.pipeline)
     }
 
     /**
      * @return Coordinate of the closest cone in the robot tangent space.
      */
-    fun getConeAngle(): Double? {
-        val results = conePipeline.singleConeResults
-        if (results.isNotEmpty()) {
-            var closestResult = results[0]
-            var smallestDistance = closestResult.distance
-            for (result in results) {
-                //iterate through find closest result
-                if (result.distance<smallestDistance){
-                    smallestDistance=result.distance
-                    closestResult=result
-                }
-            }
-            return closestResult.angle
-        }
-        return null
+    fun getClosestConeAngle(): Double? {
+        val cones = conePipeline.singleConeResults
+        return cones.minByOrNull{ it.distance }?.angle
     }
 
-    fun getPoleAngle(): Double? {
-        val results = (RearPipeline.POLE.pipeline as PolePipeline).poleResults
-        if (results.isNotEmpty()) {
-            var closestResult = results[0]
-            var smallestDistance = closestResult.distance
-            for (result in results) {
-                //iterate through find closest result
-                if (result.distance<smallestDistance){
-                    smallestDistance=result.distance
-                    closestResult=result
-                }
-            }
-            return closestResult.angle
-        }
-        return null
+    fun getClosestConePosition(): Vector2d? {
+        val cones = conePipeline.singleConeResults
+        return cones.minByOrNull{ it.distance }?.toVector()?.plus(RobotConfig.CameraData.PHONECAM.relativePosition)
+    }
+
+    fun getClosestPoleAngle(): Double? {
+        val poles = (FrontPipeline.POLE.pipeline as PolePipeline).poleResults
+        // val stacks = (FrontPipeline.POLE.pipeline as PolePipeline).conePipeline.stackResults // TODO possibly combine stacks w/ poles
+        val closestPole = poles.minByOrNull { it.distance }
+        return closestPole?.angle
     }
 
     /**
-     * @return List of pixel info for landmarks form pipeline
+     * Returns pole position in tangent space taking into account cones
+     */
+    fun getClosestPolePosition(): Vector2d? {
+
+        val poles = (FrontPipeline.POLE.pipeline as PolePipeline).poleResults
+        val stacks = (FrontPipeline.POLE.pipeline as PolePipeline).conePipeline.stackResults
+
+        val closestPole = poles.minByOrNull { it.distance } ?: return null
+        val closestStack = stacks.minByOrNull { it.distanceSqrTo(closestPole) } // Find closest stack by distance to closest pole
+
+        val vecInCameraSpace = if (closestStack != null && closestStack.distanceSqrTo(closestPole) < stackToPoleMaximumDistance) {
+            (closestStack.toVector() + closestPole.toVector()).div(2.0) // If sufficiently close, simply take the average between them
+        } else closestPole.toVector()
+
+        return vecInCameraSpace + RobotConfig.CameraData.LOGITECH_C920.relativePosition
+
+    }
+
+    /**
+     * @return List of pixel info for landmarks from pipeline
      */
     fun getLandmarkInfo(): List<ContourResults.AnalysisResult> {
-        TODO("Implement")
+
+        val poles = (FrontPipeline.POLE.pipeline as PolePipeline).poleResults
+        val stacks = (FrontPipeline.POLE.pipeline as PolePipeline).conePipeline.stackResults
+
+        // Probably a better way to do this... (Kotlin moment)
+        return List(poles.size) { i ->
+            val pole = poles[i]
+            val closestStack = stacks.minByOrNull { it.distanceSqrTo(pole) } // Find closest stack
+
+            if (closestStack != null && closestStack.distanceSqrTo(pole) < stackToPoleMaximumDistance) { // If sufficiently close, simply take the average between them
+                val averageVector = (closestStack.toVector() + pole.toVector()).div(2.0)
+                ContourResults.AnalysisResult(averageVector.angle(), averageVector.norm())
+            } else {
+                pole
+            }
+        }
+
     }
 
 }

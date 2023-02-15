@@ -18,14 +18,13 @@ class ApproachPoleFromAngle(
             InstantCommand(vision::startStreamingFrontCamera),
             SequentialCommandGroup(
                 // Drive normally until a cone has been detected
-                // TODO: Default command doesn't update if it is changed
                 ParallelDeadlineGroup(
-                    WaitUntilCommand { vision.getPoleAngle() != null },
+                    WaitUntilCommand { vision.getClosestPoleAngle() != null },
                     mecanum.defaultCommand
                 ),
                 ApproachAngle(
                     mecanum,
-                    vision::getPoleAngle,
+                    vision::getClosestPoleAngle,
                     speed
                 )
             ),

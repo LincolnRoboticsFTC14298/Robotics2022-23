@@ -4,6 +4,11 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorSimple
+import org.firstinspires.ftc.teamcode.RobotConfig.driveLeftFront
+import org.firstinspires.ftc.teamcode.RobotConfig.driveLeftRear
+import org.firstinspires.ftc.teamcode.RobotConfig.driveRightFront
+import org.firstinspires.ftc.teamcode.RobotConfig.driveRightRear
+import kotlin.math.abs
 
 @TeleOp
 class CooperativeDrive : LinearOpMode() {
@@ -11,12 +16,12 @@ class CooperativeDrive : LinearOpMode() {
     override fun runOpMode() {
 
         //motors
-        val motorFrontLeft: DcMotor = hardwareMap.dcMotor.get("frontLeft")
-        val motorBackLeft: DcMotor = hardwareMap.dcMotor.get("backLeft")
-        val motorFrontRight: DcMotor = hardwareMap.dcMotor.get("frontRight")
-        val motorBackRight: DcMotor = hardwareMap.dcMotor.get("backRight")
+        val motorFrontLeft: DcMotor = hardwareMap.dcMotor.get(driveLeftFront)
+        val motorBackLeft: DcMotor = hardwareMap.dcMotor.get(driveLeftRear)
+        val motorFrontRight: DcMotor = hardwareMap.dcMotor.get(driveRightFront)
+        val motorBackRight: DcMotor = hardwareMap.dcMotor.get(driveRightRear)
 
-        motorFrontLeft.direction = DcMotorSimple.Direction.REVERSE
+        motorFrontRight.direction = DcMotorSimple.Direction.REVERSE
         motorBackLeft.direction = DcMotorSimple.Direction.REVERSE
 
         waitForStart()
@@ -29,8 +34,7 @@ class CooperativeDrive : LinearOpMode() {
             val x: Double = gamepad2.left_stick_x.toDouble()
             val rx: Double = gamepad2.right_stick_x.toDouble()
 
-            val denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1.0)
-
+            val denominator = (abs(y) + abs(x) + abs(rx)).coerceAtLeast(1.0)
 
             val frontLeftPower = (y + x + rx) / denominator
             val backLeftPower = (y - x + rx) / denominator

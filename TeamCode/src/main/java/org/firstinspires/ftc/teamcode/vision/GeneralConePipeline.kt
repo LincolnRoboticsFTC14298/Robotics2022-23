@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.vision
 
 import org.firstinspires.ftc.teamcode.RobotConfig
+import org.firstinspires.ftc.teamcode.RobotConfig.coneDiameter
 import org.firstinspires.ftc.teamcode.vision.modulelib.InputModule
 import org.firstinspires.ftc.teamcode.vision.modulelib.ModularPipeline
 import org.firstinspires.ftc.teamcode.vision.modules.*
@@ -58,10 +59,10 @@ open class GeneralConePipeline(
     private val blueSingleConeContours = Contours(blueOverlapMask)
 
 
-    private val stackResultsModule = ContourResults(stackContours, camera)
-    private val singleConeResultsModule = ContourResults(singleConeContours, camera)
-    private val redSingleConeResultsModule = ContourResults(redSingleConeContours, camera)
-    private val blueSingleConeResultsModule = ContourResults(blueSingleConeContours, camera)
+    private val stackResultsModule = ContourResults(stackContours, camera, pitchDistanceOffset = coneDiameter/2.0)
+    private val singleConeResultsModule = ContourResults(singleConeContours, camera, pitchDistanceOffset = coneDiameter/2.0)
+    private val redSingleConeResultsModule = ContourResults(redSingleConeContours, camera, pitchDistanceOffset = coneDiameter/2.0)
+    private val blueSingleConeResultsModule = ContourResults(blueSingleConeContours, camera, pitchDistanceOffset = coneDiameter/2.0)
 
     // Data we care about and wish to access
     var stackResults = listOf<ContourResults.AnalysisResult>()

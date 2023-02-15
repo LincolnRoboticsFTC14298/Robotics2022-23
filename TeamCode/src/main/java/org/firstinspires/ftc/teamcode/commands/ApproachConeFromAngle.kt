@@ -28,14 +28,14 @@ class ApproachConeFromAngle(
                     SequentialCommandGroup(
                         // Drive normally until a cone has been detected
                         ParallelDeadlineGroup(
-                            WaitUntilCommand { vision.getConeAngle() != null },
+                            WaitUntilCommand { vision.getClosestConeAngle() != null },
                             mecanum.defaultCommand
                         ),
                         // Switch to auto approach the cone once a cone has been detected
                         WaitUntilCommand{ claw.isConeInside() },
                         ApproachAngle(
                             mecanum,
-                            vision::getConeAngle,
+                            vision::getClosestConeAngle,
                             speed
                         )
                     ),

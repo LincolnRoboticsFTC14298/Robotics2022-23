@@ -31,9 +31,9 @@ class JoystickDrive(
         // Create a vector from the gamepad x/y inputs
         var input = Vector2d(forward.invoke(), strafe.invoke())
 
-        if (fieldCentric.invoke()) {
-            // Then, rotate that vector by the inverse of that heading
-            input = input.rotated(-mecanum.getPoseEstimate().heading)
+        if (!fieldCentric.invoke()) {
+            // Rotate that vector by the heading to be in robot global space
+            input = input.rotated(mecanum.getPoseEstimate().heading)
         }
 
         var power = input
@@ -53,8 +53,11 @@ class JoystickDrive(
             }
 
             avoidanceForce = avoidanceForce.rotated(-poseEstimate.heading)
-            power = input + Vector2d(input.x * avoidanceForce.x, input.y * avoidanceForce.y) // TODO should input be rotated after
+            power += Vector2d(input.x * avoidanceForce.x, input.y * avoidanceForce.y)
         }
+
+        // Rotate that vector by the inverse of that heading back to tangent space
+        power.rotated(-mecanum.getPoseEstimate().heading)
 
         // Pass in the rotated input + right stick value for rotation
         // Rotation is independent of field centrism
