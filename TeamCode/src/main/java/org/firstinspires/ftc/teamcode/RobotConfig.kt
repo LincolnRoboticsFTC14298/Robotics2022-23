@@ -25,7 +25,7 @@ object RobotConfig {
     const val poleBaseHeight = 5 //in TODO measure
 
     /**
-     * Different types of poles.
+     * Different types of poles. Height in inches.
      */
     enum class PoleType(val height: Double) {
         LOW(0.0),
@@ -145,16 +145,18 @@ object RobotConfig {
     const val rightLiftName = "rightLift"
     const val magnetLimitName = "magnet"
 
-    const val liftHeightOffset = 0.0 // cm The raw height of zero is off the ground
-    const val liftMaxExtension = 0.0 // cm Max allowable extension height
-    const val poleLiftOffset = 20.0 // cm above the pole the lift should be at
+    const val liftHeightOffset = 0.0 // in The raw height of zero is off the ground
+    const val liftMaxExtension = 0.0 // in Max allowable extension height
+    const val poleLiftOffset = 20.0 // in above the pole the lift should be at
 
     const val liftDPP = 1.0 // TODO: Find experimentally
 
+    const val liftOffsetDistanceFromCenter = 0.0
+
     @JvmField
-    var liftMaxVel = 20.0 // cm / s  // TODO: Find max values
+    var liftMaxVel = 20.0 // in / s  // TODO: Find max values
     @JvmField
-    var liftMaxAccel = 20.0 // cm / s2
+    var liftMaxAccel = 20.0 // in / s2
 
     @JvmField
     var liftKStatic = 0.0
@@ -169,9 +171,9 @@ object RobotConfig {
     @JvmField
     var liftCoeffs = PIDCoefficients(0.0, 0.0, 0.0) // TODO: Calculate from kV and kA
 
-    val liftTargetErrorTolerance = 1.0 // cm
+    val liftTargetErrorTolerance = 0.5 // in
 
-    const val withinSwitchRange = 5.0 // cm from the bottom to check magnet switch for reset
+    const val withinSwitchRange = 3.0 // in from the bottom to check magnet switch for reset
 
     /**
      * [Claw]

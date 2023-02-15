@@ -67,12 +67,12 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
     private val timer = ElapsedTime()
 
     /**
-     * @return Target height off the ground in cm.
+     * @return Target height off the ground in in.
      */
     var setpoint: Double = 0.0
         /**
          * Sets the target extension length and constructs an optimal motion profile.
-         * @param height        Target length in cm.
+         * @param height        Target length in inches.
          */
         set(length) {
             profileTimer.reset()
@@ -199,35 +199,35 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
     }
 
     /**
-     * @return Distance the lift has extended relative to retracted state in cm.
+     * @return Distance the lift has extended relative to retracted state in in.
      */
     fun getExtensionLength(): Double {
         return state[0]
     }
 
     /**
-     * @return Velocity of the lift in cm / s.
+     * @return Velocity of the lift in in / s.
      */
     fun getVelocity(): Double {
         return state[1]
     }
 
     /**
-     * @return Acceleration of the lift in cm / s2.
+     * @return Acceleration of the lift in in / s2.
      */
     fun getAcceleration(): Double {
         return state[2]
     }
 
     /**
-     * @return Raw lift position has extended relative to retracted state in cm.
+     * @return Raw lift position has extended relative to retracted state in in.
      */
     fun getRawExtensionLength(): Double {
         return motorGroup.distance
     }
 
     /**
-     * @return Raw velocity of the lift in cm / s.
+     * @return Raw velocity of the lift in in / s.
      */
     fun getRawVelocity(): Double {
         return motorGroup.correctedVelocity * liftDPP
