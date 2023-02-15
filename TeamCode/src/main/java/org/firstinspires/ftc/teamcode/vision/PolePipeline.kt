@@ -40,7 +40,7 @@ open class PolePipeline(
     val poleAspectRatio = ThresholdAspectRatio(3.5, 50.0)
     val poleContours = FilterContours(contours, 0.1, Pair(5.0, poleConvexity), Pair(0.5, poleExtent), Pair(1.0, poleSolidity), Pair(5.0, poleAspectRatio))
 
-    val poleResultsModule = ContourResults(poleContours, camera, true)
+    val poleResultsModule = ContourResults(poleContours, camera, useDistanceByWidth = true) // TODO experiment with base of pole instead
 
     // Data we care about and wish to access
     var poleResults = listOf<ContourResults.AnalysisResult>()

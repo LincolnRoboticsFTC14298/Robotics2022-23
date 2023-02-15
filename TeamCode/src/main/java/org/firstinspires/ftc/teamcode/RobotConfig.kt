@@ -20,6 +20,9 @@ object RobotConfig {
 
     const val tileSize = 23.5 // in
 
+    const val coneDiameter = 5 // in TODO measure
+    const val poleDiameter = 2 // in TODO measure
+    const val poleBaseHeight = 5 //in TODO measure
 
     /**
      * Different types of poles.
