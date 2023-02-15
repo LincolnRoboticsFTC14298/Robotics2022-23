@@ -16,7 +16,7 @@ class CooperativeDrive : LinearOpMode() {
         val motorFrontRight: DcMotor = hardwareMap.dcMotor.get("frontRight")
         val motorBackRight: DcMotor = hardwareMap.dcMotor.get("backRight")
 
-        motorFrontLeft.direction = DcMotorSimple.Direction.REVERSE
+        motorFrontRight.direction = DcMotorSimple.Direction.REVERSE
         motorBackLeft.direction = DcMotorSimple.Direction.REVERSE
 
         waitForStart()
