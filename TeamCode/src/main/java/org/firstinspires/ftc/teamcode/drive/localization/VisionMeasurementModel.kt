@@ -40,7 +40,7 @@ class VisionMeasurementModel(private val camera: RobotConfig.CameraData) : Proba
 
             // Only add if pole within camera FOV
             if (abs(yaw) <= camera.FOVX/2.0)
-                polesInSight.add(AnalysisResult(Point(0.0, 0.0), yaw, dist))
+                polesInSight.add(AnalysisResult(yaw, dist))
         }
 
         return polesInSight.toList()
@@ -67,7 +67,7 @@ class VisionMeasurementModel(private val camera: RobotConfig.CameraData) : Proba
 
     private fun matrixToList(z: SimpleMatrix): List<AnalysisResult> {
         return List(z.numCols()) {i ->
-            AnalysisResult(Point(z.get(0, i), z.get(1, i)), z.get(2, i), z.get(3, i))
+            AnalysisResult(z.get(0, i), z.get(1, i))
         }
     }
 

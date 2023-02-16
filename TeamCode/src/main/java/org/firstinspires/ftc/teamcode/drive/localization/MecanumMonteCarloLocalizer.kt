@@ -39,7 +39,7 @@ class MecanumMonteCarloLocalizer(hwMap: HardwareMap, private val vision: Vision,
 
         // TODO Move to pole pipeline
         val landmarks = vision.getLandmarkInfo()
-        val landmarkArray = Array(landmarks.size) { index -> doubleArrayOf(landmarks[index].point.x, landmarks[index].point.y, landmarks[index].angle, landmarks[index].distance) }
+        val landmarkArray = Array(landmarks.size) { index -> doubleArrayOf(landmarks[index].angle, landmarks[index].distance) }
 
         particleFilter.update(SimpleMatrix(landmarkArray).transpose())
 
