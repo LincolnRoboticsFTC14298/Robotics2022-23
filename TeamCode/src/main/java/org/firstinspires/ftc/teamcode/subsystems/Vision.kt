@@ -190,7 +190,7 @@ class Vision(
         poles.forEach { pole ->
             val closestStack = stacks.minByOrNull { it.distance(pole, useDistanceByWidthForOther = true) } // Find closest stack
 
-            if (closestStack != null && closestStack.distance(pole) < stackToPoleMaximumDistance) { // If sufficiently close, simply take the average between them
+            if (closestStack != null && closestStack.distance(pole) < stackToPoleMaxDistance) { // If sufficiently close, simply take the average between them
                 val observationVector = closestStack.toVector()
 
                 landmarks.add(ObservationResult.vector(observationVector))
@@ -222,11 +222,27 @@ class Vision(
     fun getClosestPoleAngle(): Double? {
         return getClosestPolePosition()?.angle()
     }
-
-    // TODO take into account junctions
     fun getClosestConePosition(): Vector2d? {
-        val cones = conePipeline.singleConeResults.toMutableList()
-        return cones.minByOrNull{ it.distanceByPitch ?: Double.MAX_VALUE }?.toVector()?.plus(RobotConfig.CameraData.PHONECAM.relativePosition)
+        val cones = phoneCamPipeline.singleConeResults.toMutableList()
+        val poles = phoneCamPipeline.poleResults.toMutableList()
+        val junctions = enumValues<RobotConfig.Junction>()
+
+        cones.forEachIndexed { i, cone ->
+            val closestPole = poles.minByOrNull { it.distance(cone) }
+            if (closestPole != null &&
+                closestPole.distance(cone) < singleConeToJunctionMaxDistance) {
+                cones.removeAt(i)
+                poles.remove(closestPole)
+            } else {
+                val closestJunction = junctions.minBy { it.vector.distTo(cone.toVector()) }
+                if (closestJunction.vector.distTo(cone.toVector()) < singleConeToJunctionMaxDistance) {
+                    cones.removeAt(i)
+                }
+            }
+        }
+
+        val closestCone = cones.minByOrNull { it.distanceByPitch ?: Double.MAX_VALUE }
+        return closestCone?.toVector()?.plus(RobotConfig.CameraData.PHONECAM.relativePosition)
     }
 
     /**
