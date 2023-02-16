@@ -1,15 +1,15 @@
-package org.firstinspires.ftc.teamcode.vision.modules.scorers
+package org.firstinspires.ftc.teamcode.vision.modules.features
 
 import org.opencv.core.MatOfInt
 import org.opencv.core.MatOfPoint
-import org.opencv.core.MatOfPoint2f
 import org.opencv.core.Point
 import org.opencv.imgproc.Imgproc.*
-import kotlin.math.pow
 
-class Solidity(private val targetSolidity: Double) : Scorer {
+class Solidity() : Feature {
 
-    override fun score(contour: MatOfPoint): Double {
+    private val solidityResults = mutableListOf<Double>()
+
+    override fun featureMeasurement(contour: MatOfPoint): Double {
         val contourArea = contourArea(contour)
 
         val hullList: ArrayList<MatOfPoint> = ArrayList()
@@ -28,8 +28,17 @@ class Solidity(private val targetSolidity: Double) : Scorer {
         hullList.add(convexHull)
 
         val hullArea = contourArea(convexHull)
-        val solidity = contourArea / hullArea
 
-        return (solidity - targetSolidity)*(solidity - targetSolidity)
+        val solidity = contourArea / hullArea
+        solidityResults.add(solidity)
+        return solidity
+    }
+
+    override fun mean(): Double {
+        return solidityResults.sumOf{it}/solidityResults.size
+    }
+
+    override fun variance(): Double {
+        return solidityResults.sumOf { (it-mean()) * (it-mean()) } / solidityResults.size
     }
 }
