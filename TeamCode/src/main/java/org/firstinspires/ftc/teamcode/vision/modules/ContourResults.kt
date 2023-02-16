@@ -9,8 +9,6 @@ import org.opencv.core.MatOfPoint
 import org.opencv.core.MatOfPoint2f
 import org.opencv.core.Point
 import org.opencv.imgproc.Imgproc.*
-import java.lang.Math.toRadians
-import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.tan
 
@@ -23,19 +21,20 @@ class ContourResults(
     private val contourModule: AbstractPipelineModule<List<MatOfPoint>>,
     private val camera: RobotConfig.CameraData,
     private val targetHeight: Double = 0.0,
-    private val pitchDistanceOffset: Double = 0.0, // Used incase the center of the object is wanted instead
-    private val useDistanceByWidth: Boolean = false
+    private val pitchDistanceOffset: Double = 0.0 // Used incase the center of the object is wanted instead
 ) : AbstractPipelineModule<List<ContourResults.AnalysisResult>>() {
 
-    data class AnalysisResult(val angle: Double, val distance: Double) {
+    data class AnalysisResult(val angle: Double, val distanceByPitch: Double?, val distanceByWidth: Double) {
 
-        fun distanceSqrTo(other: AnalysisResult) : Double {
-            return distance * distance + other.distance * other.distance - 2 * distance * other.distance * cos(other.angle - angle)
+        fun toVector(useDistanceByWidth: Boolean = false) = Vector2d.polar(chooseDistance(useDistanceByWidth), angle)
+
+        fun distance(other: AnalysisResult, useDistanceByWidth: Boolean = false, useDistanceByWidthForOther: Boolean = false) : Double {
+            return toVector(useDistanceByWidth).distTo(other.toVector(useDistanceByWidthForOther))
         }
 
-        fun toVector() : Vector2d {
-            return Vector2d.polar(distance, angle)
-        }
+        private fun chooseDistance(useDistanceByWidth: Boolean) =
+            if (useDistanceByWidth) distanceByPitch ?: distanceByWidth else distanceByWidth
+
     }
 
     init {
@@ -44,8 +43,10 @@ class ContourResults(
 
     // TODO Use inverse projection on pixelPoint???
     override fun processFrameForCache(rawInput: Mat): List<AnalysisResult> {
-        val results = mutableListOf<AnalysisResult>()
-        for (contour in contourModule.processFrame(rawInput)) {
+        val contours = contourModule.processFrame(rawInput)
+        return List(contours.size) { i ->
+            val contour = contours[i]
+
             val boundingBox = boundingRect(contour)
             val pixelX = boundingBox.x+(boundingBox.width/2.0)
             val pixelY = (boundingBox.y+boundingBox.height).toDouble()
@@ -66,13 +67,12 @@ class ContourResults(
             val distanceByWidth = min(contourMinAreaRect.size.width, contourMinAreaRect.size.height) //TODO double check, finish formula
 
             // add to results
-            if (useDistanceByWidth || pitch epsilonEquals camera.FOVY / 2.0) { // TODO not safe for non rectangular outlines
-                results.add(AnalysisResult(yaw, distanceByWidth))
+            if (pitch epsilonEquals -camera.FOVY / 2.0) { // not safe to use width for non rectangular outlines
+                AnalysisResult(yaw, distanceByPitch, distanceByWidth)
             } else {
-                results.add(AnalysisResult(yaw, distanceByPitch))
+                AnalysisResult(yaw, distanceByPitch, distanceByWidth)
             }
         }
-        return results
     }
 
 
