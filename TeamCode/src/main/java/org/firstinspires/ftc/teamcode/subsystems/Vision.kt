@@ -4,14 +4,13 @@ import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.acmerobotics.roadrunner.geometry.Vector2d
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.qualcomm.robotcore.hardware.HardwareMap
-import org.firstinspires.ftc.robotcontroller.external.samples.ConceptTelemetry
 import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry
-import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.teamcode.RobotConfig.phoneCamHeight
 import org.firstinspires.ftc.teamcode.RobotConfig.webcamHeight
+import org.firstinspires.ftc.teamcode.teleops.AprilTagDemo
 import org.firstinspires.ftc.teamcode.vision.AprilTagDetectionPipeline
-import org.firstinspires.ftc.teamcode.vision.GeneralPipeline
+import org.firstinspires.ftc.teamcode.vision.GeneralConePipeline
 import org.firstinspires.ftc.teamcode.vision.PolePipeline
 import org.opencv.core.Point
 import org.openftc.apriltag.AprilTagDetection
@@ -27,8 +26,7 @@ import java.lang.Thread.sleep
  * Manages all the pipelines and cameras.
  */
 class Vision(
-    hwMap: HardwareMap,
-    telemetry: Telemetry
+    hwMap: HardwareMap
 ) : SubsystemBase() {
 
     val cameraMonitorViewId: Int = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName())
@@ -40,7 +38,7 @@ class Vision(
         POLE(PolePipeline(PolePipeline.DisplayMode.ALL_CONTOURS, 70.42, 43.3, webcamHeight))
     }
 
-    val conePipeline = GeneralPipeline(GeneralPipeline.DisplayMode.ALL_CONTOURS, 67.0, 52.9, phoneCamHeight, 0.0, telemetry)
+    val conePipeline = GeneralConePipeline(GeneralConePipeline.DisplayMode.ALL_CONTOURS, 67.0, 52.9, phoneCamHeight)
 
     init {
         name = "Vision Subsystem"
@@ -138,53 +136,84 @@ class Vision(
     }
 
     //enum
-    enum class ParkingStationLocation(id:Int) {
-        ONE(1),
-        TWO(2),
-        THREE(3)
-    }
 
     fun getParkingStation(): Double? {
-        var numFramesWithoutDetection = 0
-        val DECIMATION_HIGH = 3f
-        val DECIMATION_LOW = 2f
-        val THRESHOLD_HIGH_DECIMATION_RANGE_METERS = 1.0f
-        val THRESHOLD_NUM_FRAMES_NO_DETECTION_BEFORE_LOW_DECIMATION = 4
+//        val camera = webCam
+//        val aprilTagDetectionPipeline = RearPipeline.APRIL_TAG.pipeline
+//            val detections: ArrayList<AprilTagDetection> = aprilTagDetectionPipeline.getDetectionsUpdate()
+//
+//            // If there's been a new frame...
+//            if (detections != null) {
+//                telemetry.addData("FPS", camera.getFps())
+//                telemetry.addData("Overhead ms", camera.getOverheadTimeMs())
+//                telemetry.addData("Pipeline ms", camera.getPipelineTimeMs())
+//
+//                // If we don't see any tags
+//                if (detections.size == 0) {
+//                    numFramesWithoutDetection++
+//
+//                    // If we haven't seen a tag for a few frames, lower the decimation
+//                    // so we can hopefully pick one up if we're e.g. far back
+//                    if (numFramesWithoutDetection >= THRESHOLD_NUM_FRAMES_NO_DETECTION_BEFORE_LOW_DECIMATION) {
+//                        aprilTagDetectionPipeline.setDecimation(DECIMATION_LOW)
+//                    }
+//                } else {
+//                    numFramesWithoutDetection = 0
+//
+//                    // If the target is within 1 meter, turn on high decimation to
+//                    // increase the frame rate
+//                    if (detections[0].pose.z < THRESHOLD_HIGH_DECIMATION_RANGE_METERS) {
+//                        aprilTagDetectionPipeline.setDecimation(DECIMATION_HIGH)
+//                    }
+//                    for (detection in detections) {
+//                        telemetry.addLine(String.format("\nDetected tag ID=%d", detection.id))
+//                        telemetry.addLine(
+//                            String.format(
+//                                "Translation X: %.2f feet",
+//                                detection.pose.x * AprilTagDemo.FEET_PER_METER
+//                            )
+//                        )
+//                        telemetry.addLine(
+//                            String.format(
+//                                "Translation Y: %.2f feet",
+//                                detection.pose.y * AprilTagDemo.FEET_PER_METER
+//                            )
+//                        )
+//                        telemetry.addLine(
+//                            String.format(
+//                                "Translation Z: %.2f feet",
+//                                detection.pose.z * AprilTagDemo.FEET_PER_METER
+//                            )
+//                        )
+//                        telemetry.addLine(
+//                            String.format(
+//                                "Rotation Yaw: %.2f degrees",
+//                                Math.toDegrees(detection.pose.yaw)
+//                            )
+//                        )
+//                        telemetry.addLine(
+//                            String.format(
+//                                "Rotation Pitch: %.2f degrees",
+//                                Math.toDegrees(detection.pose.pitch)
+//                            )
+//                        )
+//                        telemetry.addLine(
+//                            String.format(
+//                                "Rotation Roll: %.2f degrees",
+//                                Math.toDegrees(detection.pose.roll)
+//                            )
+//                        )
+//                    }
+//                }
+//                telemetry.update()
+//            }
+//            sleep(20)
+//        }
+//
+//
+//
 
-        val detections: ArrayList<AprilTagDetection> = (RearPipeline.APRIL_TAG.pipeline as AprilTagDetectionPipeline).getDetectionsUpdate()
-
-            // If there's been a new frame...
-            if (detections != null) {
-
-                // If we don't see any tags
-                if (detections.size == 0)
-                {
-                    numFramesWithoutDetection++
-
-                    // If we haven't seen a tag for a few frames, lower the decimation
-                    // so we can hopefully pick one up if we're e.g. far back
-                    if (numFramesWithoutDetection >= THRESHOLD_NUM_FRAMES_NO_DETECTION_BEFORE_LOW_DECIMATION)
-                    {
-                        (RearPipeline.APRIL_TAG.pipeline as AprilTagDetectionPipeline).setDecimation(DECIMATION_LOW)
-                    }
-                }
-                // We do see tags!
-                else
-                {
-                    numFramesWithoutDetection = 0
-
-                    // If the target is within 1 meter, turn on high decimation to
-                    // increase the frame rate
-                    if (detections[0].pose.z < THRESHOLD_HIGH_DECIMATION_RANGE_METERS) {
-                        (RearPipeline.APRIL_TAG.pipeline as AprilTagDetectionPipeline).setDecimation(DECIMATION_HIGH)
-                    }
-                    for (detection in detections) {
-                        telemetry.addLine(String.format("\nDetected tag ID=%d", detection.id))
-                }
-            }
-            sleep(20)
-        }
-        return null
+        return 0.0
     }
 
     /**
