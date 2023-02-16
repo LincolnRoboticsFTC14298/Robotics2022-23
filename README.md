@@ -1,43 +1,71 @@
-## NOTICE
+# Github Guidlines
 
+<<<<<<< HEAD
+## Cloning The Repo
+=======
 This repository contains the public FTC SDK for the POWERPLAY (2022-2023) competition season.
+>>>>>>> 0879b4797f7c9664731c9306926f713ef4ddfe5d
 
-## Welcome!
-This GitHub repository contains the source code that is used to build an Android app to control a *FIRST* Tech Challenge competition robot.  To use this SDK, download/clone the entire project to your local computer.
+On the start screen, do the following:
 
+<<<<<<< HEAD
+1. Click the button that says **Get From VCS**
+2. Copy and paste `https://github.com/LincolnRoboticsFTC14298/Robotics2022-23` into the **url** box
+3. Then click **clone**
+4. Click **Trust Project**
+
+## Fetching New Changes
+
+Anytime you go to work on the project, remember to:
+=======
 ## Getting Started
 If you are new to robotics or new to the *FIRST* Tech Challenge, then you should consider reviewing the [FTC Blocks Tutorial](https://ftc-docs.firstinspires.org/programming_resources/blocks/Blocks-Tutorial.html) to get familiar with how to use the control system:
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[FTC Blocks Online Tutorial](https://ftc-docs.firstinspires.org/programming_resources/blocks/Blocks-Tutorial.html)
 
 Even if you are an advanced Java programmer, it is helpful to start with the [FTC Blocks tutorial](https://ftc-docs.firstinspires.org/programming_resources/blocks/Blocks-Tutorial.html), and then migrate to the [OnBot Java Tool](https://ftc-docs.firstinspires.org/programming_resources/onbot_java/OnBot-Java-Tutorial.html) or to [Android Studio](https://ftc-docs.firstinspires.org/programming_resources/android_studio_java/Android-Studio-Tutorial.html) afterwards.
+>>>>>>> 0879b4797f7c9664731c9306926f713ef4ddfe5d
 
-## Downloading the Project
-If you are an Android Studio programmer, there are several ways to download this repo.  Note that if you use the Blocks or OnBot Java Tool to program your robot, then you do not need to download this repository.
+1. Click **Git** at the top of the screen
+2. Click **Fetch**
 
-* If you are a git user, you can clone the most current version of the repository:
+## Commits
 
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;git clone https://github.com/FIRST-Tech-Challenge/FtcRobotController.git</p>
+Remember:
+**ONLY COMMIT WHEN IT COMPILES SUCCESSFULLY**
 
-* Or, if you prefer, you can use the "Download Zip" button available through the main repository page.  Downloading the project as a .ZIP file will keep the size of the download manageable.
+In order to commit, do the following:
 
-* You can also download the project folder (as a .zip or .tar.gz archive file) from the Downloads subsection of the [Releases](https://github.com/FIRST-Tech-Challenge/FtcRobotController/releases) page for this repository.
+1. Click on **commit** on the left-hand side
+2. Click on the checkmark that says **Change # Files**
+3. Add a commit message (Guidelines below)
+4. Click **Commit and Push**
 
-* The Releases page also contains prebuilt APKs.
+Remember:
+**ONLY COMMIT WHEN IT COMPILES SUCCESSFULLY**
 
-Once you have downloaded and uncompressed (if needed) your folder, you can use Android Studio to import the folder  ("Import project (Eclipse ADT, Gradle, etc.)").
+You should also only commit one change at a time.
+You shouldn't make a new class and change a different one in the same commit.
+As well, do not make a commit as a request for a feature.
+Use github's **Issues** feature or request on the discord for that.
 
-## Getting Help
-### User Documentation and Tutorials
-*FIRST* maintains online documentation with information and tutorials on how to use the *FIRST* Tech Challenge software and robot control system.  You can access this documentation using the following link:
+## Commit Message Guidelines
 
+<<<<<<< HEAD
+Your commit message **MUST** have the following:
+=======
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[FIRST Tech Challenge Documentation](https://ftc-docs.firstinspires.org/index.html)
+>>>>>>> 0879b4797f7c9664731c9306926f713ef4ddfe5d
 
-Note that the online documentation is an "evergreen" document that is constantly being updated and edited.  It contains the most current information about the *FIRST* Tech Challenge software and control system.
+- Files Edited
+- New Files Created
+        - Description of what the class does
 
-### Javadoc Reference Material
-The Javadoc reference documentation for the FTC SDK is now available online.  Click on the following link to view the FTC SDK Javadoc documentation as a live website:
+Your commit message can have:
 
+<<<<<<< HEAD
+- TODO's
+=======
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[FTC Javadoc Documentation](https://javadoc.io/doc/org.firstinspires.ftc)
 
 ### Online User Forum
@@ -1319,3 +1347,4 @@ Changes include:
  * The API for the Legacy Module and Core Device Interface Module have been updated.
    - Support for encoders with the Legacy Module is now working.
  * The hardware loop has been updated for better performance.
+>>>>>>> 0879b4797f7c9664731c9306926f713ef4ddfe5d
