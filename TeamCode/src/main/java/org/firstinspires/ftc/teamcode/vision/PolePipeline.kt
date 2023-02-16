@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.vision
 
 import org.firstinspires.ftc.teamcode.RobotConfig
+import org.firstinspires.ftc.teamcode.RobotConfig.poleBaseHeight
+import org.firstinspires.ftc.teamcode.RobotConfig.poleDiameter
 import org.firstinspires.ftc.teamcode.vision.modulelib.InputModule
 import org.firstinspires.ftc.teamcode.vision.modulelib.ModularPipeline
 import org.firstinspires.ftc.teamcode.vision.modules.*
@@ -40,7 +42,7 @@ open class PolePipeline(
     val poleAspectRatio = ThresholdAspectRatio(3.5, 50.0)
     val poleContours = FilterContours(contours, 0.1, Pair(5.0, poleConvexity), Pair(0.5, poleExtent), Pair(1.0, poleSolidity), Pair(5.0, poleAspectRatio))
 
-    val poleResultsModule = ContourResults(poleContours, camera, useDistanceByWidth = true) // TODO experiment with base of pole instead
+    val poleResultsModule = ContourResults(poleContours, camera, poleBaseHeight, poleDiameter/2.0) // TODO experiment with base of pole instead
 
     // Data we care about and wish to access
     var poleResults = listOf<ContourResults.AnalysisResult>()
