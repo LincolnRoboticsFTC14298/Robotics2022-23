@@ -3,9 +3,8 @@ package org.firstinspires.ftc.teamcode.drive.localization
 import org.ejml.simple.SimpleMatrix
 import org.firstinspires.ftc.teamcode.RobotConfig
 import org.firstinspires.ftc.teamcode.filters.particleFilter.ProbabilisticMeasurementModel
+import org.firstinspires.ftc.teamcode.subsystems.Vision.ObservationResult
 import org.firstinspires.ftc.teamcode.util.matrixToVector
-import org.firstinspires.ftc.teamcode.vision.modules.ContourResults.AnalysisResult
-import org.opencv.core.Point
 import kotlin.math.*
 
 class VisionMeasurementModel(private val camera: RobotConfig.CameraData) : ProbabilisticMeasurementModel {
@@ -26,9 +25,9 @@ class VisionMeasurementModel(private val camera: RobotConfig.CameraData) : Proba
         return probability
     }
 
-    private fun getExpectedObservations(state: SimpleMatrix): List<AnalysisResult> {
+    private fun getExpectedObservations(state: SimpleMatrix): List<ObservationResult> {
 
-        val polesInSight = mutableListOf<AnalysisResult>()
+        val polesInSight = mutableListOf<ObservationResult>()
 
         for (pole in enumValues<RobotConfig.Pole>().toList()) {
             val diff = pole.vector - matrixToVector(state)
@@ -39,8 +38,8 @@ class VisionMeasurementModel(private val camera: RobotConfig.CameraData) : Proba
             // TODO Pixel/Projection
 
             // Only add if pole within camera FOV
-            if (abs(yaw) <= camera.FOVX/2.0)
-                polesInSight.add(AnalysisResult(yaw, dist))
+            if (abs(yaw) <= camera.FOVX/2.0) // TODO This check fails to account for the offset between camera and robot center
+                polesInSight.add(ObservationResult(yaw, dist))
         }
 
         return polesInSight.toList()
@@ -50,24 +49,17 @@ class VisionMeasurementModel(private val camera: RobotConfig.CameraData) : Proba
      * Assumes tight convergence
      * TODO GENERALIZE
      */
-    private fun getCorrespondence(z: List<AnalysisResult>, expected: List<AnalysisResult>): List<Pair<AnalysisResult, AnalysisResult>> {
+    private fun getCorrespondence(z: List<ObservationResult>, expected: List<ObservationResult>): List<Pair<ObservationResult, ObservationResult>> {
         return List(z.size) { i ->
             val currentObservation = z[i]
-            val closestPole = expected.minBy { distanceSqr(currentObservation, it) }
+            val closestPole = expected.minBy { it.distance(currentObservation) }
             Pair(currentObservation, closestPole)
         }
     }
 
-    private fun distanceSqr(p1: AnalysisResult, p2: AnalysisResult): Double {
-        val a = p1.distance
-        val b = p2.distance
-        val dtheta = p1.angle - p2.angle
-        return a*a + b*b - 2*a*b*cos(dtheta)
-    }
-
-    private fun matrixToList(z: SimpleMatrix): List<AnalysisResult> {
+    private fun matrixToList(z: SimpleMatrix): List<ObservationResult> {
         return List(z.numCols()) {i ->
-            AnalysisResult(z.get(0, i), z.get(1, i))
+            ObservationResult(z.get(0, i), z.get(1, i))
         }
     }
 
