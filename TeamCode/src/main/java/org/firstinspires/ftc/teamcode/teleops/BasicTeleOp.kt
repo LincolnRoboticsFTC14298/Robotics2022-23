@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.teleops
 
 import com.acmerobotics.roadrunner.geometry.Pose2d
+import com.acmerobotics.roadrunner.geometry.Vector2d
 import com.arcrobotics.ftclib.command.*
 import com.arcrobotics.ftclib.command.button.Trigger
 import com.arcrobotics.ftclib.gamepad.GamepadEx
@@ -42,18 +43,14 @@ class BasicTeleOp : CommandOpMode() {
         /**
          * Drive
          */
-        val forward = { driver1.leftY }
-        // Negate left x because left is positive
-        val strafe = { -driver1.leftX }
-        // Negate right x because ccw is positive
+        val input = { Vector2d(driver1.leftY, -driver1.leftX) }
         val rotation = { -driver1.rightX }
 
         var fieldCentric = false
 
         mecanum.defaultCommand = JoystickDrive(
             mecanum,
-            forward,
-            strafe,
+            input,
             rotation,
             { fieldCentric }
         )
@@ -65,56 +62,56 @@ class BasicTeleOp : CommandOpMode() {
                 InstantCommand(passthrough::junctionDeposit, passthrough)
             )
 
-        driver1
-            .getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-            .whenPressed(
-                SequentialCommandGroup(
-                    ReadyPoleDeposit(RobotConfig.PoleType.LOW, lift, passthrough),
-                    ApproachPoleFromAngle(mecanum, vision, forward)
-                )
-            )
-
-        driver1
-            .getGamepadButton(GamepadKeys.Button.DPAD_UP)
-            .whenPressed(
-                SequentialCommandGroup(
-                    ReadyPoleDeposit(RobotConfig.PoleType.MEDIUM, lift, passthrough),
-                    ApproachPoleFromAngle(mecanum, vision, forward)
-                )
-            )
-
-        driver1
-            .getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
-            .whenPressed(
-                SequentialCommandGroup(
-                    ReadyPoleDeposit(RobotConfig.PoleType.HIGH, lift, passthrough),
-                    ApproachPoleFromAngle(mecanum, vision, forward)
-                )
-            )
-
-        driver1
-            .getGamepadButton(GamepadKeys.Button.A)
-            .whenPressed(
-                InstantCommand(claw::partiallyOpen, claw)
-            )
-
-        // Reset to pickup and keep claw open until a cone comes in
-        driver1
-            .getGamepadButton(GamepadKeys.Button.A)
-            .whenPressed(
-                SequentialCommandGroup(
-                    ReadyPickUp(lift, claw, passthrough),
-                    WaitUntilCommand(claw::isConeInside),
-                    InstantCommand(claw::close, claw),
-                )
-            )
-
-        // Manually close claw
-        driver1
-            .getGamepadButton(GamepadKeys.Button.B)
-            .whenPressed(
-                InstantCommand(claw::close, claw)
-            )
+//        driver1
+//            .getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
+//            .whenPressed(
+//                SequentialCommandGroup(
+//                    ReadyPoleDeposit(RobotConfig.PoleType.LOW, lift, passthrough),
+//                    ApproachPoleFromAngle(mecanum, vision, forward)
+//                )
+//            )
+//
+//        driver1
+//            .getGamepadButton(GamepadKeys.Button.DPAD_UP)
+//            .whenPressed(
+//                SequentialCommandGroup(
+//                    ReadyPoleDeposit(RobotConfig.PoleType.MEDIUM, lift, passthrough),
+//                    ApproachPoleFromAngle(mecanum, vision, forward)
+//                )
+//            )
+//
+//        driver1
+//            .getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
+//            .whenPressed(
+//                SequentialCommandGroup(
+//                    ReadyPoleDeposit(RobotConfig.PoleType.HIGH, lift, passthrough),
+//                    ApproachPoleFromAngle(mecanum, vision, forward)
+//                )
+//            )
+//
+//        driver1
+//            .getGamepadButton(GamepadKeys.Button.A)
+//            .whenPressed(
+//                InstantCommand(claw::partiallyOpen, claw)
+//            )
+//
+//        // Reset to pickup and keep claw open until a cone comes in
+//        driver1
+//            .getGamepadButton(GamepadKeys.Button.A)
+//            .whenPressed(
+//                SequentialCommandGroup(
+//                    ReadyPickUp(lift, claw, passthrough),
+//                    WaitUntilCommand(claw::isConeInside),
+//                    InstantCommand(claw::close, claw),
+//                )
+//            )
+//
+//        // Manually close claw
+//        driver1
+//            .getGamepadButton(GamepadKeys.Button.B)
+//            .whenPressed(
+//                InstantCommand(claw::close, claw)
+//            )
 
 
         // Press trigger to deposit cone

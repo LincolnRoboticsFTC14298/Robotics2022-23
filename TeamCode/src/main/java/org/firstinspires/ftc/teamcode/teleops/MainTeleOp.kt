@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.teleops
 
+import com.acmerobotics.roadrunner.geometry.Vector2d
 import com.arcrobotics.ftclib.command.CommandOpMode
 import com.arcrobotics.ftclib.command.InstantCommand
 import com.arcrobotics.ftclib.command.SequentialCommandGroup
@@ -50,10 +51,7 @@ class MainTeleOp : CommandOpMode() {
         /**
          * Drive
          */
-        val forward  = { driver1.leftY }
-        // Negate left x because left is positive
-        val strafe   = { -driver1.leftX }
-        // Negate right x because ccw is positive
+        val input = { Vector2d(driver1.leftY, -driver1.leftX) }
         val rotation = { -driver1.rightX }
 
         var fieldCentric = true
@@ -61,38 +59,38 @@ class MainTeleOp : CommandOpMode() {
 //        var obstacleAvoidance = true
 //        val obstacleAvoidanceProvider = { obstacleAvoidance }
 
-        mecanum.defaultCommand = JoystickDrive(mecanum, forward, strafe, rotation, fieldCentricProvider) //obstacleAvoidanceProvider)
+        mecanum.defaultCommand = JoystickDrive(mecanum, input, rotation, fieldCentricProvider) //obstacleAvoidanceProvider)
 
         /**
          * Lift
          */
-        // Deposit and then retract lift and passthrough
-        val semiAutoDepositLow = SequentialCommandGroup(
-                ReadyPoleDeposit(RobotConfig.PoleType.LOW, lift, passthrough),
-                ApproachPoleFromAngle(mecanum, vision, forward)
-            )
+//        // Deposit and then retract lift and passthrough
+//        val semiAutoDepositLow = SequentialCommandGroup(
+//                ReadyPoleDeposit(RobotConfig.PoleType.LOW, lift, passthrough),
+//                ApproachPoleFromAngle(mecanum, vision, forward)
+//            )
+//
+//        val semiAutoDepositMedium = SequentialCommandGroup(
+//            ReadyPoleDeposit(RobotConfig.PoleType.MEDIUM, lift, passthrough),
+//            ApproachPoleFromAngle(mecanum, vision, forward)
+//        )
+//
+//        val semiAutoDepositHigh = SequentialCommandGroup(
+//            ReadyPoleDeposit(RobotConfig.PoleType.HIGH, lift, passthrough),
+//            ApproachPoleFromAngle(mecanum, vision, forward)
+//        )
 
-        val semiAutoDepositMedium = SequentialCommandGroup(
-            ReadyPoleDeposit(RobotConfig.PoleType.MEDIUM, lift, passthrough),
-            ApproachPoleFromAngle(mecanum, vision, forward)
-        )
-
-        val semiAutoDepositHigh = SequentialCommandGroup(
-            ReadyPoleDeposit(RobotConfig.PoleType.HIGH, lift, passthrough),
-            ApproachPoleFromAngle(mecanum, vision, forward)
-        )
-
-        driver1
-            .getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-            .whenActive(semiAutoDepositLow)
-
-        driver1
-            .getGamepadButton(GamepadKeys.Button.DPAD_UP)
-            .whenActive(semiAutoDepositMedium)
-
-        driver1
-            .getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
-            .whenActive(semiAutoDepositHigh)
+//        driver1
+//            .getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
+//            .whenActive(semiAutoDepositLow)
+//
+//        driver1
+//            .getGamepadButton(GamepadKeys.Button.DPAD_UP)
+//            .whenActive(semiAutoDepositMedium)
+//
+//        driver1
+//            .getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
+//            .whenActive(semiAutoDepositHigh)
 
 //        driver1
 //            .getGamepadButton(GamepadKeys.Button.Y)
@@ -102,18 +100,18 @@ class MainTeleOp : CommandOpMode() {
         /**
          * Claw
          */
-        val approachCone = ApproachCone(mecanum, vision, lift, passthrough, claw, forward)
-        // Press X to approach cone
-        driver1
-            .getGamepadButton(GamepadKeys.Button.A)
-            .whenPressed(approachCone)
-
-        driver1
-            .getGamepadButton(GamepadKeys.Button.X)
-            .cancelWhenActive(semiAutoDepositLow)
-            .cancelWhenActive(semiAutoDepositMedium)
-            .cancelWhenActive(semiAutoDepositHigh)
-            .cancelWhenActive(approachCone)
+//        val approachCone = ApproachCone(mecanum, vision, lift, passthrough, claw, forward)
+//        // Press X to approach cone
+//        driver1
+//            .getGamepadButton(GamepadKeys.Button.A)
+//            .whenPressed(approachCone)
+//
+//        driver1
+//            .getGamepadButton(GamepadKeys.Button.X)
+//            .cancelWhenActive(semiAutoDepositLow)
+//            .cancelWhenActive(semiAutoDepositMedium)
+//            .cancelWhenActive(semiAutoDepositHigh)
+//            .cancelWhenActive(approachCone)
 
         /****************************************************
          * Driver 2 Controls                                *
