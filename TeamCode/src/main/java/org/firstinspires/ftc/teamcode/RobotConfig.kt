@@ -247,9 +247,9 @@ object RobotConfig {
         }
     }
 
-    const val stackToPoleMaximumDistance = 5.0
+    const val stackToPoleMaxDistance = 5.0
     const val visionToPoleMaxDistance = 5.0 // Difference between vision observation and pole location to be considered the same
-
+    const val singleConeToJunctionMaxDistance = 4.0
 
 
 

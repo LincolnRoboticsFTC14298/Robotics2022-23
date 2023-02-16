@@ -30,7 +30,7 @@ class ApproachPoleAndDeposit(
 
     init { // TODO Semi-auto based on choosing the pole + vision
         addCommands(
-            InstantCommand(vision::startStreamingFrontCamera),
+            //InstantCommand(vision::startStreamingFrontCamera),
             ParallelCommandGroup(
                 // Start the lift and extend passthrough once appropriate
                 ReadyPoleDeposit(poleType, lift, passthrough),
@@ -44,7 +44,7 @@ class ApproachPoleAndDeposit(
             ),
             // Once lift and passthrough are done and at the pole, deposit
             ClawDeposit(claw),
-            InstantCommand(vision::stopStreamingFrontCamera)
+            //InstantCommand(vision::stopStreamingFrontCamera)
         )
         addRequirements(mecanum, lift, passthrough, claw)
     }
@@ -55,8 +55,9 @@ class ApproachPoleAndDeposit(
      */
     private fun getVisionRelativePoint() : Vector2d {
         val diff = nearestPole.vector - mecanum.getPoseEstimate().vec()
-        val closestVisionMatch = vision.getLandmarkInfo().minBy { it.toVector().distTo(diff) }.toVector()
-        return if (closestVisionMatch.distTo(diff) < visionToPoleMaxDistance) closestVisionMatch else diff
+        val closestVisionMatch = vision.getLandmarkInfo().minByOrNull { it.toVector().distTo(diff) }?.toVector()
+        return if (closestVisionMatch != null && closestVisionMatch.distTo(diff) < visionToPoleMaxDistance)
+            closestVisionMatch else diff
     }
 
 }

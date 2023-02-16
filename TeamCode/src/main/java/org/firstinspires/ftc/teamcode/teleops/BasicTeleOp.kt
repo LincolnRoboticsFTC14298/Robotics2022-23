@@ -13,6 +13,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.RobotConfig
 import org.firstinspires.ftc.teamcode.commands.*
 import org.firstinspires.ftc.teamcode.commands.drive.JoystickDrive
+import org.firstinspires.ftc.teamcode.drive.PoseStorage
 import org.firstinspires.ftc.teamcode.drive.localization.MecanumMonteCarloLocalizer
 import org.firstinspires.ftc.teamcode.drive.localization.OdometryLocalizer
 import org.firstinspires.ftc.teamcode.subsystems.*
@@ -34,7 +35,10 @@ class BasicTeleOp : CommandOpMode() {
         val passthrough = Passthrough(hardwareMap)
         val vision = Vision(hardwareMap)
         //val localizer = MecanumMonteCarloLocalizer(hardwareMap, vision, Pose2d(), arrayToRowMatrix(doubleArrayOf()))
-        val mecanum = Mecanum(hardwareMap)
+        val localizer = OdometryLocalizer(hardwareMap)
+        localizer.poseEstimate = PoseStorage.currentPose
+
+        val mecanum = Mecanum(hardwareMap, vision, localizer)
 
         register(lift, claw, passthrough, mecanum, vision)
 

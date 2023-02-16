@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode.vision
 
 import org.firstinspires.ftc.robotcore.external.Telemetry
+import org.firstinspires.ftc.teamcode.RobotConfig
+import org.firstinspires.ftc.teamcode.RobotConfig.coneDiameter
+import org.firstinspires.ftc.teamcode.RobotConfig.poleDiameter
 import org.firstinspires.ftc.teamcode.vision.modulelib.InputModule
 import org.firstinspires.ftc.teamcode.vision.modulelib.ModularPipeline
 import org.firstinspires.ftc.teamcode.vision.modules.*
@@ -13,11 +16,8 @@ import org.opencv.imgproc.Imgproc.drawContours
 
 open class GeneralPipeline(
     private var displayMode: DisplayMode = DisplayMode.ALL_CONTOURS,
-    private val FOVX: Double,
-    private val FOVY: Double,
-    private val cameraHeight: Double,
-    private val cameraPitch: Double = 0.0,
-    val telemetry: Telemetry
+    camera: RobotConfig.CameraData,
+    var telemetry: Telemetry?
 ) : ModularPipeline() {
 
     //private val camMat = Mat()
@@ -51,26 +51,26 @@ open class GeneralPipeline(
     private val rawPoleContours = Contours(denoisedPoleMask)
 
     // Pole Scorer //
-    private val poleConvexity = Convexity(); private val poleConvexityScorer = DiffSquaredScorer(poleConvexity, 0.988, 11.09)
-    private val poleExtent = Extent(); private val poleExtentScorer = DiffSquaredScorer(poleExtent, 0.661, 0.036)
-    private val poleSolidity = Solidity(); private val poleSolidityScorer = DiffSquaredScorer(poleSolidity, 0.909, 0.227)
-    private val poleAspectRatio = AspectRatio(); private val poleAspectRatioScorer = ThresholdScorer(poleAspectRatio, Pair(1.0, 30.0), 20.0)
-    private val poleArea = Area(); private val poleAreaScorer = ThresholdScorer(poleArea, Pair(50.0, 100000.0), 20.0)
-    private val poleContours = FilterContours(rawPoleContours, 0.05, telemetry, poleConvexityScorer + poleExtentScorer + poleSolidityScorer + poleAspectRatioScorer + poleAreaScorer)
+    private val poleConvexityScorer = DiffSquaredScorer(Convexity(), 0.988, 11.09)
+    private val poleExtentScorer = DiffSquaredScorer(Extent(), 0.661, 0.036)
+    private val poleSolidityScorer = DiffSquaredScorer(Solidity(), 0.909, 0.227)
+    private val poleAspectRatioScorer = ThresholdScorer(AspectRatio(), Pair(1.0, 30.0), 20.0)
+    private val poleAreaScorer = ThresholdScorer(Area(), Pair(50.0, 100000.0), 20.0)
+    private val poleContours = FilterContours(rawPoleContours, 0.05, poleConvexityScorer + poleExtentScorer + poleSolidityScorer + poleAspectRatioScorer + poleAreaScorer)
 
     // Single Cone Scorer //
-    private val singleConeConvexity = Convexity(); private val singleConeConvexityScorer = DiffSquaredScorer(singleConeConvexity, 0.942, 13.3)
-    private val singleConeExtent = Extent(); private val singleConeExtentScorer = DiffSquaredScorer(singleConeExtent, 0.668, 4.06)
-    private val singleConeSolidity = Solidity(); private val singleConeSolidityScorer = DiffSquaredScorer(singleConeSolidity, 0.901, 38.9)
-    private val singleConeAspectRatio = AspectRatio(); private val singleConeAspectRatioScorer = DiffSquaredScorer(singleConeAspectRatio, 1.369, 0.23)
-    private val singleConeContours = FilterContours(rawConeContours, 0.05, telemetry, singleConeConvexityScorer + singleConeExtentScorer + singleConeSolidityScorer + singleConeAspectRatioScorer)
+    private val singleConeConvexityScorer = DiffSquaredScorer(Convexity() , 0.942, 13.3)
+    private val singleConeExtentScorer = DiffSquaredScorer(Extent(), 0.668, 4.06)
+    private val singleConeSolidityScorer = DiffSquaredScorer(Solidity() , 0.901, 38.9)
+    private val singleConeAspectRatioScorer = DiffSquaredScorer(AspectRatio() , 1.369, 0.23)
+    private val singleConeContours = FilterContours(rawConeContours, 0.05, singleConeConvexityScorer + singleConeExtentScorer + singleConeSolidityScorer + singleConeAspectRatioScorer)
 
     // Stacked Scorer //
-    private val stackConvexity = Convexity(); private val stackConvexityScorer = DiffSquaredScorer(stackConvexity, 0.894, 0.25)
-    private val stackExtent = Extent(); private val stackExtentScorer = DiffSquaredScorer(stackExtent, 0.712, 0.28)
-    private val stackSolidity = Solidity(); private val stackSolidityScorer = DiffSquaredScorer(stackSolidity, 0.903, 18.8)
-    private val stackAspectRatio = AspectRatio(); private val stackAspectRatioScorer = ThresholdScorer(stackAspectRatio, Pair(1.0, 15.0), 25.0)
-    private val stackContours = FilterContours(rawConeContours, 0.04, telemetry, stackConvexityScorer + stackExtentScorer + stackSolidityScorer + stackAspectRatioScorer)
+    private val stackConvexityScorer = DiffSquaredScorer(Convexity(), 0.894, 0.25)
+    private val stackExtentScorer = DiffSquaredScorer(Extent(), 0.712, 0.28)
+    private val stackSolidityScorer = DiffSquaredScorer(Solidity(), 0.903, 18.8)
+    private val stackAspectRatioScorer = ThresholdScorer(AspectRatio(), Pair(1.0, 15.0), 25.0)
+    private val stackContours = FilterContours(rawConeContours, 0.04, stackConvexityScorer + stackExtentScorer + stackSolidityScorer + stackAspectRatioScorer)
 
     // Single Color Mask and Single Cone Overlap //
     private val redOverlap = MaskOverlap(ContourToMask(singleConeContours), redMask)
@@ -79,11 +79,11 @@ open class GeneralPipeline(
     private val blueSingleConeContours = Contours(blueOverlap)
 
     // Results Modules //
-    private val stackResultsModule = ContourResults(stackContours, cameraHeight, FOVX, FOVY, cameraPitch)
-    private val singleConeResultsModule = ContourResults(singleConeContours, cameraHeight, FOVX, FOVY, cameraPitch)
-    private val redSingleConeResultsModule = ContourResults(redSingleConeContours, cameraHeight, FOVX, FOVY, cameraPitch)
-    private val blueSingleConeResultsModule = ContourResults(blueSingleConeContours, cameraHeight, FOVX, FOVY, cameraPitch)
-    private val poleResultsModule = ContourResults(poleContours, cameraHeight, FOVX, FOVY, cameraPitch)
+    private val stackResultsModule = ContourResults(stackContours, camera, coneDiameter)
+    private val singleConeResultsModule = ContourResults(singleConeContours, camera, coneDiameter)
+    private val redSingleConeResultsModule = ContourResults(redSingleConeContours, camera, coneDiameter)
+    private val blueSingleConeResultsModule = ContourResults(blueSingleConeContours, camera, coneDiameter)
+    private val poleResultsModule = ContourResults(poleContours, camera, poleDiameter)
 
     // Data we care about and wish to access
     var stackResults = listOf<ContourResults.AnalysisResult>()
@@ -106,16 +106,15 @@ open class GeneralPipeline(
         poleResults = poleResultsModule.processFrame(input)
 
         // Telemetry for Testing //
-        telemetry.addData("displaymode", displayMode)
+        telemetry?.addData("displaymode", displayMode)
 
-        telemetry.addData("mean, variance", null)
-        telemetry.addData("aspectRatio", poleAspectRatio.mean().toString() + ", " + poleAspectRatio.variance().toString())
-        telemetry.addData("convexity", poleConvexity.mean().toString() + ", " + poleConvexity.variance().toString())
-        telemetry.addData("extent", poleExtent.mean().toString() + ", " + poleExtent.variance().toString())
-        telemetry.addData("solidity", poleSolidity.mean().toString() + ", " + poleSolidity.variance().toString())
-        telemetry.addData("aspectRatio min, max", poleAspectRatio.min().toString() + ", " + poleAspectRatio.max().toString())
+        telemetry?.addLine("mean, variance")
+        telemetry?.addData("aspectRatio", poleAspectRatioScorer.feature.mean().toString() + ", " + poleAspectRatioScorer.feature.variance().toString())
+        telemetry?.addData("convexity", poleConvexityScorer.feature.mean().toString() + ", " + poleConvexityScorer.feature.variance().toString())
+        telemetry?.addData("extent", poleExtentScorer.feature.mean().toString() + ", " + poleExtentScorer.feature.variance().toString())
+        telemetry?.addData("solidity", poleSolidityScorer.feature.mean().toString() + ", " + poleSolidityScorer.feature.variance().toString())
+        telemetry?.addData("aspectRatio min, max", (poleAspectRatioScorer.feature as AspectRatio).min().toString() + ", " + poleAspectRatioScorer.feature.max().toString())
         //telemetry.addData("areaResults", poleArea.areaResultsList().sorted().toString())
-        telemetry.update()
 
         // Display //
         return when (displayMode) {

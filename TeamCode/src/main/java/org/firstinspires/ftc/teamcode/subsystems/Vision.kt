@@ -1,36 +1,37 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
+import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.roadrunner.geometry.Vector2d
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.qualcomm.robotcore.hardware.HardwareMap
-import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry
+import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.teamcode.RobotConfig
-import org.firstinspires.ftc.teamcode.RobotConfig.stackToPoleMaximumDistance
-import org.firstinspires.ftc.teamcode.teleops.testing.AprilTagDemo
+import org.firstinspires.ftc.teamcode.RobotConfig.singleConeToJunctionMaxDistance
+import org.firstinspires.ftc.teamcode.RobotConfig.stackToPoleMaxDistance
 import org.firstinspires.ftc.teamcode.vision.AprilTagDetectionPipeline
-import org.firstinspires.ftc.teamcode.vision.GeneralConePipeline
-import org.firstinspires.ftc.teamcode.vision.PolePipeline
-import org.firstinspires.ftc.teamcode.vision.modules.ContourResults
+import org.firstinspires.ftc.teamcode.vision.GeneralPipeline
 import org.openftc.apriltag.AprilTagDetection
 import org.openftc.easyopencv.OpenCvCamera.AsyncCameraOpenListener
 import org.openftc.easyopencv.OpenCvCameraFactory
 import org.openftc.easyopencv.OpenCvCameraRotation
 import org.openftc.easyopencv.OpenCvInternalCamera
 import org.openftc.easyopencv.OpenCvPipeline
-import kotlin.math.cos
 
 /**
  * Manages all the pipelines and cameras.
  */
 class Vision(
     hwMap: HardwareMap,
-    startPipeline: FrontPipeline = FrontPipeline.POLE
+    startPipeline: FrontPipeline = FrontPipeline.GENERAL_PIPELINE,
+    private val telemetry: Telemetry? = null
 ) : SubsystemBase() {
 
     val cameraMonitorViewId: Int = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName())
     val webCam = OpenCvCameraFactory.getInstance().createWebcam(hwMap.get(WebcamName::class.java, "Webcam 1"), cameraMonitorViewId)
     val phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId)
+
+    private val dashboard = FtcDashboard.getInstance()
 
     enum class AprilTagResult(var id: Int) {
         PARK_LEFT(5),
@@ -44,15 +45,17 @@ class Vision(
 
     enum class FrontPipeline(var pipeline: OpenCvPipeline) {
         APRIL_TAG(AprilTagDetectionPipeline(1.18,  RobotConfig.CameraData.LOGITECH_C920)),
-        POLE(PolePipeline(PolePipeline.DisplayMode.ALL_CONTOURS, RobotConfig.CameraData.LOGITECH_C920))
+        GENERAL_PIPELINE(GeneralPipeline(GeneralPipeline.DisplayMode.ALL_CONTOURS, RobotConfig.CameraData.LOGITECH_C920, null))
     }
 
-    val conePipeline = GeneralConePipeline(GeneralConePipeline.DisplayMode.ALL_CONTOURS, RobotConfig.CameraData.PHONECAM)
+    val phoneCamPipeline = GeneralPipeline(GeneralPipeline.DisplayMode.ALL_CONTOURS, RobotConfig.CameraData.PHONECAM, telemetry)
 
     init {
         name = "Vision Subsystem"
 
-        phoneCam.setPipeline(conePipeline)
+        (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).telemetry = telemetry
+
+        phoneCam.setPipeline(phoneCamPipeline)
 
         // Open cameras asynchronously and load the pipelines
         phoneCam.openCameraDeviceAsync(object : AsyncCameraOpenListener {
@@ -71,7 +74,7 @@ class Vision(
 
         webCam.openCameraDeviceAsync(object : AsyncCameraOpenListener {
             override fun onOpened() {
-                startStreamingRearCamera()
+                startStreamingFrontCamera()
             }
 
             override fun onError(errorCode: Int) {
@@ -130,6 +133,7 @@ class Vision(
      */
     fun startStreamingFrontCamera() {
         webCam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT)
+        dashboard.startCameraStream(webCam, 10.0)
     }
 
     /**
@@ -137,6 +141,7 @@ class Vision(
      */
     fun stopStreamingFrontCamera() {
         webCam.stopStreaming()
+        dashboard.stopCameraStream()
     }
 
     /**
@@ -144,6 +149,7 @@ class Vision(
      */
     fun startStreamingRearCamera() {
         phoneCam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT)
+        dashboard.startCameraStream(phoneCam, 10.0)
     }
 
     /**
@@ -151,6 +157,7 @@ class Vision(
      */
     fun stopStreamingRearCamera() {
         phoneCam.stopStreaming()
+        dashboard.startCameraStream(webCam, 10.0)
     }
 
     /**
@@ -182,15 +189,15 @@ class Vision(
      */
     fun getCameraSpaceLandmarkInfo(): List<ObservationResult> {
 
-        val poles = (FrontPipeline.POLE.pipeline as PolePipeline).poleResults
-        val stacks = (FrontPipeline.POLE.pipeline as PolePipeline).conePipeline.stackResults.toMutableList()
+        val poles = (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).poleResults
+        val stacks = (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).stackResults.toMutableList()
 
         val landmarks = mutableListOf<ObservationResult>()
 
         poles.forEach { pole ->
             val closestStack = stacks.minByOrNull { it.distance(pole, useDistanceByWidthForOther = true) } // Find closest stack
 
-            if (closestStack != null && closestStack.distance(pole) < stackToPoleMaximumDistance) { // If sufficiently close, simply take the average between them
+            if (closestStack != null && closestStack.distance(pole) < stackToPoleMaxDistance) { // If sufficiently close, simply take the average between them
                 val observationVector = closestStack.toVector()
 
                 landmarks.add(ObservationResult.vector(observationVector))
@@ -222,11 +229,27 @@ class Vision(
     fun getClosestPoleAngle(): Double? {
         return getClosestPolePosition()?.angle()
     }
-
-    // TODO take into account junctions
     fun getClosestConePosition(): Vector2d? {
-        val cones = conePipeline.singleConeResults.toMutableList()
-        return cones.minByOrNull{ it.distanceByPitch ?: Double.MAX_VALUE }?.toVector()?.plus(RobotConfig.CameraData.PHONECAM.relativePosition)
+        val cones = phoneCamPipeline.singleConeResults.toMutableList()
+        val poles = phoneCamPipeline.poleResults.toMutableList()
+        val junctions = enumValues<RobotConfig.Junction>()
+
+        cones.forEachIndexed { i, cone ->
+            val closestPole = poles.minByOrNull { it.distance(cone) }
+            if (closestPole != null &&
+                closestPole.distance(cone) < singleConeToJunctionMaxDistance) {
+                cones.removeAt(i)
+                poles.remove(closestPole)
+            } else {
+                val closestJunction = junctions.minBy { it.vector.distTo(cone.toVector()) }
+                if (closestJunction.vector.distTo(cone.toVector()) < singleConeToJunctionMaxDistance) {
+                    cones.removeAt(i)
+                }
+            }
+        }
+
+        val closestCone = cones.minByOrNull { it.distanceByPitch ?: Double.MAX_VALUE }
+        return closestCone?.toVector()?.plus(RobotConfig.CameraData.PHONECAM.relativePosition)
     }
 
     /**

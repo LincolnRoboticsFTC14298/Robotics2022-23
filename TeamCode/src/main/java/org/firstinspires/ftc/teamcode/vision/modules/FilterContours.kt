@@ -13,7 +13,6 @@ import org.opencv.core.MatOfPoint
 class FilterContours(
     private val contourModule: AbstractPipelineModule<List<MatOfPoint>>,
     private val threshold: Double,
-    private val telemetry: Telemetry?,
     private val scorer: Scorer
 ) : AbstractPipelineModule<List<MatOfPoint>>() {
 

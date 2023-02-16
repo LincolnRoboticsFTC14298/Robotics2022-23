@@ -5,7 +5,7 @@ import org.firstinspires.ftc.teamcode.vision.modules.features.Feature
 import org.opencv.core.MatOfPoint
 
 class DiffSquaredScorer(
-    private val feature: Feature,
+    val feature: Feature,
     private val targetValue: Double,
     private val weight: Double
 ) : Scorer {
