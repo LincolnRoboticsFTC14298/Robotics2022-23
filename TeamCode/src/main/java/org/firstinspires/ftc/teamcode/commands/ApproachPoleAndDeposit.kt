@@ -55,8 +55,9 @@ class ApproachPoleAndDeposit(
      */
     private fun getVisionRelativePoint() : Vector2d {
         val diff = nearestPole.vector - mecanum.getPoseEstimate().vec()
-        val closestVisionMatch = vision.getLandmarkInfo().minBy { it.toVector().distTo(diff) }.toVector()
-        return if (closestVisionMatch.distTo(diff) < visionToPoleMaxDistance) closestVisionMatch else diff
+        val closestVisionMatch = vision.getLandmarkInfo().minByOrNull { it.toVector().distTo(diff) }?.toVector()
+        return if (closestVisionMatch != null && closestVisionMatch.distTo(diff) < visionToPoleMaxDistance)
+            closestVisionMatch else diff
     }
 
 }
