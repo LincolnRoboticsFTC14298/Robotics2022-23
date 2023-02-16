@@ -3,29 +3,27 @@ package org.firstinspires.ftc.teamcode.subsystems
 import com.acmerobotics.roadrunner.geometry.Vector2d
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.qualcomm.robotcore.hardware.HardwareMap
-import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry
+import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.teamcode.RobotConfig
-import org.firstinspires.ftc.teamcode.RobotConfig.stackToPoleMaximumDistance
-import org.firstinspires.ftc.teamcode.teleops.testing.AprilTagDemo
+import org.firstinspires.ftc.teamcode.RobotConfig.singleConeToJunctionMaxDistance
+import org.firstinspires.ftc.teamcode.RobotConfig.stackToPoleMaxDistance
 import org.firstinspires.ftc.teamcode.vision.AprilTagDetectionPipeline
-import org.firstinspires.ftc.teamcode.vision.GeneralConePipeline
-import org.firstinspires.ftc.teamcode.vision.PolePipeline
-import org.firstinspires.ftc.teamcode.vision.modules.ContourResults
+import org.firstinspires.ftc.teamcode.vision.GeneralPipeline
 import org.openftc.apriltag.AprilTagDetection
 import org.openftc.easyopencv.OpenCvCamera.AsyncCameraOpenListener
 import org.openftc.easyopencv.OpenCvCameraFactory
 import org.openftc.easyopencv.OpenCvCameraRotation
 import org.openftc.easyopencv.OpenCvInternalCamera
 import org.openftc.easyopencv.OpenCvPipeline
-import kotlin.math.cos
 
 /**
  * Manages all the pipelines and cameras.
  */
 class Vision(
     hwMap: HardwareMap,
-    startPipeline: FrontPipeline = FrontPipeline.POLE
+    startPipeline: FrontPipeline = FrontPipeline.GENERAL_PIPELINE,
+    private val telemetry: Telemetry? = null
 ) : SubsystemBase() {
 
     val cameraMonitorViewId: Int = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName())
@@ -44,15 +42,17 @@ class Vision(
 
     enum class FrontPipeline(var pipeline: OpenCvPipeline) {
         APRIL_TAG(AprilTagDetectionPipeline(1.18,  RobotConfig.CameraData.LOGITECH_C920)),
-        POLE(PolePipeline(PolePipeline.DisplayMode.ALL_CONTOURS, RobotConfig.CameraData.LOGITECH_C920))
+        GENERAL_PIPELINE(GeneralPipeline(GeneralPipeline.DisplayMode.ALL_CONTOURS, RobotConfig.CameraData.LOGITECH_C920, null))
     }
 
-    val conePipeline = GeneralConePipeline(GeneralConePipeline.DisplayMode.ALL_CONTOURS, RobotConfig.CameraData.PHONECAM)
+    val phoneCamPipeline = GeneralPipeline(GeneralPipeline.DisplayMode.ALL_CONTOURS, RobotConfig.CameraData.PHONECAM, telemetry)
 
     init {
         name = "Vision Subsystem"
 
-        phoneCam.setPipeline(conePipeline)
+        (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).telemetry = telemetry
+
+        phoneCam.setPipeline(phoneCamPipeline)
 
         // Open cameras asynchronously and load the pipelines
         phoneCam.openCameraDeviceAsync(object : AsyncCameraOpenListener {
@@ -182,8 +182,8 @@ class Vision(
      */
     fun getCameraSpaceLandmarkInfo(): List<ObservationResult> {
 
-        val poles = (FrontPipeline.POLE.pipeline as PolePipeline).poleResults
-        val stacks = (FrontPipeline.POLE.pipeline as PolePipeline).conePipeline.stackResults.toMutableList()
+        val poles = (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).poleResults
+        val stacks = (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).stackResults.toMutableList()
 
         val landmarks = mutableListOf<ObservationResult>()
 

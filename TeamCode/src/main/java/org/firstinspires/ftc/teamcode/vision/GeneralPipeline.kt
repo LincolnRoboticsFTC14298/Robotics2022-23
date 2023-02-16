@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode.vision
 
 import org.firstinspires.ftc.robotcore.external.Telemetry
+import org.firstinspires.ftc.teamcode.RobotConfig
+import org.firstinspires.ftc.teamcode.RobotConfig.coneDiameter
+import org.firstinspires.ftc.teamcode.RobotConfig.poleDiameter
 import org.firstinspires.ftc.teamcode.vision.modulelib.InputModule
 import org.firstinspires.ftc.teamcode.vision.modulelib.ModularPipeline
 import org.firstinspires.ftc.teamcode.vision.modules.*
@@ -13,11 +16,8 @@ import org.opencv.imgproc.Imgproc.drawContours
 
 open class GeneralPipeline(
     private var displayMode: DisplayMode = DisplayMode.ALL_CONTOURS,
-    private val FOVX: Double,
-    private val FOVY: Double,
-    private val cameraHeight: Double,
-    private val cameraPitch: Double = 0.0,
-    val telemetry: Telemetry
+    camera: RobotConfig.CameraData,
+    var telemetry: Telemetry?
 ) : ModularPipeline() {
 
     //private val camMat = Mat()
@@ -79,11 +79,11 @@ open class GeneralPipeline(
     private val blueSingleConeContours = Contours(blueOverlap)
 
     // Results Modules //
-    private val stackResultsModule = ContourResults(stackContours, cameraHeight, FOVX, FOVY, cameraPitch)
-    private val singleConeResultsModule = ContourResults(singleConeContours, cameraHeight, FOVX, FOVY, cameraPitch)
-    private val redSingleConeResultsModule = ContourResults(redSingleConeContours, cameraHeight, FOVX, FOVY, cameraPitch)
-    private val blueSingleConeResultsModule = ContourResults(blueSingleConeContours, cameraHeight, FOVX, FOVY, cameraPitch)
-    private val poleResultsModule = ContourResults(poleContours, cameraHeight, FOVX, FOVY, cameraPitch)
+    private val stackResultsModule = ContourResults(stackContours, camera, coneDiameter)
+    private val singleConeResultsModule = ContourResults(singleConeContours, camera, coneDiameter)
+    private val redSingleConeResultsModule = ContourResults(redSingleConeContours, camera, coneDiameter)
+    private val blueSingleConeResultsModule = ContourResults(blueSingleConeContours, camera, coneDiameter)
+    private val poleResultsModule = ContourResults(poleContours, camera, poleDiameter)
 
     // Data we care about and wish to access
     var stackResults = listOf<ContourResults.AnalysisResult>()
@@ -106,16 +106,15 @@ open class GeneralPipeline(
         poleResults = poleResultsModule.processFrame(input)
 
         // Telemetry for Testing //
-        telemetry.addData("displaymode", displayMode)
+        telemetry?.addData("displaymode", displayMode)
 
-        telemetry.addData("mean, variance", null)
-        telemetry.addData("aspectRatio", poleAspectRatio.mean().toString() + ", " + poleAspectRatio.variance().toString())
-        telemetry.addData("convexity", poleConvexity.mean().toString() + ", " + poleConvexity.variance().toString())
-        telemetry.addData("extent", poleExtent.mean().toString() + ", " + poleExtent.variance().toString())
-        telemetry.addData("solidity", poleSolidity.mean().toString() + ", " + poleSolidity.variance().toString())
-        telemetry.addData("aspectRatio min, max", poleAspectRatio.min().toString() + ", " + poleAspectRatio.max().toString())
+        telemetry?.addLine("mean, variance")
+        telemetry?.addData("aspectRatio", poleAspectRatioScorer.feature.mean().toString() + ", " + poleAspectRatioScorer.feature.variance().toString())
+        telemetry?.addData("convexity", poleConvexityScorer.feature.mean().toString() + ", " + poleConvexityScorer.feature.variance().toString())
+        telemetry?.addData("extent", poleExtentScorer.feature.mean().toString() + ", " + poleExtentScorer.feature.variance().toString())
+        telemetry?.addData("solidity", poleSolidityScorer.feature.mean().toString() + ", " + poleSolidityScorer.feature.variance().toString())
+        telemetry?.addData("aspectRatio min, max", (poleAspectRatioScorer.feature as AspectRatio).min().toString() + ", " + poleAspectRatioScorer.feature.max().toString())
         //telemetry.addData("areaResults", poleArea.areaResultsList().sorted().toString())
-        telemetry.update()
 
         // Display //
         return when (displayMode) {
