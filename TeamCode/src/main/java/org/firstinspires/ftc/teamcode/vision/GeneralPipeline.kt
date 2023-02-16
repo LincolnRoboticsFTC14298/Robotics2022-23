@@ -51,26 +51,26 @@ open class GeneralPipeline(
     private val rawPoleContours = Contours(denoisedPoleMask)
 
     // Pole Scorer //
-    private val poleConvexity = Convexity(); private val poleConvexityScorer = DiffSquaredScorer(poleConvexity, 0.988, 11.09)
-    private val poleExtent = Extent(); private val poleExtentScorer = DiffSquaredScorer(poleExtent, 0.661, 0.036)
-    private val poleSolidity = Solidity(); private val poleSolidityScorer = DiffSquaredScorer(poleSolidity, 0.909, 0.227)
-    private val poleAspectRatio = AspectRatio(); private val poleAspectRatioScorer = ThresholdScorer(poleAspectRatio, Pair(1.0, 30.0), 20.0)
-    private val poleArea = Area(); private val poleAreaScorer = ThresholdScorer(poleArea, Pair(50.0, 100000.0), 20.0)
-    private val poleContours = FilterContours(rawPoleContours, 0.05, telemetry, poleConvexityScorer + poleExtentScorer + poleSolidityScorer + poleAspectRatioScorer + poleAreaScorer)
+    private val poleConvexityScorer = DiffSquaredScorer(Convexity(), 0.988, 11.09)
+    private val poleExtentScorer = DiffSquaredScorer(Extent(), 0.661, 0.036)
+    private val poleSolidityScorer = DiffSquaredScorer(Solidity(), 0.909, 0.227)
+    private val poleAspectRatioScorer = ThresholdScorer(AspectRatio(), Pair(1.0, 30.0), 20.0)
+    private val poleAreaScorer = ThresholdScorer(Area(), Pair(50.0, 100000.0), 20.0)
+    private val poleContours = FilterContours(rawPoleContours, 0.05, poleConvexityScorer + poleExtentScorer + poleSolidityScorer + poleAspectRatioScorer + poleAreaScorer)
 
     // Single Cone Scorer //
-    private val singleConeConvexity = Convexity(); private val singleConeConvexityScorer = DiffSquaredScorer(singleConeConvexity, 0.942, 13.3)
-    private val singleConeExtent = Extent(); private val singleConeExtentScorer = DiffSquaredScorer(singleConeExtent, 0.668, 4.06)
-    private val singleConeSolidity = Solidity(); private val singleConeSolidityScorer = DiffSquaredScorer(singleConeSolidity, 0.901, 38.9)
-    private val singleConeAspectRatio = AspectRatio(); private val singleConeAspectRatioScorer = DiffSquaredScorer(singleConeAspectRatio, 1.369, 0.23)
-    private val singleConeContours = FilterContours(rawConeContours, 0.05, telemetry, singleConeConvexityScorer + singleConeExtentScorer + singleConeSolidityScorer + singleConeAspectRatioScorer)
+    private val singleConeConvexityScorer = DiffSquaredScorer(Convexity() , 0.942, 13.3)
+    private val singleConeExtentScorer = DiffSquaredScorer(Extent(), 0.668, 4.06)
+    private val singleConeSolidityScorer = DiffSquaredScorer(Solidity() , 0.901, 38.9)
+    private val singleConeAspectRatioScorer = DiffSquaredScorer(AspectRatio() , 1.369, 0.23)
+    private val singleConeContours = FilterContours(rawConeContours, 0.05, singleConeConvexityScorer + singleConeExtentScorer + singleConeSolidityScorer + singleConeAspectRatioScorer)
 
     // Stacked Scorer //
-    private val stackConvexity = Convexity(); private val stackConvexityScorer = DiffSquaredScorer(stackConvexity, 0.894, 0.25)
-    private val stackExtent = Extent(); private val stackExtentScorer = DiffSquaredScorer(stackExtent, 0.712, 0.28)
-    private val stackSolidity = Solidity(); private val stackSolidityScorer = DiffSquaredScorer(stackSolidity, 0.903, 18.8)
-    private val stackAspectRatio = AspectRatio(); private val stackAspectRatioScorer = ThresholdScorer(stackAspectRatio, Pair(1.0, 15.0), 25.0)
-    private val stackContours = FilterContours(rawConeContours, 0.04, telemetry, stackConvexityScorer + stackExtentScorer + stackSolidityScorer + stackAspectRatioScorer)
+    private val stackConvexityScorer = DiffSquaredScorer(Convexity(), 0.894, 0.25)
+    private val stackExtentScorer = DiffSquaredScorer(Extent(), 0.712, 0.28)
+    private val stackSolidityScorer = DiffSquaredScorer(Solidity(), 0.903, 18.8)
+    private val stackAspectRatioScorer = ThresholdScorer(AspectRatio(), Pair(1.0, 15.0), 25.0)
+    private val stackContours = FilterContours(rawConeContours, 0.04, stackConvexityScorer + stackExtentScorer + stackSolidityScorer + stackAspectRatioScorer)
 
     // Single Color Mask and Single Cone Overlap //
     private val redOverlap = MaskOverlap(ContourToMask(singleConeContours), redMask)
