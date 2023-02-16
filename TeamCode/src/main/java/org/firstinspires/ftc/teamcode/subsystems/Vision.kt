@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
+import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.roadrunner.geometry.Vector2d
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.qualcomm.robotcore.hardware.HardwareMap
@@ -29,6 +30,8 @@ class Vision(
     val cameraMonitorViewId: Int = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName())
     val webCam = OpenCvCameraFactory.getInstance().createWebcam(hwMap.get(WebcamName::class.java, "Webcam 1"), cameraMonitorViewId)
     val phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId)
+
+    private val dashboard = FtcDashboard.getInstance()
 
     enum class AprilTagResult(var id: Int) {
         PARK_LEFT(5),
@@ -71,7 +74,7 @@ class Vision(
 
         webCam.openCameraDeviceAsync(object : AsyncCameraOpenListener {
             override fun onOpened() {
-                startStreamingRearCamera()
+                startStreamingFrontCamera()
             }
 
             override fun onError(errorCode: Int) {
@@ -130,6 +133,7 @@ class Vision(
      */
     fun startStreamingFrontCamera() {
         webCam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT)
+        dashboard.startCameraStream(webCam, 10.0)
     }
 
     /**
@@ -137,6 +141,7 @@ class Vision(
      */
     fun stopStreamingFrontCamera() {
         webCam.stopStreaming()
+        dashboard.stopCameraStream()
     }
 
     /**
@@ -144,6 +149,7 @@ class Vision(
      */
     fun startStreamingRearCamera() {
         phoneCam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT)
+        dashboard.startCameraStream(phoneCam, 10.0)
     }
 
     /**
@@ -151,6 +157,7 @@ class Vision(
      */
     fun stopStreamingRearCamera() {
         phoneCam.stopStreaming()
+        dashboard.startCameraStream(webCam, 10.0)
     }
 
     /**
