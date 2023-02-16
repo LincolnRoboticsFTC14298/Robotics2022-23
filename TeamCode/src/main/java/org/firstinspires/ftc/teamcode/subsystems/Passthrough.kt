@@ -76,11 +76,9 @@ class Passthrough(hwMap: HardwareMap) : SubsystemBase() {
 
     override fun periodic() {
         Log.v("Passthrough angle estimate", getAngleEstimate().toString())
-        if (!atTarget()) {
-            val state = motionProfile[timer.seconds()]
-            servoLeft.turnToAngle(state.x)
-            servoRight.turnToAngle(state.x)
-        }
+        val state = motionProfile[timer.seconds()]
+        servoLeft.turnToAngle(state.x)
+        servoRight.turnToAngle(state.x)
     }
 
     fun junctionDeposit() {
