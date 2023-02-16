@@ -21,8 +21,9 @@ import kotlin.math.cos
 class ContourResults(
     private val contourModule: AbstractPipelineModule<List<MatOfPoint>>,
     private val camera: RobotConfig.CameraData,
-    private val targetHeight: Double = 0.0,
-    private val pitchDistanceOffset: Double = 0.0 // Used incase the center of the object is wanted instead
+    private val targetWidth: Double,
+    private val targetHeightOffset: Double = 0.0,
+    private val pitchDistanceOffset: Double = targetWidth/2.0 // Used incase the center of the object is wanted instead
 ) : AbstractPipelineModule<List<ContourResults.AnalysisResult>>() {
 
     data class AnalysisResult(val angle: Double, val distanceByPitch: Double?, val distanceByWidth: Double) {
@@ -60,12 +61,13 @@ class ContourResults(
             // calculate angle and distance
             val pitch = (Ay/2.0) * camera.FOVY
             val yaw = (Ax/2.0) * camera.FOVX
-            val distanceByPitch = (targetHeight - camera.height) / tan(camera.pitch + pitch) / cos(yaw) + pitchDistanceOffset
+            val distanceByPitch = (targetHeightOffset - camera.height) / tan(camera.pitch + pitch) / cos(yaw) + pitchDistanceOffset // TODO Replace w/ inverse projection
 
             /// New variable
             val contour2f = MatOfPoint2f(*contour.toArray())
             val contourMinAreaRect = minAreaRect(contour2f)
-            val distanceByWidth = min(contourMinAreaRect.size.width, contourMinAreaRect.size.height) //TODO double check, finish formula
+            val measuredWidth = min(contourMinAreaRect.size.width, contourMinAreaRect.size.height)
+            val distanceByWidth = targetWidth * camera.fx / measuredWidth
 
             // add to results
             if (pitch epsilonEquals -camera.FOVY / 2.0) { // not safe to use width for non rectangular outlines
