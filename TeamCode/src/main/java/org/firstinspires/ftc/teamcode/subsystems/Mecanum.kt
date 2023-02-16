@@ -132,6 +132,16 @@ class Mecanum(
         }
     }
 
-        return optimalPole
+    fun getClosestPoleOfType(poleType: RobotConfig.PoleType) : RobotConfig.Pole {
+        val poles = RobotConfig.Pole.getPolesOfType(poleType)
+
+        val headVec = getPoseEstimate().headingVec()
+        val posVec = getPoseEstimate().vec()
+
+        return poles.maxBy {
+            val diff = it.vector.minus(posVec)
+            val dist = diff.norm()
+            diff.dot(headVec) / (dist * dist) // divide by dist twice so that further values have smaller result
+        }
     }
 }
