@@ -16,14 +16,14 @@ class ApproachPoleFromAngle(
 
     init {
         addCommands(
-            InstantCommand(vision::startStreamingFrontCamera),
+            //InstantCommand(vision::startStreamingFrontCamera),
             // Drive normally until a cone has been detected
             ApproachAngle(
                 mecanum,
                 vision::getClosestPoleAngle,
                 input
             ),
-            InstantCommand(vision::stopStreamingFrontCamera)
+            //InstantCommand(vision::stopStreamingFrontCamera)
         )
         addRequirements(mecanum, vision)
     }
