@@ -37,7 +37,7 @@ class MainTeleOp : CommandOpMode() {
         val vision = Vision(hardwareMap)
         //val localizer = MecanumMonteCarloLocalizer(hardwareMap, vision)
         val localizer = OdometryLocalizer(hardwareMap)
-        val mecanum = Mecanum(hardwareMap, localizer)
+        val mecanum = Mecanum(hardwareMap, vision, localizer)
 
         register(lift, claw, passthrough, mecanum, vision)
 

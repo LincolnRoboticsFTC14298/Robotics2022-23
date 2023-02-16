@@ -34,7 +34,7 @@ class BasicTeleOp : CommandOpMode() {
         val passthrough = Passthrough(hardwareMap)
         val vision = Vision(hardwareMap)
         //val localizer = MecanumMonteCarloLocalizer(hardwareMap, vision, Pose2d(), arrayToRowMatrix(doubleArrayOf()))
-        val mecanum = Mecanum(hardwareMap)
+        val mecanum = Mecanum(hardwareMap, vision)
 
         register(lift, claw, passthrough, mecanum, vision)
 

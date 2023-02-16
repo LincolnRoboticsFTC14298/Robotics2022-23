@@ -17,10 +17,11 @@ import kotlin.math.floor
 
 class Mecanum(
     hwMap: HardwareMap,
+    vision: Vision,
     localizer: Localizer = OdometryLocalizer(hwMap)
 ) : SubsystemBase() {
 
-    val drive = SampleMecanumDrive(hwMap, localizer)
+    val drive = SampleMecanumDrive(hwMap, vision, localizer)
 
     fun trajectoryBuilder(startPose: Pose2d, reversed: Boolean = false): TrajectoryBuilder {
         return drive.trajectoryBuilder(startPose, reversed)

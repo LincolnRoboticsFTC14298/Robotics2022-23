@@ -20,6 +20,7 @@ import org.firstinspires.ftc.teamcode.drive.trajectorysequence.sequencesegment.S
 import org.firstinspires.ftc.teamcode.drive.trajectorysequence.sequencesegment.TrajectorySegment;
 import org.firstinspires.ftc.teamcode.drive.trajectorysequence.sequencesegment.TurnSegment;
 import org.firstinspires.ftc.teamcode.drive.trajectorysequence.sequencesegment.WaitSegment;
+import org.firstinspires.ftc.teamcode.subsystems.Vision;
 import org.firstinspires.ftc.teamcode.util.DashboardUtil;
 
 import java.util.ArrayList;
@@ -57,8 +58,11 @@ public class TrajectorySequenceRunner {
     private final FtcDashboard dashboard;
     private final LinkedList<Pose2d> poseHistory = new LinkedList<>();
 
-    public TrajectorySequenceRunner(TrajectoryFollower follower, PIDCoefficients headingPIDCoefficients) {
+    private final Vision vision;
+
+    public TrajectorySequenceRunner(TrajectoryFollower follower, PIDCoefficients headingPIDCoefficients, Vision vision) {
         this.follower = follower;
+        this.vision = vision;
 
         turnController = new PIDFController(headingPIDCoefficients);
         turnController.setInputBounds(0, 2 * Math.PI);
@@ -67,6 +71,10 @@ public class TrajectorySequenceRunner {
 
         dashboard = FtcDashboard.getInstance();
         dashboard.setTelemetryTransmissionInterval(25);
+    }
+
+    public TrajectorySequenceRunner(TrajectoryFollower follower, PIDCoefficients headingPIDCoefficients) {
+        this(follower, headingPIDCoefficients, null);
     }
 
     public void followTrajectorySequenceAsync(TrajectorySequence trajectorySequence) {
@@ -261,6 +269,8 @@ public class TrajectorySequenceRunner {
 
         fieldOverlay.setStroke("#3F51B5");
         DashboardUtil.drawRobot(fieldOverlay, poseEstimate);
+
+        DashboardUtil.drawObservations(fieldOverlay, vision, poseEstimate);
     }
 
     public Pose2d getLastPoseError() {
