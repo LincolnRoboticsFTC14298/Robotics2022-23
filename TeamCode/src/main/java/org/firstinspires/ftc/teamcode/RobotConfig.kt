@@ -69,6 +69,10 @@ object RobotConfig {
                 }
                 return null
             }
+
+            fun getPolesOfType(type: PoleType) : List<Pole> {
+                return values().filter { it.type == type }
+            }
         }
     }
 
@@ -244,7 +248,7 @@ object RobotConfig {
     }
 
     const val stackToPoleMaximumDistance = 5.0
-
+    const val visionToPoleMaxDistance = 5.0 // Difference between vision observation and pole location to be considered the same
 
 
 
