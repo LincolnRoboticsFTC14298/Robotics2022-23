@@ -5,7 +5,7 @@ import org.firstinspires.ftc.teamcode.vision.modules.features.Feature
 import org.opencv.core.MatOfPoint
 
 class ThresholdScorer(
-    private val feature: Feature,
+    val feature: Feature,
     private val range: Pair<Double, Double>,
     private val weight: Double
 ) : Scorer {
@@ -14,4 +14,5 @@ class ThresholdScorer(
         val measuredValue = feature.featureMeasurement(contour)
         return if (measuredValue in range.first..range.second) 0.0 else weight
     }
+
 }
