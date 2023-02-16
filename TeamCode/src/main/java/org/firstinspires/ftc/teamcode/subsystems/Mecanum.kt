@@ -99,10 +99,11 @@ class Mecanum(
         val headVec = getPoseEstimate().headingVec()
         val posVec = getPoseEstimate().vec()
 
+        /*
         val minX = floor(posVec.x / RobotConfig.tileSize)
         val minY = floor(posVec.y / RobotConfig.tileSize)
 
-        val highestCosT = -1.0
+        var highestCosT = -1.0
         var optimalPole: RobotConfig.Pole? = null
 
         for (x in listOf(minX * RobotConfig.tileSize, (minX+1) * RobotConfig.tileSize)) {
@@ -112,16 +113,35 @@ class Mecanum(
                 if (pole != null) {
                     val diff = corner.minus(posVec)
                     val dist = diff.norm()
-                    val distSignedCosT = diff.dot(headVec) / (dist * dist) // divide by dist twice so that further values have smaller resultg
+                    val distSignedCosT = diff.dot(headVec) / (dist * dist) // divide by dist twice so that further values have smaller result
 
                     // Highest dot product means the angle between the corner and heading is lowest
                     if (distSignedCosT > highestCosT) {
+                        highestCosT = distSignedCosT
                         optimalPole = pole
                     }
                 }
             }
         }
+        */
 
-        return optimalPole
+        return enumValues<RobotConfig.Pole>().maxBy {
+            val diff = it.vector.minus(posVec)
+            val dist = diff.norm()
+            diff.dot(headVec) / (dist * dist) // divide by dist twice so that further values have smaller result
+        }
+    }
+
+    fun getClosestPoleOfType(poleType: RobotConfig.PoleType) : RobotConfig.Pole {
+        val poles = RobotConfig.Pole.getPolesOfType(poleType)
+
+        val headVec = getPoseEstimate().headingVec()
+        val posVec = getPoseEstimate().vec()
+
+        return poles.maxBy {
+            val diff = it.vector.minus(posVec)
+            val dist = diff.norm()
+            diff.dot(headVec) / (dist * dist) // divide by dist twice so that further values have smaller result
+        }
     }
 }

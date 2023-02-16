@@ -160,66 +160,79 @@ class Vision(
         webCam.setPipeline(pipeline.pipeline)
     }
 
+
+    data class ObservationResult(val angle: Double, val distance: Double) {
+
+        companion object {
+            fun vector(vector: Vector2d) : ObservationResult {
+               return ObservationResult(vector.angle(), vector.norm())
+            }
+        }
+        fun toVector() = Vector2d.polar(distance, angle)
+
+        fun distance(other: ObservationResult) : Double {
+            return toVector().distTo(other.toVector())
+        }
+    }
+
     /**
-     * @return Coordinate of the closest cone in the robot tangent space.
+     * @return List of pixel info for landmarks from pipeline
+     * TODO: Include tall stacks not next to poles
      */
-    fun getClosestConeAngle(): Double? {
-        val cones = conePipeline.singleConeResults
-        return cones.minByOrNull{ it.distance }?.angle
-    }
+    fun getCameraSpaceLandmarkInfo(): List<ObservationResult> {
 
-    fun getClosestConePosition(): Vector2d? {
-        val cones = conePipeline.singleConeResults
-        return cones.minByOrNull{ it.distance }?.toVector()?.plus(RobotConfig.CameraData.PHONECAM.relativePosition)
-    }
-
-    fun getClosestPoleAngle(): Double? {
         val poles = (FrontPipeline.POLE.pipeline as PolePipeline).poleResults
-        // val stacks = (FrontPipeline.POLE.pipeline as PolePipeline).conePipeline.stackResults // TODO possibly combine stacks w/ poles
-        val closestPole = poles.minByOrNull { it.distance }
-        return closestPole?.angle
+        val stacks = (FrontPipeline.POLE.pipeline as PolePipeline).conePipeline.stackResults.toMutableList()
+
+        val landmarks = mutableListOf<ObservationResult>()
+
+        poles.forEach { pole ->
+            val closestStack = stacks.minByOrNull { it.distance(pole, useDistanceByWidthForOther = true) } // Find closest stack
+
+            if (closestStack != null && closestStack.distance(pole) < stackToPoleMaximumDistance) { // If sufficiently close, simply take the average between them
+                val observationVector = closestStack.toVector()
+
+                landmarks.add(ObservationResult.vector(observationVector))
+                stacks.remove(closestStack) // Remove once identified as a pair
+            } else {
+                landmarks.add(ObservationResult(pole.angle, pole.distanceByPitch ?: pole.distanceByWidth))
+            }
+        }
+
+        return landmarks
+    }
+
+    fun getLandmarkInfo(): List<ObservationResult> {
+        val cameraLandmarks = getCameraSpaceLandmarkInfo()
+        return List(cameraLandmarks.size) { i ->
+            val cameraLandmark = cameraLandmarks[i]
+            val robotLandmark = cameraLandmark.toVector() + RobotConfig.CameraData.LOGITECH_C920.relativePosition
+            ObservationResult.vector(robotLandmark)
+        }
     }
 
     /**
      * Returns pole position in tangent space taking into account cones
      */
     fun getClosestPolePosition(): Vector2d? {
+        return getLandmarkInfo().minByOrNull { it.distance }?.toVector()
+    }
 
-        val poles = (FrontPipeline.POLE.pipeline as PolePipeline).poleResults
-        val stacks = (FrontPipeline.POLE.pipeline as PolePipeline).conePipeline.stackResults
+    fun getClosestPoleAngle(): Double? {
+        return getClosestPolePosition()?.angle()
+    }
 
-        val closestPole = poles.minByOrNull { it.distance } ?: return null
-        val closestStack = stacks.minByOrNull { it.distanceSqrTo(closestPole) } // Find closest stack by distance to closest pole
-
-        val vecInCameraSpace = if (closestStack != null && closestStack.distanceSqrTo(closestPole) < stackToPoleMaximumDistance) {
-            (closestStack.toVector() + closestPole.toVector()).div(2.0) // If sufficiently close, simply take the average between them
-        } else closestPole.toVector()
-
-        return vecInCameraSpace + RobotConfig.CameraData.LOGITECH_C920.relativePosition
-
+    // TODO take into account junctions
+    fun getClosestConePosition(): Vector2d? {
+        val cones = conePipeline.singleConeResults.toMutableList()
+        return cones.minByOrNull{ it.distanceByPitch ?: Double.MAX_VALUE }?.toVector()?.plus(RobotConfig.CameraData.PHONECAM.relativePosition)
     }
 
     /**
-     * @return List of pixel info for landmarks from pipeline
+     * @return Coordinate of the closest cone in the robot tangent space.
      */
-    fun getLandmarkInfo(): List<ContourResults.AnalysisResult> {
-
-        val poles = (FrontPipeline.POLE.pipeline as PolePipeline).poleResults
-        val stacks = (FrontPipeline.POLE.pipeline as PolePipeline).conePipeline.stackResults
-
-        // Probably a better way to do this... (Kotlin moment)
-        return List(poles.size) { i ->
-            val pole = poles[i]
-            val closestStack = stacks.minByOrNull { it.distanceSqrTo(pole) } // Find closest stack
-
-            if (closestStack != null && closestStack.distanceSqrTo(pole) < stackToPoleMaximumDistance) { // If sufficiently close, simply take the average between them
-                val averageVector = (closestStack.toVector() + pole.toVector()).div(2.0)
-                ContourResults.AnalysisResult(averageVector.angle(), averageVector.norm())
-            } else {
-                pole
-            }
-        }
-
+    fun getClosestConeAngle(): Double? {
+        return getClosestConePosition()?.angle()
     }
 
 }

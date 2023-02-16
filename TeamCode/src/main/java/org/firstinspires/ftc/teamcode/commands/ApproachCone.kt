@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.commands
 
+import com.acmerobotics.roadrunner.geometry.Vector2d
 import com.arcrobotics.ftclib.command.*
 import org.firstinspires.ftc.teamcode.commands.drive.ApproachRelativePoint
 import org.firstinspires.ftc.teamcode.subsystems.Claw
@@ -12,7 +13,6 @@ import org.firstinspires.ftc.teamcode.subsystems.Vision
  * Drives until it detects a cone using vision. It then precisely aligns
  * and drives to pick up the cone with input from driver. Uses vision
  * because environment is much more dynamic than a pole.
- * TODO: Test!! What happens when the cone tips? When it is lifted? When it moves? What if its too close? How will it react?
  */
 class ApproachCone(
     mecanum: Mecanum,
@@ -20,7 +20,7 @@ class ApproachCone(
     lift: Lift,
     passthrough: Passthrough,
     claw: Claw,
-    speed: () -> Double
+    input: () -> Vector2d
 ) : SequentialCommandGroup() {
 
     init {
@@ -30,24 +30,16 @@ class ApproachCone(
                 // Waiting for intake to get a cone
                 WaitUntilCommand { claw.isConeInside() },
                 // Driving
-                SequentialCommandGroup(
-                    // Drive normally until a cone has been detected
-                    ParallelDeadlineGroup(
-                        WaitUntilCommand { vision.getClosestConePosition() != null },
-                        mecanum.defaultCommand
-                    ),
-                    // Switch to auto approach the cone once a cone has been detected
-                    ApproachRelativePoint(
-                        mecanum,
-                        vision::getClosestConePosition,
-                        lift.getFutureRelativePosition() + passthrough.getFutureRelativePosition(),
-                        speed
-                    )
+                ApproachRelativePoint(
+                    mecanum,
+                    vision::getClosestConePosition,
+                    lift.getFutureRelativePosition() + passthrough.getFutureRelativePosition(),
+                    input
                 )
             ),
             InstantCommand(vision::startStreamingRearCamera)
         )
-        addRequirements(mecanum, vision, claw)
+        addRequirements(mecanum, vision, lift, passthrough, claw)
     }
 
 }

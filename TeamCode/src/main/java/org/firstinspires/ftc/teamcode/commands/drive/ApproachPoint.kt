@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Mecanum
  * @param targetPoint                   Target point the robot center should be at in global space.
  * @param offsetPose                    Offset vector in robot tangent space. This offset vector
  *                                      will approach the target instead.
- * @param speed                         Controls how fast the robot drives forward towards the point.
+ * @param input                         Input in tangent space
  * @param maxTolerableDistance          Maximum distance it can be from the target in inches.
  * @param maxTolerableAngleDifference   Maximum angle it can face away from the target in radians.
  */
@@ -19,7 +19,7 @@ class ApproachPoint(
     mecanum: Mecanum,
     targetPoint: () -> Vector2d,
     offsetPose: Pose2d = Pose2d(0.0, 0.0, 0.0),
-    speed: () -> Double,
+    input: () -> Vector2d,
     maxTolerableDistance: Double = 1.0, // in
     maxTolerableAngleDifference: Double = 0.05 // radians
 ) : SequentialCommandGroup() {
@@ -34,7 +34,7 @@ class ApproachPoint(
                     dT.rotated(-pose.heading)
                 },
                 offsetPose,
-                speed,
+                input,
                 maxTolerableDistance,
                 maxTolerableAngleDifference
             )
