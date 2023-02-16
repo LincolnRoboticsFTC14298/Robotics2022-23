@@ -11,6 +11,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.teamcode.subsystems.Claw;
+import org.firstinspires.ftc.teamcode.subsystems.Passthrough;
+
 @TeleOp
 public class SimpleMecanumTeleOp extends LinearOpMode
 {
@@ -27,6 +30,10 @@ public class SimpleMecanumTeleOp extends LinearOpMode
         motorFrontRight.setDirection(DcMotorSimple.Direction.REVERSE);
         motorBackLeft.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        Claw claw = new Claw(hardwareMap);
+        Passthrough passthrough = new Passthrough(hardwareMap);
+
+
         waitForStart();
 
         if (isStopRequested()) return;
@@ -36,6 +43,22 @@ public class SimpleMecanumTeleOp extends LinearOpMode
             double y = -gamepad1.left_stick_y;
             double x = gamepad1.left_stick_x;
             double rx = gamepad1.right_stick_x;
+
+            if (gamepad1.a) {
+                claw.close();
+            }
+
+            if (gamepad1.b) {
+                claw.open();
+            }
+
+            if (gamepad1.x) {
+                passthrough.pickUp();
+            }
+
+            if (gamepad1.y) {
+                passthrough.junctionDeposit();
+            }
 
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
             double frontLeftPower = (y + x + rx) / denominator;
@@ -47,6 +70,12 @@ public class SimpleMecanumTeleOp extends LinearOpMode
             motorBackLeft.setPower(backLeftPower);
             motorFrontRight.setPower(frontRightPower);
             motorBackRight.setPower(backRightPower);
+
+            claw.periodic();
+            passthrough.periodic();
+            claw.fetchTelemetry(telemetry);
+            passthrough.fetchTelemetry(telemetry);
+            telemetry.update();
         }
     }
 }
