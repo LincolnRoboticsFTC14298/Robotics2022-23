@@ -27,9 +27,15 @@ class Vision(
     private val telemetry: Telemetry? = null
 ) : SubsystemBase() {
 
-    val cameraMonitorViewId: Int = hwMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hwMap.appContext.getPackageName())
-    val webCam = OpenCvCameraFactory.getInstance().createWebcam(hwMap.get(WebcamName::class.java, "Webcam 1"), cameraMonitorViewId)
-    val phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId)
+    var cameraMonitorViewId = hardwareMap.appContext.resources.getIdentifier(
+        "cameraMonitorViewId",
+        "id",
+        hardwareMap.appContext.packageName
+    )
+
+    var viewportContainerIds = OpenCvCameraFactory.getInstance().splitLayoutForMultipleViewports(cameraMonitorViewId, 2, OpenCvCameraFactory.ViewportSplitMethod.VERTICALLY)
+    val webCam = OpenCvCameraFactory.getInstance().createWebcam(hwMap.get(WebcamName::class.java, "Webcam 1"), viewportContainerIds[0])
+    val phoneCam = OpenCvCameraFactory.getInstance().createInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, viewportContainerIds[1])
 
     private val dashboard = FtcDashboard.getInstance()
 
@@ -74,6 +80,9 @@ class Vision(
 
         webCam.openCameraDeviceAsync(object : AsyncCameraOpenListener {
             override fun onOpened() {
+                webCam.setPipeline(startingPipeline.pipeline)
+                webCam.showFpsMeterOnViewport(true)
+                webCam.setViewportRenderer(OpenCvCamera.ViewportRenderer.GPU_ACCELERATED)
                 startStreamingFrontCamera()
             }
 
@@ -132,7 +141,7 @@ class Vision(
      * Starts streaming the front camera.
      */
     fun startStreamingFrontCamera() {
-        webCam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT)
+        webCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_LEFT) // TODO Check
         dashboard.startCameraStream(webCam, 10.0)
     }
 
