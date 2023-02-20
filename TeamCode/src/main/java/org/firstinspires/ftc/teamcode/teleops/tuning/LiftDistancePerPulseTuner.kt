@@ -11,7 +11,6 @@ import java.lang.Math.toRadians
 import kotlin.math.sin
 
 @TeleOp
-@Disabled
 class LiftDistancePerPulseTuner() : OpMode() {
 
     private lateinit var lift: Lift
@@ -22,7 +21,10 @@ class LiftDistancePerPulseTuner() : OpMode() {
     }
 
     override fun loop() {
-        val power = gamepad1.left_stick_x * 0.6
+        val power = -gamepad1.left_stick_y * 0.6
+
+        lift.checkLimit = true
+        lift.checkEncoder()
         lift.setPower(power)
         lift.updateFilter(null)
         telemetry.addData("power", power)
