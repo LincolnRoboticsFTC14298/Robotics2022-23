@@ -13,6 +13,8 @@ import org.firstinspires.ftc.teamcode.subsystems.Vision
  * Drives until it detects a cone using vision. It then precisely aligns
  * and drives to pick up the cone with input from driver. Uses vision
  * because environment is much more dynamic than a pole.
+ *
+ * TODO: use GVF
  */
 class ApproachCone(
     mecanum: Mecanum,
@@ -32,7 +34,7 @@ class ApproachCone(
                 // Driving
                 ApproachRelativePoint(
                     mecanum,
-                    vision::getClosestConePosition,
+                    { vision.getClosestConePosition(pose = mecanum.getPoseEstimate()) },
                     lift.getFutureRelativePosition() + passthrough.getFutureRelativePosition(),
                     input
                 )

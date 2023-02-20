@@ -26,7 +26,7 @@ class ApproachConeFromAngle(
                 // Driving
                 ApproachAngle(
                     mecanum,
-                    vision::getClosestConeAngle,
+                    { vision.getClosestConeAngle(mecanum.getPoseEstimate()) },
                     input
                 )
             ),

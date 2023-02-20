@@ -229,7 +229,7 @@ class Vision(
     fun getClosestPoleAngle(): Double? {
         return getClosestPolePosition()?.angle()
     }
-    fun getClosestConePosition(): Vector2d? {
+    fun getClosestConePosition(pose: Pose2d? = null, useWidth: Boolean = false): Vector2d? {
         val cones = phoneCamPipeline.singleConeResults.toMutableList()
         val poles = phoneCamPipeline.poleResults.toMutableList()
         val junctions = enumValues<RobotConfig.Junction>()
@@ -240,15 +240,18 @@ class Vision(
                 closestPole.distance(cone) < singleConeToJunctionMaxDistance) {
                 cones.removeAt(i)
                 poles.remove(closestPole)
-            } else {
-                val closestJunction = junctions.minBy { it.vector.distTo(cone.toVector()) }
+            } else if (pose != null) {
+                val closestJunction = junctions.minBy {
+                    val coneFieldFrame = cone.toVector().rotated(-pose.heading) + pose.vec()
+                    it.vector.distTo(coneFieldFrame)
+                }
                 if (closestJunction.vector.distTo(cone.toVector()) < singleConeToJunctionMaxDistance) {
                     cones.removeAt(i)
                 }
             }
         }
 
-        val closestCone = cones.minByOrNull { it.distanceByPitch ?: Double.MAX_VALUE }
+        val closestCone = cones.minByOrNull { it.distanceByPitch ?: if(useWidth) it.distanceByWidth else Double.MAX_VALUE }
         return closestCone?.toVector()?.plus(RobotConfig.CameraData.PHONECAM.relativePosition)
     }
 
