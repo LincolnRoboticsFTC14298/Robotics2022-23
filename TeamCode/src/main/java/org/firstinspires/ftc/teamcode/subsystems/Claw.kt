@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.RobotConfig.valueThreshold
  * Claw subsystem consists of a servo, potentiometer and a color sensor.
  * @param hwMap HardwareMap.
  */
-class Claw(hwMap: HardwareMap) : SubsystemBase() {
+class Claw(hwMap: HardwareMap, startingPosition: Double = clawClosedPosition) : SubsystemBase() {
 
     private val servo = SimpleServo(hwMap, clawServoName, 0.0, 360.0)
     private var colorSensor = hwMap.get(NormalizedColorSensor::class.java, colorSensorName)
@@ -32,7 +32,7 @@ class Claw(hwMap: HardwareMap) : SubsystemBase() {
     private var timer = ElapsedTime()
     private lateinit var motionProfile: MotionProfile
 
-    private var setpoint: Double = getPositionEstimate()
+    private var setpoint: Double = 0.0
         set(position) {
             field = position
             timer.reset()
@@ -47,6 +47,8 @@ class Claw(hwMap: HardwareMap) : SubsystemBase() {
 
     init {
         colorSensor.gain = colorGain.toFloat()
+        setpoint = startingPosition
+        servo.position = startingPosition
     }
 
     override fun periodic() {

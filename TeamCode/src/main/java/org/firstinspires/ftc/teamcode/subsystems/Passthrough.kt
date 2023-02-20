@@ -34,7 +34,7 @@ import kotlin.math.cos
  * The angle is that made with the heading vector (i.e. w/ the front of the intake side)
  * @param hwMap             HardwareMap
  */
-class Passthrough(hwMap: HardwareMap) : SubsystemBase() {
+class Passthrough(hwMap: HardwareMap, startingAngle: Double = passthroughMinDegree) : SubsystemBase() {
 
     /**
      * @see <a href="https://docs.ftclib.org/ftclib/features/hardware">FTCLib Docs: Hardware</a>
@@ -69,16 +69,21 @@ class Passthrough(hwMap: HardwareMap) : SubsystemBase() {
         }
 
     init {
-        pickUp()
+        servoLeft.inverted = true
+
+        setpoint = startingAngle
+        servoLeft.turnToAngle(startingAngle)
+        servoRight.turnToAngle(startingAngle)
     }
 
     // TODO: check direction of servo
 
     override fun periodic() {
+        val targetAngle = motionProfile[timer.seconds()].x
+        servoLeft.turnToAngle(targetAngle)
+        servoRight.turnToAngle(targetAngle)
+
         Log.v("Passthrough angle estimate", getAngleEstimate().toString())
-        val state = motionProfile[timer.seconds()]
-        servoLeft.turnToAngle(state.x)
-        servoRight.turnToAngle(state.x)
     }
 
     fun junctionDeposit() {
@@ -123,7 +128,7 @@ class Passthrough(hwMap: HardwareMap) : SubsystemBase() {
      * @return Angle estimate based on motion profiling in degrees.
      */
     fun getAngleEstimate() : Double {
-        return servoLeft.angle
+        return servoRight.angle
     }
 
     /**
