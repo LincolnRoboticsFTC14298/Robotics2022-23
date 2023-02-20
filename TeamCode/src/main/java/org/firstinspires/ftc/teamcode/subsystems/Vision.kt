@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
 import com.acmerobotics.dashboard.FtcDashboard
+import com.acmerobotics.roadrunner.geometry.Pose2d
 import com.acmerobotics.roadrunner.geometry.Vector2d
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.qualcomm.robotcore.hardware.HardwareMap
+import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.teamcode.RobotConfig
@@ -12,11 +14,13 @@ import org.firstinspires.ftc.teamcode.RobotConfig.stackToPoleMaxDistance
 import org.firstinspires.ftc.teamcode.vision.AprilTagDetectionPipeline
 import org.firstinspires.ftc.teamcode.vision.GeneralPipeline
 import org.openftc.apriltag.AprilTagDetection
+import org.openftc.easyopencv.OpenCvCamera
 import org.openftc.easyopencv.OpenCvCamera.AsyncCameraOpenListener
 import org.openftc.easyopencv.OpenCvCameraFactory
 import org.openftc.easyopencv.OpenCvCameraRotation
 import org.openftc.easyopencv.OpenCvInternalCamera
 import org.openftc.easyopencv.OpenCvPipeline
+
 
 /**
  * Manages all the pipelines and cameras.
@@ -266,8 +270,35 @@ class Vision(
     /**
      * @return Coordinate of the closest cone in the robot tangent space.
      */
-    fun getClosestConeAngle(): Double? {
-        return getClosestConePosition()?.angle()
+    fun getClosestConeAngle(pose: Pose2d? = null): Double? {
+        return getClosestConePosition(pose = pose, useWidth = true)?.angle()
+    }
+
+    fun getRawStacks() : List<ObservationResult> {
+        val stacks = mutableListOf<ObservationResult>()
+
+        phoneCamPipeline.stackResults.forEach { stack ->
+            if(stack.distanceByPitch != null) stacks.add(ObservationResult(stack.angle, stack.distanceByPitch))
+        }
+
+        (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).stackResults.forEach { stack ->
+            if(stack.distanceByPitch != null) stacks.add(ObservationResult(stack.angle, stack.distanceByPitch))
+        }
+
+        return stacks
+    }
+
+    fun fetchTelemetry(telemetry: Telemetry, pose: Pose2d? = null) {
+        telemetry.addLine("Processed data")
+        telemetry.addData("Closest cone", "angle: %.1f distance: %.1f position: %s", Math.toDegrees(getClosestConeAngle(pose) ?: Double.NaN), getClosestConePosition(pose)?.norm() ?: Double.NaN , getClosestConePosition(pose)?.toString())
+        telemetry.addData("Closest pole", "angle: %.1f distance: %.1f position: %s", Math.toDegrees(getClosestPoleAngle() ?: Double.NaN), getClosestPolePosition()?.norm() ?: Double.NaN, getClosestPolePosition()?.toString())
+        telemetry.addData("Landmarks", getLandmarkInfo())
+
+        telemetry.addLine()
+        telemetry.addLine("Raw data")
+        telemetry.addData("Stacks", (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).stackResults)
+        telemetry.addData("Poles", (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).poleResults)
+        telemetry.addData("Single cones", (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).singleConeResults)
     }
 
 }
