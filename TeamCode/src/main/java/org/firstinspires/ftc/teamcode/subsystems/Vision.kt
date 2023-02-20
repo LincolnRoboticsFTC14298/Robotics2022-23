@@ -187,6 +187,8 @@ class Vision(
         fun distance(other: ObservationResult) : Double {
             return toVector().distTo(other.toVector())
         }
+
+        override fun toString() = String.format("(%.3f, %.3f)", angle, distance)
     }
 
     /**
