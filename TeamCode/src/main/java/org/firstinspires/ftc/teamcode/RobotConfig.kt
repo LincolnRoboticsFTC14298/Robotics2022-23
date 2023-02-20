@@ -107,11 +107,11 @@ object RobotConfig {
      * [OdometryLocalizer]
      */
     const val leftEncoderName = "leftEncoder" // Must be ports 0 and 3
-    const val rightEncoderName = "rightEncoder"
+    val rightEncoderName = driveRightRear
     const val frontEncoderName = "frontEncoder" // port 1 or 2
 
-    var TICKS_PER_REV = 0.0
-    var WHEEL_RADIUS = 2.0 // in
+    var TICKS_PER_REV = 8192.0
+    var WHEEL_RADIUS = 1.37795 / 2.0 // in
     var GEAR_RATIO = 1.0 // output (wheel) speed / input (encoder) speed
 
     @JvmField
@@ -119,9 +119,9 @@ object RobotConfig {
     @JvmField
     var Y_MULTIPLIER = 1.0
     @JvmField
-    var LATERAL_DISTANCE = 10.0 // in; distance between the left and right wheels
+    var LATERAL_DISTANCE = 12.0 // in; distance between the left and right wheels
     @JvmField
-    var FORWARD_OFFSET = 4.0 // in; offset of the lateral wheel
+    var FORWARD_OFFSET = 12.5 / 2.0 // in; offset of the lateral wheel
 
     /**
      * [Lift]
@@ -131,8 +131,9 @@ object RobotConfig {
     const val magnetLimitName = "magnet"
 
     const val liftHeightOffset = 0.0 // in The raw height of zero is off the ground
+
     const val liftMaxExtension = 0.0 // in Max allowable extension height
-    const val poleLiftOffset = 20.0 // in above the pole the lift should be at
+    const val poleLiftOffset = 5.0 // in above the pole the lift should be at
 
     const val liftDPP = 1.0 // TODO: Find experimentally
 
@@ -175,9 +176,9 @@ object RobotConfig {
 
 
     @JvmField
-    var clawMaxVel = 0.7
+    var clawMaxVel = 5.0
     @JvmField
-    var clawMaxAccel = 4.5
+    var clawMaxAccel = 5.0
 
     @JvmField
     var colorGain = 20.0
@@ -203,12 +204,12 @@ object RobotConfig {
     @JvmField
     var passthroughDepositAngle = 180.0 // degrees
     @JvmField
-    var passthroughJunctionAngle = -35.0
+    var passthroughJunctionAngle = -15.0
 
     @JvmField
-    var passthroughMaxVel = 0.0
+    var passthroughMaxVel = 25.0
     @JvmField
-    var passthroughMaxAccel = 0.0
+    var passthroughMaxAccel = 25.0
 
     @JvmField
     var passthroughTimeTolerance = 0.2 // Seconds to wait after motion profile supposedly complete
@@ -218,7 +219,7 @@ object RobotConfig {
      */
     enum class CameraData(val pitch: Double, val height: Double, val relativePosition: Vector2d, val FOVX: Double, val FOVY: Double, val fx: Double, val fy: Double, val cx: Double, val cy: Double, val distCoeffs: MatOfDouble) {
         PHONECAM(0.0, 2.0, Vector2d(-5.0, 0.0), toRadians(60.0), toRadians(60.0), 0.0, 0.0, 0.0, 0.0, MatOfDouble(0.0, 0.0, 0.0, 0.0, 0.0)),
-        LOGITECH_C920(0.0, 3.0, Vector2d(5.0, 0.0), toRadians(60.0), toRadians(60.0), 578.272, 578.272, 402.145, 221.506, MatOfDouble(0.0, 0.0, 0.0, 0.0, 0.0));
+        LOGITECH_C920(0.0, 3.0, Vector2d(5.0, 0.0), toRadians(60.0), toRadians(60.0), 1.44943054e+3, 1.44934063e+3, 9.37759430e+2, 5.34866814e+2, MatOfDouble(0.07622862, -0.41153656, -0.00089351, 0.00219123, 0.57699695));
 
         fun getCameraMatrix(): Mat {
             val cameraMat = Mat(3, 3, CvType.CV_64FC1)
