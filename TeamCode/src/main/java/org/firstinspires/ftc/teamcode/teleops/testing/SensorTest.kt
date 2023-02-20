@@ -17,7 +17,7 @@ class SensorTest() : OpMode() {
 
 
     override fun init() {
-        limit = hardwareMap.get(TouchSensor::class.java, "magnet");
+        limit = hardwareMap.get(TouchSensor::class.java, RobotConfig.magnetLimitName);
         //color = hardwareMap.get(NormalizedColorSensor::class.java, "color")
     }
 
