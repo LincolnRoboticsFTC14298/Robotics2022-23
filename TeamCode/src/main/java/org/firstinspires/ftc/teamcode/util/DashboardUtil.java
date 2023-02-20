@@ -17,21 +17,25 @@ public class DashboardUtil {
     private static final double DEFAULT_RESOLUTION = 2.0; // distance units; presumed inches
     private static final double ROBOT_RADIUS = 9; // in
 
-    public static void drawObservations(Canvas canvas, Vision vision, Pose2d pose) {
-        if (vision != null) {
-            List<Vision.ObservationResult> landmarks = vision.getLandmarkInfo();
-            Vector2d cone = vision.getClosestConePosition();
+    public static void drawClaw(Canvas canvas, Vector2d clawOffset, Pose2d pose) {
+        canvas.setStroke("#253368");
+        Vector2d clawFieldFrame = pose.vec().plus(clawOffset.rotated(-pose.getHeading()));
+        canvas.fillCircle(clawFieldFrame.getX(), clawFieldFrame.getY(), coneDiameter / 2.0 * 1.2);
+    }
 
-            canvas.setStroke("#F9A801");
-            for (Vision.ObservationResult landmark : landmarks) {
-                Vector2d landmarkFieldFrame = landmark.toVector().rotated(-pose.getHeading()).plus(pose.vec());
-                canvas.strokeCircle(landmarkFieldFrame.getX(), landmarkFieldFrame.getY(), RobotConfig.poleDiameter / 2.0);
-            }
-            if (cone != null) {
-                canvas.setStroke("#8CA231");
-                Vector2d coneFieldFrame = cone.rotated(-pose.getHeading()).plus(pose.vec());
-                canvas.fillCircle(coneFieldFrame.getX(), coneFieldFrame.getY(), RobotConfig.coneDiameter / 2.0);
-            }
+    public static void drawObservations(Canvas canvas, Vision vision, Pose2d pose) {
+        List<Vision.ObservationResult> landmarks = vision.getLandmarkInfo();
+        Vector2d cone = vision.getClosestConePosition(pose, false);
+
+        canvas.setStroke("#F9A801");
+        for (Vision.ObservationResult landmark : landmarks) {
+            Vector2d landmarkFieldFrame = landmark.toVector().rotated(-pose.getHeading()).plus(pose.vec());
+            canvas.strokeCircle(landmarkFieldFrame.getX(), landmarkFieldFrame.getY(), RobotConfig.poleDiameter / 2.0);
+        }
+        if (cone != null) {
+            canvas.setStroke("#8CA231");
+            Vector2d coneFieldFrame = cone.rotated(-pose.getHeading()).plus(pose.vec());
+            canvas.fillCircle(coneFieldFrame.getX(), coneFieldFrame.getY(), RobotConfig.coneDiameter / 2.0);
         }
     }
 
