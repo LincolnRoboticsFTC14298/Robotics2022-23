@@ -23,7 +23,7 @@ import org.openftc.easyopencv.OpenCvPipeline
  */
 class Vision(
     hwMap: HardwareMap,
-    startPipeline: FrontPipeline = FrontPipeline.GENERAL_PIPELINE,
+    startingPipeline: FrontPipeline = FrontPipeline.GENERAL_PIPELINE,
     private val telemetry: Telemetry? = null
 ) : SubsystemBase() {
 
@@ -61,12 +61,10 @@ class Vision(
 
         (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).telemetry = telemetry
 
-        phoneCam.setPipeline(phoneCamPipeline)
-
         // Open cameras asynchronously and load the pipelines
         phoneCam.openCameraDeviceAsync(object : AsyncCameraOpenListener {
             override fun onOpened() {
-
+                phoneCam.setPipeline(phoneCamPipeline)
             }
 
             override fun onError(errorCode: Int) {
@@ -76,7 +74,6 @@ class Vision(
             }
         })
 
-        webCam.setPipeline(startPipeline.pipeline)
 
         webCam.openCameraDeviceAsync(object : AsyncCameraOpenListener {
             override fun onOpened() {
