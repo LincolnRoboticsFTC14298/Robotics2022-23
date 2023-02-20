@@ -40,7 +40,7 @@ class MainTeleOp : CommandOpMode() {
         val localizer = OdometryLocalizer(hardwareMap)
         localizer.poseEstimate = PoseStorage.currentPose
 
-        val mecanum = Mecanum(hardwareMap, vision, localizer)
+        val mecanum = Mecanum(hardwareMap, localizer, vision)
 
         register(lift, claw, passthrough, mecanum, vision)
 

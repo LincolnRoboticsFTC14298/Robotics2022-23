@@ -36,9 +36,9 @@ class BasicTeleOp : CommandOpMode() {
         val vision = Vision(hardwareMap)
         //val localizer = MecanumMonteCarloLocalizer(hardwareMap, vision, Pose2d(), arrayToRowMatrix(doubleArrayOf()))
         val localizer = OdometryLocalizer(hardwareMap)
-        localizer.poseEstimate = PoseStorage.currentPose
+        localizer.poseEstimate = Pose2d(0.0, 0.0, Math.toRadians(90.0))//PoseStorage.currentPose
 
-        val mecanum = Mecanum(hardwareMap, vision, localizer)
+        val mecanum = Mecanum(hardwareMap, localizer, vision)
 
         register(lift, claw, passthrough, mecanum, vision)
 
@@ -59,6 +59,9 @@ class BasicTeleOp : CommandOpMode() {
             { fieldCentric }
         )
 
+        val approachPoleCommand = InstantCommand({})//ApproachPoleFromAngle(mecanum, vision, input)
+
+
         // Deposit settings
         driver1
             .getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
@@ -66,68 +69,66 @@ class BasicTeleOp : CommandOpMode() {
                 InstantCommand(passthrough::junctionDeposit, passthrough)
             )
 
-//        driver1
-//            .getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-//            .whenPressed(
-//                SequentialCommandGroup(
-//                    ReadyPoleDeposit(RobotConfig.PoleType.LOW, lift, passthrough),
-//                    ApproachPoleFromAngle(mecanum, vision, forward)
-//                )
-//            )
-//
-//        driver1
-//            .getGamepadButton(GamepadKeys.Button.DPAD_UP)
-//            .whenPressed(
-//                SequentialCommandGroup(
-//                    ReadyPoleDeposit(RobotConfig.PoleType.MEDIUM, lift, passthrough),
-//                    ApproachPoleFromAngle(mecanum, vision, forward)
-//                )
-//            )
-//
-//        driver1
-//            .getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
-//            .whenPressed(
-//                SequentialCommandGroup(
-//                    ReadyPoleDeposit(RobotConfig.PoleType.HIGH, lift, passthrough),
-//                    ApproachPoleFromAngle(mecanum, vision, forward)
-//                )
-//            )
-//
+        driver1
+            .getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
+            .whenPressed(
+                SequentialCommandGroup(
+                    ReadyPoleDeposit(RobotConfig.PoleType.LOW, lift, passthrough),
+                    approachPoleCommand
+                )
+            )
+
+        driver1
+            .getGamepadButton(GamepadKeys.Button.DPAD_UP)
+            .whenPressed(
+                SequentialCommandGroup(
+                    ReadyPoleDeposit(RobotConfig.PoleType.MEDIUM, lift, passthrough),
+                    approachPoleCommand
+                )
+            )
+
+        driver1
+            .getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
+            .whenPressed(
+                SequentialCommandGroup(
+                    ReadyPoleDeposit(RobotConfig.PoleType.HIGH, lift, passthrough),
+                    approachPoleCommand
+                )
+            )
+
+        driver1
+            .getGamepadButton(GamepadKeys.Button.A)
+            .whenPressed(
+                SequentialCommandGroup(
+                    ReadyPickUp(lift, claw, passthrough),
+                    WaitUntilCommand(claw::isConeInside),
+                    InstantCommand(claw::close, claw)
+                )
+
+            )
+
+        // Reset to pickup and keep claw open until a cone comes in
 //        driver1
 //            .getGamepadButton(GamepadKeys.Button.A)
 //            .whenPressed(
-//                InstantCommand(claw::partiallyOpen, claw)
+//                //ApproachConeFromAngle(mecanum, vision, claw, input)
 //            )
-//
-//        // Reset to pickup and keep claw open until a cone comes in
-//        driver1
-//            .getGamepadButton(GamepadKeys.Button.A)
-//            .whenPressed(
-//                SequentialCommandGroup(
-//                    ReadyPickUp(lift, claw, passthrough),
-//                    WaitUntilCommand(claw::isConeInside),
-//                    InstantCommand(claw::close, claw),
-//                )
-//            )
-//
-//        // Manually close claw
-//        driver1
-//            .getGamepadButton(GamepadKeys.Button.B)
-//            .whenPressed(
-//                InstantCommand(claw::close, claw)
-//            )
+
+        // Manually close claw
+        driver1
+            .getGamepadButton(GamepadKeys.Button.B)
+            .whenPressed(
+                InstantCommand(claw::close, claw)
+            )
 
 
         // Press trigger to deposit cone
         Trigger(TriggerReader(driver1, GamepadKeys.Trigger.RIGHT_TRIGGER)::isDown)
             .whenActive(InstantCommand(claw::partiallyOpen, claw))
 
-//        driver1
-//            .getGamepadButton(GamepadKeys.Button.X)
-//            .cancelWhenActive(semiAutoDepositLow)
-//            .cancelWhenActive(semiAutoDepositMedium)
-//            .cancelWhenActive(semiAutoDepositHigh)
-//            .cancelWhenActive(approachCone)
+        driver1
+            .getGamepadButton(GamepadKeys.Button.X)
+            .cancelWhenActive(approachPoleCommand)
     }
 
     override fun run() {
