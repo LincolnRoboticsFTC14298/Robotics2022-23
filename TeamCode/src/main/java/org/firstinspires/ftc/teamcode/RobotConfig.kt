@@ -61,15 +61,6 @@ object RobotConfig {
         val vector = Vector2d(x * tileSize, y * tileSize)
 
         companion object {
-            fun getPole(vector: Vector2d): Pole? {
-                values().forEach { pole ->
-                    if (pole.vector epsilonEquals vector) {
-                        return pole
-                    }
-                }
-                return null
-            }
-
             fun getPolesOfType(type: PoleType) : List<Pole> {
                 return values().filter { it.type == type }
             }
@@ -91,16 +82,6 @@ object RobotConfig {
 
         val vector = Vector2d(x * tileSize, y * tileSize)
 
-        companion object {
-            fun getJunction(vector: Vector2d): Junction? {
-                values().forEach { junction ->
-                    if (junction.vector.epsilonEquals(vector)) {
-                        return junction
-                    }
-                }
-                return null
-            }
-        }
     }
 
     /****************************************************
