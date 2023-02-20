@@ -62,7 +62,7 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
     private lateinit var motionProfile: MotionProfile
 
     private var filter: KalmanFilter
-    private var state: DoubleArray = doubleArrayOf()
+    private var state: DoubleArray = doubleArrayOf(0.0, 0.0, 0.0)
 
     private val profileTimer = ElapsedTime()
     private val timer = ElapsedTime()
@@ -89,12 +89,10 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
 
     init {
 
-        motorGroup.encoder.reset()
-
         val processModel = ConstantAccelerationProcessModel()
 
         val H = SimpleMatrix(arrayOf(doubleArrayOf(1.0, 0.0, 0.0), doubleArrayOf(0.0, 1.0, 0.0)))
-        val R = SimpleMatrix(arrayOf(doubleArrayOf(1.0, 0.0), doubleArrayOf(0.0, 2.0)))
+        val R = SimpleMatrix(arrayOf(doubleArrayOf(0.5, 0.0), doubleArrayOf(0.0, 2.0)))
         val measurementModel = LinearMeasurementModel(H, R)
 
         // Retracted and stationary
@@ -102,6 +100,8 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
         // Completely sure that it is retracted and stationary
         val initialCovariance = SimpleMatrix(arrayOf(doubleArrayOf(0.0)))
         filter = KalmanFilter(processModel, measurementModel, initialState, initialCovariance)
+
+        motorGroup.resetEncoder()
 
         motorGroup.setDistancePerPulse(liftDPP)
         motorGroup.setZeroPowerBehavior(Motor.ZeroPowerBehavior.FLOAT)
@@ -152,11 +152,11 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
     /**
      * Resets encoder position if necessary
      */
-    private var checkLimit = false
+    var checkLimit = false
     fun checkEncoder() {
         if (checkLimit && getExtensionLength() <= withinSwitchRange) {
             if (limit.isPressed) {
-                motorGroup.encoder.reset()
+                motorGroup.resetEncoder()
                 checkLimit = false // Only need to check limit switch once
                 Log.i("Limit Switch", "Resetting")
             }
