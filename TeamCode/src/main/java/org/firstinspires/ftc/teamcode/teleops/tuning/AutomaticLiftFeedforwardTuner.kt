@@ -2,17 +2,18 @@ package org.firstinspires.ftc.teamcode.teleops.tuning
 
 import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
+import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.robotcore.internal.system.Misc
 import org.firstinspires.ftc.teamcode.subsystems.Lift
-import org.firstinspires.ftc.teamcode.util.LoggingUtil
 import org.firstinspires.ftc.teamcode.util.RegressionUtil
 import kotlin.math.sqrt
 
 
 @TeleOp
+@Disabled
 class AutomaticLiftFeedforwardTuner : LinearOpMode() {
 
     var height = 80.0
@@ -33,7 +34,7 @@ class AutomaticLiftFeedforwardTuner : LinearOpMode() {
 
         while(!isStopRequested) {
             if (gamepad1.a) {
-                break;
+                break
             }
         }
 

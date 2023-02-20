@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.RobotConfig
 import org.firstinspires.ftc.teamcode.subsystems.Passthrough
 
 @TeleOp
+@Disabled
 class PassthroughTuner() : OpMode() {
 
     lateinit var passthrough: Passthrough

@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Claw
 
 
 @TeleOp
+@Disabled
 class ClawTuner() : OpMode() {
 
     lateinit var claw: Claw

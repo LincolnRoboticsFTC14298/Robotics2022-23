@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.teleops.testing
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
@@ -11,6 +12,7 @@ import org.firstinspires.ftc.teamcode.RobotConfig.driveRightRear
 import kotlin.math.abs
 
 @TeleOp
+@Disabled
 class CooperativeDrive : LinearOpMode() {
 
     override fun runOpMode() {
