@@ -110,11 +110,16 @@ public class SampleMecanumDrive extends MecanumDrive {
         rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
         leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        trajectorySequenceRunner = new TrajectorySequenceRunner(follower, HEADING_PID, vision);
+        trajectorySequenceRunner = new TrajectorySequenceRunner(follower, HEADING_PID, vision, clawPositionProvider);
     }
 
-    public SampleMecanumDrive(HardwareMap hardwareMap, Vision vision, Localizer localizer) {
-        this(hardwareMap, vision);
+    public SampleMecanumDrive(HardwareMap hardwareMap, Localizer localizer, Vision vision, Supplier<Vector2d> clawPositionProvider) {
+        this(hardwareMap, vision, clawPositionProvider);
+        setLocalizer(localizer);
+    }
+
+    public SampleMecanumDrive(HardwareMap hardwareMap, Localizer localizer) {
+        this(hardwareMap, null, null);
         setLocalizer(localizer);
     }
 
