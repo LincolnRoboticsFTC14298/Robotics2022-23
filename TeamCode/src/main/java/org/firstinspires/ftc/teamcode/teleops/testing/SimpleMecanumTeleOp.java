@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
 
-@TeleOp
 public class SimpleMecanumTeleOp extends LinearOpMode
 {
     @Override

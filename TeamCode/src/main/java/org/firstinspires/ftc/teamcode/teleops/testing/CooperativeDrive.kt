@@ -7,8 +7,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive
 import kotlin.math.abs
 
-@TeleOp
-@Disabled
 class CooperativeDrive : LinearOpMode() {
 
     override fun runOpMode() {

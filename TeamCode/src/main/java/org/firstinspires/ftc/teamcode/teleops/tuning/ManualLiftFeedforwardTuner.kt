@@ -8,8 +8,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.subsystems.Lift
 import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor
 
-@TeleOp
-@Disabled
 class ManualLiftFeedforwardTuner : OpMode() {
 
     lateinit var lift: Lift

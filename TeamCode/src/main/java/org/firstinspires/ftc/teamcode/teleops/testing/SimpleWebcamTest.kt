@@ -34,8 +34,6 @@ import org.opencv.core.Point
 import org.opencv.imgproc.Imgproc
 import org.opencv.core.Scalar
 
-@TeleOp(name = "Webcam")
-@Disabled
 class SimpleWebcamTest : LinearOpMode() {
     
     lateinit var webcam: OpenCvWebcam

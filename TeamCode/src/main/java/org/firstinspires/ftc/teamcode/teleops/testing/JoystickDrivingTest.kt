@@ -5,15 +5,14 @@ import com.acmerobotics.roadrunner.Twist2d
 import com.acmerobotics.roadrunner.Vector2d
 import com.arcrobotics.ftclib.command.CommandOpMode
 import com.arcrobotics.ftclib.gamepad.GamepadEx
+import com.arcrobotics.ftclib.gamepad.GamepadKeys
 import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import org.firstinspires.ftc.teamcode.commands.drive.JoystickDrive
+import org.firstinspires.ftc.teamcode.commands.drive.MotionProfiledJoystickDrive
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive
 import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor
 import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer
 
-@TeleOp
-@Disabled
 class JoystickDrivingTest : CommandOpMode() {
 
     override fun initialize() {
@@ -32,7 +31,9 @@ class JoystickDrivingTest : CommandOpMode() {
         var fieldCentric = true
         val fieldCentricProvider = { fieldCentric }
 
-        mecanum.defaultCommand = JoystickDrive(mecanum, input, fieldCentricProvider) //obstacleAvoidanceProvider)
+        driver1.getGamepadButton(GamepadKeys.Button.A).whenPressed( Runnable { fieldCentric = !fieldCentric } )
+
+        mecanum.defaultCommand = MotionProfiledJoystickDrive(mecanum, input, fieldCentricProvider) //obstacleAvoidanceProvider)
     }
 
 }

@@ -5,14 +5,14 @@ import com.acmerobotics.roadrunner.Vector2d;
 
 import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor;
 import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer;
-import org.firstinspires.ftc.teamcode.teleops.TuningOpModes;
 import org.firstinspires.ftc.teamcode.teleops.ActionOpMode;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
+import org.firstinspires.ftc.teamcode.teleops.OpModeManager;
 
 public final class SplineTest extends ActionOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        if (TuningOpModes.DRIVE_CLASS.equals(MecanumDrive.class)) {
+        if (OpModeManager.DRIVE_CLASS.equals(MecanumDrive.class)) {
             MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0), new OdometryLocalizer(hardwareMap), new VoltageSensor(hardwareMap));
 
             waitForStart();

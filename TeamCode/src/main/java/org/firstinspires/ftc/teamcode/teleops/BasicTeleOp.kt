@@ -12,11 +12,10 @@ import com.outoftheboxrobotics.photoncore.PhotonCore
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.FieldConfig
 import org.firstinspires.ftc.teamcode.commands.*
-import org.firstinspires.ftc.teamcode.commands.drive.JoystickDrive
+import org.firstinspires.ftc.teamcode.commands.drive.MotionProfiledJoystickDrive
 import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer
 import org.firstinspires.ftc.teamcode.subsystems.*
 
-@TeleOp
 class BasicTeleOp : CommandOpMode() {
 
     override fun initialize() {
@@ -46,7 +45,7 @@ class BasicTeleOp : CommandOpMode() {
 
         var fieldCentric = false
 
-        mecanum.defaultCommand = JoystickDrive(
+        mecanum.defaultCommand = MotionProfiledJoystickDrive(
             mecanum,
             input,
             { fieldCentric }

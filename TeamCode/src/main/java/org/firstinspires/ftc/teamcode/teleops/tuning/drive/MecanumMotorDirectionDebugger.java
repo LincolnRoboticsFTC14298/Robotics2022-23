@@ -10,7 +10,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor;
 import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer;
-import org.firstinspires.ftc.teamcode.teleops.TuningOpModes;
+import org.firstinspires.ftc.teamcode.teleops.OpModeManager;
 
 /**
  * This is a simple teleop routine for debugging your motor configuration.
@@ -44,7 +44,7 @@ public class MecanumMotorDirectionDebugger extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        if (!TuningOpModes.DRIVE_CLASS.equals(MecanumDrive.class)) {
+        if (!OpModeManager.DRIVE_CLASS.equals(MecanumDrive.class)) {
             throw new RuntimeException(getClass().getSimpleName() + " is for mecanum drives only.");
         }
 

@@ -12,9 +12,6 @@ import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor
 import org.firstinspires.ftc.teamcode.util.RegressionUtil
 import kotlin.math.sqrt
 
-
-@TeleOp
-@Disabled
 class AutomaticLiftFeedforwardTuner : LinearOpMode() {
 
     var height = 80.0

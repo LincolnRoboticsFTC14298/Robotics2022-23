@@ -7,8 +7,6 @@ import com.qualcomm.robotcore.hardware.TouchSensor
 import org.firstinspires.ftc.teamcode.FieldConfig
 import org.firstinspires.ftc.teamcode.subsystems.Lift.Companion.magnetLimitName
 
-@TeleOp
-@Disabled
 class SensorTest() : OpMode() {
 
     private lateinit var limit: TouchSensor

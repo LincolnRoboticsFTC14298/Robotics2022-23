@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import org.firstinspires.ftc.teamcode.FieldConfig
 import org.firstinspires.ftc.teamcode.subsystems.Lift
 
-@TeleOp
 class LiftManualTest : OpMode() {
 
     private lateinit var motorLeft: DcMotor

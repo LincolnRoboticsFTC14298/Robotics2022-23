@@ -12,12 +12,10 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.commands.ApproachCone
 import org.firstinspires.ftc.teamcode.commands.ApproachConeFromAngle
-import org.firstinspires.ftc.teamcode.commands.drive.JoystickDrive
+import org.firstinspires.ftc.teamcode.commands.drive.MotionProfiledJoystickDrive
 import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer
 import org.firstinspires.ftc.teamcode.subsystems.*
 
-@TeleOp
-@Disabled
 class ConeAutoTest : CommandOpMode() {
 
     private lateinit var vision: Vision
@@ -49,7 +47,7 @@ class ConeAutoTest : CommandOpMode() {
         var fieldCentric = true
         val fieldCentricProvider = { fieldCentric }
 
-        mecanum.defaultCommand = JoystickDrive(mecanum, input, fieldCentricProvider) //obstacleAvoidanceProvider)
+        mecanum.defaultCommand = MotionProfiledJoystickDrive(mecanum, input, fieldCentricProvider) //obstacleAvoidanceProvider)
 
         driver1.getGamepadButton(GamepadKeys.Button.A)
             .whenPressed(

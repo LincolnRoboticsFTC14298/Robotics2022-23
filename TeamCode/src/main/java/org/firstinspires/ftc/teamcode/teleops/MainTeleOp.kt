@@ -11,10 +11,9 @@ import com.outoftheboxrobotics.photoncore.PhotonCore
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.FieldConfig
 import org.firstinspires.ftc.teamcode.commands.*
-import org.firstinspires.ftc.teamcode.commands.drive.JoystickDrive
+import org.firstinspires.ftc.teamcode.commands.drive.MotionProfiledJoystickDrive
 import org.firstinspires.ftc.teamcode.subsystems.*
 import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer
-
 
 class MainTeleOp : CommandOpMode() {
 
@@ -53,7 +52,7 @@ class MainTeleOp : CommandOpMode() {
 //        var obstacleAvoidance = true
 //        val obstacleAvoidanceProvider = { obstacleAvoidance }
 
-        mecanum.defaultCommand = JoystickDrive(mecanum, input, fieldCentricProvider) //obstacleAvoidanceProvider)
+        mecanum.defaultCommand = MotionProfiledJoystickDrive(mecanum, input, fieldCentricProvider) //obstacleAvoidanceProvider)
 
         /**
          * Lift

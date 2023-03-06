@@ -9,8 +9,6 @@ import org.firstinspires.ftc.teamcode.subsystems.Passthrough.Companion.passthrou
 import org.firstinspires.ftc.teamcode.subsystems.Passthrough.Companion.passthroughJunctionAngle
 import org.firstinspires.ftc.teamcode.subsystems.Passthrough.Companion.passthroughPickUpAngle
 
-@TeleOp
-@Disabled
 class PassthroughTuner() : OpMode() {
 
     lateinit var passthrough: Passthrough

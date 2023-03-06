@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.subsystems.Lift
 import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor
 
-@TeleOp
 class LiftDistancePerPulseTuner() : OpMode() {
 
     private lateinit var lift: Lift

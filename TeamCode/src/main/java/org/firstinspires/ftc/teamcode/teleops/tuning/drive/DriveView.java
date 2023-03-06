@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor;
 import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer;
-import org.firstinspires.ftc.teamcode.teleops.TuningOpModes;
+import org.firstinspires.ftc.teamcode.teleops.OpModeManager;
 import org.firstinspires.ftc.teamcode.util.Encoder;
 import org.firstinspires.ftc.teamcode.util.Localizer;
 import org.firstinspires.ftc.teamcode.util.OverflowEncoder;
@@ -52,7 +52,7 @@ final class DriveView {
 
     public DriveView(HardwareMap hardwareMap) {
         final Localizer localizer;
-        if (TuningOpModes.DRIVE_CLASS.equals(MecanumDrive.class)) {
+        if (OpModeManager.DRIVE_CLASS.equals(MecanumDrive.class)) {
             type = "mecanum";
 
             inPerTick = MecanumDrive.IN_PER_TICK;

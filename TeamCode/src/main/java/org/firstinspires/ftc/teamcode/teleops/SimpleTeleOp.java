@@ -12,7 +12,6 @@ import org.firstinspires.ftc.teamcode.subsystems.Claw;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.Passthrough;
 
-@TeleOp
 public class SimpleTeleOp extends LinearOpMode
 {
     @Override
