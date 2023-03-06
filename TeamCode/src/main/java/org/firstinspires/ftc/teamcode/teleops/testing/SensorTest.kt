@@ -3,13 +3,10 @@ package org.firstinspires.ftc.teamcode.teleops.testing
 import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor
 import com.qualcomm.robotcore.hardware.TouchSensor
-import org.firstinspires.ftc.teamcode.RobotConfig
-import org.firstinspires.ftc.teamcode.RobotConfig.colorSensorName
+import org.firstinspires.ftc.teamcode.FieldConfig
+import org.firstinspires.ftc.teamcode.subsystems.Lift.Companion.magnetLimitName
 
-@TeleOp
-@Disabled
 class SensorTest() : OpMode() {
 
     private lateinit var limit: TouchSensor
@@ -17,7 +14,7 @@ class SensorTest() : OpMode() {
 
 
     override fun init() {
-        limit = hardwareMap.get(TouchSensor::class.java, "magnet");
+        limit = hardwareMap.get(TouchSensor::class.java, magnetLimitName);
         //color = hardwareMap.get(NormalizedColorSensor::class.java, "color")
     }
 

@@ -1,19 +1,19 @@
 package org.firstinspires.ftc.teamcode.commands.drive
 
-import com.acmerobotics.roadrunner.control.PIDFController
-import com.acmerobotics.roadrunner.geometry.Vector2d
+import com.acmerobotics.roadrunner.Twist2d
 import com.arcrobotics.ftclib.command.ParallelDeadlineGroup
 import com.arcrobotics.ftclib.command.SequentialCommandGroup
 import com.arcrobotics.ftclib.command.WaitUntilCommand
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive
-import org.firstinspires.ftc.teamcode.subsystems.Mecanum
+import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive
+import org.firstinspires.ftc.teamcode.util.PIDCoefficients
+import org.firstinspires.ftc.teamcode.util.PIDFController
 import kotlin.math.abs
 
 
 class ApproachAngle(
-    private val mecanum: Mecanum,
+    private val mecanum: MecanumDrive,
     private val targetAngle: () -> Double?,
-    private val input: () -> Vector2d,
+    private val input: () -> Twist2d,
     private val maxTolerableAngleDifference: Double = 0.05 // radians
 ) : SequentialCommandGroup() {
 
@@ -23,17 +23,18 @@ class ApproachAngle(
 
     private var lastTargetAngleSeen: Double? = null
 
-    private val controller = PIDFController(SampleMecanumDrive.HEADING_PID)
+    private val controller = PIDFController(PIDCoefficients(MecanumDrive.HEADING_GAIN, 0.0, MecanumDrive.HEADING_VEL_GAIN))
+
     init {
         // Automatically handles overflow
         controller.setInputBounds(-Math.PI, Math.PI)
 
-        val fieldInput = { input.invoke().rotated(mecanum.getPoseEstimate().heading) }
-
-        val rotation = {
+        val localInput = {
             lastTargetAngleSeen = targetAngle.invoke() ?: lastTargetAngleSeen
             // Set desired angular velocity to the heading controller output
-            controller.update(lastTargetAngleSeen!!)
+            val rotation = controller.update(lastTargetAngleSeen!!)
+
+            Twist2d(input.invoke().transVel, rotation)
         }
 
         addCommands(
@@ -43,8 +44,9 @@ class ApproachAngle(
             ),
             PseudoMotionProfiledDrive(
                 mecanum,
-                fieldInput,
-                rotation
+                localInput,
+                isInputVelocityNormalized = true,
+                isInputRotationNormalized = false
             )
         )
 

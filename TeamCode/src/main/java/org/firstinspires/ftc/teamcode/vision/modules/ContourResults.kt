@@ -1,8 +1,9 @@
 package org.firstinspires.ftc.teamcode.vision.modules
 
-import com.acmerobotics.roadrunner.geometry.Vector2d
-import com.acmerobotics.roadrunner.util.epsilonEquals
-import org.firstinspires.ftc.teamcode.RobotConfig
+import com.acmerobotics.roadrunner.Vector2d
+import org.firstinspires.ftc.teamcode.FieldConfig
+import org.firstinspires.ftc.teamcode.subsystems.Vision
+import org.firstinspires.ftc.teamcode.util.epsilonEquals
 import org.firstinspires.ftc.teamcode.vision.modulelib.AbstractPipelineModule
 import org.opencv.core.Mat
 import org.opencv.core.MatOfPoint
@@ -12,6 +13,7 @@ import org.opencv.imgproc.Imgproc.*
 import kotlin.math.min
 import kotlin.math.tan
 import kotlin.math.cos
+import kotlin.math.sin
 
 
 /**
@@ -20,7 +22,7 @@ import kotlin.math.cos
  */
 class ContourResults(
     private val contourModule: AbstractPipelineModule<List<MatOfPoint>>,
-    private val camera: RobotConfig.CameraData,
+    private val camera: Vision.Companion.CameraData,
     private val targetWidth: Double,
     private val targetHeightOffset: Double = 0.0,
     private val pitchDistanceOffset: Double = targetWidth/2.0 // Used incase the center of the object is wanted instead
@@ -28,14 +30,22 @@ class ContourResults(
 
     data class AnalysisResult(val angle: Double, val distanceByPitch: Double?, val distanceByWidth: Double) {
 
-        fun toVector(useDistanceByWidth: Boolean = false) = Vector2d.polar(chooseDistance(useDistanceByWidth), angle)
-
-        fun distance(other: AnalysisResult, useDistanceByWidth: Boolean = false, useDistanceByWidthForOther: Boolean = false) : Double {
-            return toVector(useDistanceByWidth).distTo(other.toVector(useDistanceByWidthForOther))
+        fun toVector(useDistanceByWidth: Boolean = false) : Vector2d {
+            val distance = chooseDistance(useDistanceByWidth)
+            return Vector2d(distance * cos(angle), distance * sin(angle))
         }
+
+        fun distance(other: AnalysisResult, useDistanceByWidth: Boolean = false, useDistanceByWidthForOther: Boolean = false) =
+             (toVector(useDistanceByWidth) - other.toVector(useDistanceByWidthForOther)).norm()
+
+
+        fun sqrDistance(other: AnalysisResult, useDistanceByWidth: Boolean = false, useDistanceByWidthForOther: Boolean = false) =
+            (toVector(useDistanceByWidth) - other.toVector(useDistanceByWidthForOther)).sqrNorm()
 
         private fun chooseDistance(useDistanceByWidth: Boolean) =
             if (useDistanceByWidth) distanceByPitch ?: distanceByWidth else distanceByWidth
+
+        override fun toString() = String.format("Angle: %.1f, Distance by pitch: %.2f, Distance by width: %.2f", Math.toDegrees(angle), distanceByPitch, distanceByWidth)
 
     }
 

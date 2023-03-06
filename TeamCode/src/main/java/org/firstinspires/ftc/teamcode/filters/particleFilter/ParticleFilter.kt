@@ -25,7 +25,7 @@ class ParticleFilter(
      */
     fun initialize(mean: SimpleMatrix, standardDeviation: SimpleMatrix) {
         particles = Array(numberOfParticles) {
-            generateGaussianNoiseVector(mean, standardDeviation)
+            generateGaussianNoiseMatrix(mean, standardDeviation)
         }
     }
 
@@ -36,7 +36,7 @@ class ParticleFilter(
     fun predict(u: SimpleMatrix, dt: Double) {
         for ((index, particle) in particles.withIndex()) {
             // Generate noise to interject into control vector
-            val noise = u.elementMult(generateGaussianNoiseVector(motionNoiseStandardDeviations))
+            val noise = u.elementMult(generateGaussianNoiseMatrix(motionNoiseStandardDeviations))
 
             // Predict motion of noisy control vector
             particles[index] = motionProcessModel.predictState(particle, u+noise, dt)
@@ -85,13 +85,19 @@ class ParticleFilter(
         return totalState.divide(numberOfParticles.toDouble())
     }
 
-    private fun generateGaussianNoiseVector(mean: SimpleMatrix, standardDeviations: SimpleMatrix) : SimpleMatrix {
-        val gaussianVector = SimpleMatrix(arrayOf(DoubleArray(mean.numRows()) { random.nextGaussian() })).transpose()
+    private fun generateGaussianNoiseMatrix(mean: SimpleMatrix, standardDeviations: SimpleMatrix) : SimpleMatrix {
+        val mat = Array(standardDeviations.numRows()) {
+            DoubleArray(standardDeviations.numCols()) {
+                random.nextGaussian()
+            }
+        }
+
+        val gaussianVector = SimpleMatrix(mat)
         return mean + standardDeviations.elementMult(gaussianVector)
     }
 
-    private fun generateGaussianNoiseVector(standardDeviations: SimpleMatrix) : SimpleMatrix {
-        return generateGaussianNoiseVector(SimpleMatrix(standardDeviations.numRows(), standardDeviations.numCols()), standardDeviations)
+    private fun generateGaussianNoiseMatrix(standardDeviations: SimpleMatrix) : SimpleMatrix {
+        return generateGaussianNoiseMatrix(SimpleMatrix(standardDeviations.numRows(), standardDeviations.numCols()), standardDeviations)
     }
 
 }

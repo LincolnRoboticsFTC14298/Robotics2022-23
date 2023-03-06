@@ -2,17 +2,16 @@ package org.firstinspires.ftc.teamcode.teleops.tuning
 
 import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
+import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.robotcore.internal.system.Misc
 import org.firstinspires.ftc.teamcode.subsystems.Lift
-import org.firstinspires.ftc.teamcode.util.LoggingUtil
+import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor
 import org.firstinspires.ftc.teamcode.util.RegressionUtil
 import kotlin.math.sqrt
 
-
-@TeleOp
 class AutomaticLiftFeedforwardTuner : LinearOpMode() {
 
     var height = 80.0
@@ -20,7 +19,7 @@ class AutomaticLiftFeedforwardTuner : LinearOpMode() {
 
     lateinit var lift: Lift
     override fun runOpMode() {
-        lift = Lift(hardwareMap)
+        lift = Lift(hardwareMap, VoltageSensor(hardwareMap))
         telemetry = MultipleTelemetry(telemetry, FtcDashboard.getInstance().telemetry)
 
         val timer = ElapsedTime()
@@ -33,7 +32,7 @@ class AutomaticLiftFeedforwardTuner : LinearOpMode() {
 
         while(!isStopRequested) {
             if (gamepad1.a) {
-                break;
+                break
             }
         }
 
@@ -121,12 +120,7 @@ class AutomaticLiftFeedforwardTuner : LinearOpMode() {
             telemetry.update()
         }
 
-        val results = RegressionUtil.fitStateData(timeSamples, velocitySamples, accelerationSamples, powerSamples,
-            LoggingUtil.getLogFile(
-                Misc.formatInvariant(
-                    "DriveAccelRegression-%d.csv", System.currentTimeMillis()
-                )
-            ))
+        val results = RegressionUtil.fitStateData(timeSamples, velocitySamples, accelerationSamples, powerSamples, null)
 
         val kStatic = results.kStatic - results.kA*gravityAcceleration
 

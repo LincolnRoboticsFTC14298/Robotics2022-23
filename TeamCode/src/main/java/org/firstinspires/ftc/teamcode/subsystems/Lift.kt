@@ -1,11 +1,9 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
+import org.firstinspires.ftc.teamcode.util.PIDFController
 import android.util.Log
-import com.acmerobotics.roadrunner.control.PIDFController
-import com.acmerobotics.roadrunner.geometry.Pose2d
-import com.acmerobotics.roadrunner.profile.MotionProfile
-import com.acmerobotics.roadrunner.profile.MotionProfileGenerator
-import com.acmerobotics.roadrunner.profile.MotionState
+import com.acmerobotics.dashboard.config.Config
+import com.acmerobotics.roadrunner.*
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.arcrobotics.ftclib.hardware.motors.Motor
 import com.arcrobotics.ftclib.hardware.motors.MotorGroup
@@ -15,25 +13,9 @@ import com.qualcomm.robotcore.util.ElapsedTime
 import com.qualcomm.robotcore.util.Range
 import org.ejml.simple.SimpleMatrix
 import org.firstinspires.ftc.robotcore.external.Telemetry
-import org.firstinspires.ftc.teamcode.RobotConfig
-import org.firstinspires.ftc.teamcode.RobotConfig.gravityFeedforward
-import org.firstinspires.ftc.teamcode.RobotConfig.leftLiftName
-import org.firstinspires.ftc.teamcode.RobotConfig.liftCoeffs
-import org.firstinspires.ftc.teamcode.RobotConfig.liftDPP
-import org.firstinspires.ftc.teamcode.RobotConfig.liftHeightOffset
-import org.firstinspires.ftc.teamcode.RobotConfig.liftKA
-import org.firstinspires.ftc.teamcode.RobotConfig.liftKStatic
-import org.firstinspires.ftc.teamcode.RobotConfig.liftKV
-import org.firstinspires.ftc.teamcode.RobotConfig.liftMaxAccel
-import org.firstinspires.ftc.teamcode.RobotConfig.liftMaxExtension
-import org.firstinspires.ftc.teamcode.RobotConfig.liftMaxVel
-import org.firstinspires.ftc.teamcode.RobotConfig.liftOffsetDistanceFromCenter
-import org.firstinspires.ftc.teamcode.RobotConfig.liftTargetErrorTolerance
-import org.firstinspires.ftc.teamcode.RobotConfig.magnetLimitName
-import org.firstinspires.ftc.teamcode.RobotConfig.poleLiftOffset
-import org.firstinspires.ftc.teamcode.RobotConfig.rightLiftName
-import org.firstinspires.ftc.teamcode.RobotConfig.withinSwitchRange
+import org.firstinspires.ftc.teamcode.FieldConfig
 import org.firstinspires.ftc.teamcode.filters.kalmanFilter.*
+import org.firstinspires.ftc.teamcode.util.PIDCoefficients
 import org.firstinspires.ftc.teamcode.util.arrayToColumnMatrix
 import java.lang.Math.toRadians
 import kotlin.math.abs
@@ -44,7 +26,8 @@ import kotlin.math.sin
  * Lift consists of two multistage slides powered by a motor which pulls a string.
  * @param hwMap        HardwareMap.
  */
-class Lift(hwMap: HardwareMap) : SubsystemBase() {
+@Config
+class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : SubsystemBase() {
 
     /**
      * Avoid using the individual motors, it's best to use the group.
@@ -54,15 +37,13 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
     private val rightMotor = Motor(hwMap, rightLiftName)
     private val motorGroup = MotorGroup(leftMotor, rightMotor)
 
-    private val batteryVoltageSensor = hwMap.voltageSensor.iterator().next()
-
     private val limit = hwMap.get(TouchSensor::class.java, magnetLimitName)
 
     private val controller = PIDFController(liftCoeffs, liftKStatic, liftKV, liftKA)
-    private lateinit var motionProfile: MotionProfile
+    private lateinit var motionProfile: TimeProfile
 
     private var filter: KalmanFilter
-    private var state: DoubleArray = doubleArrayOf()
+    private var state: DoubleArray = doubleArrayOf(0.0, 0.0, 0.0)
 
     private val profileTimer = ElapsedTime()
     private val timer = ElapsedTime()
@@ -78,23 +59,16 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
         set(length) {
             profileTimer.reset()
             field = Range.clip(length, 0.0, liftMaxExtension)
-            motionProfile = MotionProfileGenerator.generateSimpleMotionProfile(
-                MotionState(getExtensionLength(), getVelocity(), getAcceleration()),
-                MotionState(field, 0.0, 0.0),
-                liftMaxVel,
-                liftMaxAccel
-            )
+            motionProfile = TimeProfile(constantProfile(field - getExtensionLength(), 0.0, liftMaxVel, -liftMaxAccel, liftMaxAccel).baseProfile)
             Log.i("Lift setpoint", length.toString())
         }
 
     init {
 
-        motorGroup.encoder.reset()
-
         val processModel = ConstantAccelerationProcessModel()
 
         val H = SimpleMatrix(arrayOf(doubleArrayOf(1.0, 0.0, 0.0), doubleArrayOf(0.0, 1.0, 0.0)))
-        val R = SimpleMatrix(arrayOf(doubleArrayOf(1.0, 0.0), doubleArrayOf(0.0, 2.0)))
+        val R = SimpleMatrix(arrayOf(doubleArrayOf(0.5, 0.0), doubleArrayOf(0.0, 2.0)))
         val measurementModel = LinearMeasurementModel(H, R)
 
         // Retracted and stationary
@@ -103,31 +77,33 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
         val initialCovariance = SimpleMatrix(arrayOf(doubleArrayOf(0.0)))
         filter = KalmanFilter(processModel, measurementModel, initialState, initialCovariance)
 
+        motorGroup.resetEncoder()
+
         motorGroup.setDistancePerPulse(liftDPP)
         motorGroup.setZeroPowerBehavior(Motor.ZeroPowerBehavior.FLOAT)
 
         retract()
     }
 
-    lateinit var desiredState: MotionState
+    lateinit var desiredState: DoubleArray
     override fun periodic() {
         // TODO: Maybe only set power if it has actually changed!! Do this through thresholding
         //  integrating current power with desired power. Write wrappers for automatic voltage
         //  compensation.
         //  Naive optimization would only write when motion profiling is active; heavily trusts ff
 
-        desiredState = motionProfile[profileTimer.seconds()]
+        desiredState = motionProfile[profileTimer.seconds()].values().toDoubleArray()
 
         controller.apply {
-            targetPosition = desiredState.x
-            targetVelocity = desiredState.v
-            targetAcceleration = desiredState.a + gravityFeedforward
+            targetPosition = desiredState[0]
+            targetVelocity = desiredState[1]
+            targetAcceleration = desiredState[2] + gravityFeedforward
         }
 
         checkEncoder()
 
         // Get current state estimates using kalman filter//
-        val u = doubleArrayOf(desiredState.x-state[0], desiredState.v-state[1], desiredState.a-state[2]) // Subtract desired state with previous state estimate
+        val u = desiredState.zip(state).map { it.first - it.second }.toDoubleArray()
         updateFilter(arrayToColumnMatrix(u))
 
         setPower(controller.update(getExtensionLength(), getVelocity()))
@@ -152,11 +128,11 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
     /**
      * Resets encoder position if necessary
      */
-    private var checkLimit = false
+    var checkLimit = false
     fun checkEncoder() {
         if (checkLimit && getExtensionLength() <= withinSwitchRange) {
             if (limit.isPressed) {
-                motorGroup.encoder.reset()
+                motorGroup.resetEncoder()
                 checkLimit = false // Only need to check limit switch once
                 Log.i("Limit Switch", "Resetting")
             }
@@ -171,7 +147,7 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
      * Sets the target height of the lift and constructs an optimal motion profile for it.
      * @param pole          Based on [PoleType] heights.
      */
-    fun setHeight(pole: RobotConfig.PoleType) {
+    fun setHeight(pole: FieldConfig.PoleType) {
         setHeight(pole.height + poleLiftOffset)
     }
 
@@ -188,7 +164,7 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
      * @param power         Percentage of the maximum speed of the lift.
      */
     fun setPower(power: Double) {
-        motorGroup.set(power * 12.0 / batteryVoltageSensor.voltage)
+        motorGroup.set(power * 12.0 / voltageSensor.voltage)
     }
 
     /**
@@ -249,7 +225,7 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
      * @return Time remaining from reaching the target.
      */
     fun timeFromTarget(): Double {
-        return motionProfile.duration() - profileTimer.seconds()
+        return motionProfile.duration - profileTimer.seconds()
     }
 
     /**
@@ -262,8 +238,45 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
         telemetry.addData("Lift estimated length", getExtensionLength())
         telemetry.addData("Lift estimated velocity", getVelocity())
         telemetry.addData("Lift estimated acceleration", getAcceleration())
-        telemetry.addData("Target velocity", desiredState.v)
-        telemetry.addData("Velocity Error", desiredState.v - getVelocity())
+        telemetry.addData("Target velocity", desiredState[1])
+        telemetry.addData("Velocity Error", desiredState[1] - getVelocity())
+    }
+
+    companion object {
+        const val leftLiftName = "leftLift"
+        const val rightLiftName = "rightLift"
+        const val magnetLimitName = "magnet"
+
+        const val liftHeightOffset = 0.0 // in The raw height of zero is off the ground
+
+        const val liftMaxExtension = 0.0 // in Max allowable extension height
+        const val poleLiftOffset = 5.0 // in above the pole the lift should be at
+
+        const val liftDPP = 1.0 // TODO: Find experimentally
+
+        const val liftOffsetDistanceFromCenter = 0.0
+
+        @JvmField
+        var liftMaxVel = 20.0 // in / s  // TODO: Find max values
+        @JvmField
+        var liftMaxAccel = 20.0 // in / s2
+
+        @JvmField
+        var liftKStatic = 0.0
+        @JvmField
+        var liftKV = 1.0 / liftMaxVel
+        @JvmField
+        var liftKA = 0.0
+        @JvmField
+        var gravityFeedforward = 0.0
+
+
+        //@JvmField
+        var liftCoeffs = PIDCoefficients(0.0, 0.0, 0.0) // TODO: Calculate from kV and kA
+
+        val liftTargetErrorTolerance = 0.5 // in
+
+        const val withinSwitchRange = 3.0 // in from the bottom to check magnet switch for reset
     }
 
 }

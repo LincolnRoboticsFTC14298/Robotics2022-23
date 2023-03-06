@@ -1,25 +1,24 @@
 package org.firstinspires.ftc.teamcode.teleops.testing
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorSimple
-import org.firstinspires.ftc.teamcode.RobotConfig.driveLeftFront
-import org.firstinspires.ftc.teamcode.RobotConfig.driveLeftRear
-import org.firstinspires.ftc.teamcode.RobotConfig.driveRightFront
-import org.firstinspires.ftc.teamcode.RobotConfig.driveRightRear
+import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive
 import kotlin.math.abs
 
-@TeleOp
 class CooperativeDrive : LinearOpMode() {
 
     override fun runOpMode() {
 
         //motors
-        val motorFrontLeft: DcMotor = hardwareMap.dcMotor.get(driveLeftFront)
-        val motorBackLeft: DcMotor = hardwareMap.dcMotor.get(driveLeftRear)
-        val motorFrontRight: DcMotor = hardwareMap.dcMotor.get(driveRightFront)
-        val motorBackRight: DcMotor = hardwareMap.dcMotor.get(driveRightRear)
+
+
+        //motors
+        val motorFrontLeft = hardwareMap.dcMotor[MecanumDrive.leftFrontName]
+        val motorBackLeft = hardwareMap.dcMotor[MecanumDrive.leftRearName]
+        val motorFrontRight = hardwareMap.dcMotor[MecanumDrive.rightFrontName]
+        val motorBackRight = hardwareMap.dcMotor[MecanumDrive.rightRearName]
 
         motorFrontRight.direction = DcMotorSimple.Direction.REVERSE
         motorBackLeft.direction = DcMotorSimple.Direction.REVERSE

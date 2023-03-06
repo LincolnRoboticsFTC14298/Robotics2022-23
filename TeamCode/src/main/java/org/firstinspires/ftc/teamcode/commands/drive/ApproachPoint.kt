@@ -1,9 +1,10 @@
 package org.firstinspires.ftc.teamcode.commands.drive
 
-import com.acmerobotics.roadrunner.geometry.Pose2d
-import com.acmerobotics.roadrunner.geometry.Vector2d
+import com.acmerobotics.roadrunner.Pose2d
+import com.acmerobotics.roadrunner.Twist2d
+import com.acmerobotics.roadrunner.Vector2d
 import com.arcrobotics.ftclib.command.SequentialCommandGroup
-import org.firstinspires.ftc.teamcode.subsystems.Mecanum
+import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive
 
 /**
  * Approaches a global point while accepting an input controlling speed or aggressiveness.
@@ -16,10 +17,10 @@ import org.firstinspires.ftc.teamcode.subsystems.Mecanum
  * @param maxTolerableAngleDifference   Maximum angle it can face away from the target in radians.
  */
 class ApproachPoint(
-    mecanum: Mecanum,
-    targetPoint: () -> Vector2d,
+    mecanum: MecanumDrive,
+    targetPoint: () -> Vector2d?,
     offsetPose: Pose2d = Pose2d(0.0, 0.0, 0.0),
-    input: () -> Vector2d,
+    input: () -> Twist2d,
     maxTolerableDistance: Double = 1.0, // in
     maxTolerableAngleDifference: Double = 0.05 // radians
 ) : SequentialCommandGroup() {
@@ -29,9 +30,12 @@ class ApproachPoint(
             ApproachRelativePoint(
                 mecanum,
                 {
-                    val pose = mecanum.getPoseEstimate()
-                    val dT = targetPoint.invoke().minus(pose.vec())
-                    dT.rotated(-pose.heading)
+                    val target = targetPoint.invoke()
+                    if (target != null ) {
+                        mecanum.pose.inverse() * target
+                    } else {
+                        null
+                    }
                 },
                 offsetPose,
                 input,

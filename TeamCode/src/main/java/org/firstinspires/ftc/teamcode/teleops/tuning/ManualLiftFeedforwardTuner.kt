@@ -2,17 +2,18 @@ package org.firstinspires.ftc.teamcode.teleops.tuning
 
 import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
+import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.subsystems.Lift
+import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor
 
-@TeleOp
 class ManualLiftFeedforwardTuner : OpMode() {
 
     lateinit var lift: Lift
 
     override fun init() {
-        lift = Lift(hardwareMap)
+        lift = Lift(hardwareMap, VoltageSensor(hardwareMap))
         telemetry = MultipleTelemetry(telemetry, FtcDashboard.getInstance().telemetry)
     }
 

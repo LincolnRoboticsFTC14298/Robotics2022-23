@@ -11,8 +11,6 @@ import com.qualcomm.robotcore.util.ElapsedTime
 import java.util.*
 import kotlin.math.sin
 
-@TeleOp(name = "PhotonTest")
-@Disabled
 class PhotonTest : OpMode() {
 
     lateinit var motor1: DcMotor
