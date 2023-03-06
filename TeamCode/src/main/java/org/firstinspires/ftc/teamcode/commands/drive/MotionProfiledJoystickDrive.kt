@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive
 /**
  * Manual joystick control of drivetrain.
  */
-class JoystickDrive(
+class MotionProfiledJoystickDrive(
     mecanum: MecanumDrive,
     input: () -> Twist2d,
     fieldCentric: () -> Boolean,

@@ -7,20 +7,23 @@ import com.acmerobotics.roadrunner.Twist2d
 import com.acmerobotics.roadrunner.Vector2d
 import com.arcrobotics.ftclib.command.CommandOpMode
 import com.arcrobotics.ftclib.gamepad.GamepadEx
+import com.arcrobotics.ftclib.gamepad.GamepadKeys
 import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import org.firstinspires.ftc.teamcode.commands.drive.JoystickDrive
+import org.firstinspires.ftc.teamcode.commands.drive.MotionProfiledJoystickDrive
+import org.firstinspires.ftc.teamcode.commands.drive.SimpleJoystickDrive
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive
 import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer
 import org.firstinspires.ftc.teamcode.subsystems.Vision
 import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor
 
-@TeleOp
-@Disabled
 class VisionTest : CommandOpMode() {
 
     private lateinit var vision: Vision
     private lateinit var mecanum: MecanumDrive
+
+    private var fieldCentric = true
+    private var usePose = false
 
     override fun initialize() {
         telemetry = MultipleTelemetry(telemetry, FtcDashboard.getInstance().telemetry)
@@ -33,20 +36,21 @@ class VisionTest : CommandOpMode() {
 
         val driver1 = GamepadEx(gamepad1)
 
-        /**
-         * Drive
-         */
         val input = { Twist2d(Vector2d(driver1.leftY, -driver1.leftX), -driver1.rightX) }
 
-        var fieldCentric = true
-        val fieldCentricProvider = { fieldCentric }
 
-        mecanum.defaultCommand = JoystickDrive(mecanum, input, fieldCentricProvider) //obstacleAvoidanceProvider)
+        val fieldCentricProvider = { fieldCentric }
+        driver1.getGamepadButton(GamepadKeys.Button.A).whenPressed( Runnable { fieldCentric = !fieldCentric } )
+
+        driver1.getGamepadButton(GamepadKeys.Button.B).whenPressed( Runnable { usePose = !usePose } )
+
+        mecanum.defaultCommand = SimpleJoystickDrive(mecanum, input, fieldCentricProvider)
     }
 
     override fun run() {
-        super.run()
-        vision.fetchTelemetry(telemetry, mecanum.pose)
+        telemetry.addData("Field Centric", fieldCentric)
+        telemetry.addData("Use Pose", usePose)
+        vision.fetchTelemetry(telemetry, if (usePose) mecanum.pose else null)
         telemetry.update()
     }
 
