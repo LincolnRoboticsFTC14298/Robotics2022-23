@@ -11,10 +11,13 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.IMU
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.teamcode.FieldConfig
 import org.firstinspires.ftc.teamcode.util.*
 import java.util.*
 import kotlin.math.ceil
+import kotlin.math.max
+
 
 @Config
 class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Localizer, val voltageSensor: VoltageSensor) : SubsystemBase() {
@@ -58,16 +61,20 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
         private var lastRightRearPos: Int
         private var lastRightFrontPos: Int
 
+        private var lastHeading: Rotation2d
+
         init {
-            leftFront = RawEncoder(this@MecanumDrive.leftFront)
-            leftRear = RawEncoder(leftBack)
-            rightRear = RawEncoder(rightBack)
-            rightFront = RawEncoder(this@MecanumDrive.rightFront)
+            leftFront = OverflowEncoder(RawEncoder(this@MecanumDrive.leftFront))
+            leftRear = OverflowEncoder(RawEncoder(this@MecanumDrive.leftBack))
+            rightRear = OverflowEncoder(RawEncoder(this@MecanumDrive.rightBack))
+            rightFront = OverflowEncoder(RawEncoder(this@MecanumDrive.rightFront))
 
             lastLeftFrontPos = leftFront.positionAndVelocity.position
             lastLeftRearPos = leftRear.positionAndVelocity.position
             lastRightRearPos = rightRear.positionAndVelocity.position
             lastRightFrontPos = rightFront.positionAndVelocity.position
+
+            lastHeading = Rotation2d.exp(imu.robotYawPitchRollAngles.getYaw(AngleUnit.RADIANS))
         }
 
         override fun updateAndGetIncr(): Twist2dIncrDual<Time> {
@@ -76,37 +83,49 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
             val rightRearPosVel = rightRear.positionAndVelocity
             val rightFrontPosVel = rightFront.positionAndVelocity
 
-            val incrs: MecanumKinematics.WheelIncrements<Time> = MecanumKinematics.WheelIncrements(
-                DualNum<Time>(
-                    listOf(
-                        (leftFrontPosVel.position - lastLeftFrontPos).toDouble(),
-                        leftFrontPosVel.velocity.toDouble()
-                    )
-                ) * inPerTick,
-                DualNum<Time>(
-                    listOf(
-                        (leftRearPosVel.position - lastLeftRearPos).toDouble(),
-                        leftRearPosVel.velocity.toDouble()
-                    )
-                ) * inPerTick,
-                DualNum<Time>(
-                    listOf(
-                        (rightRearPosVel.position - lastRightRearPos).toDouble(),
-                        rightRearPosVel.velocity.toDouble()
-                    )
-                ) * inPerTick,
-                DualNum<Time>(
-                    listOf(
-                        (rightFrontPosVel.position - lastRightFrontPos).toDouble(),
-                        rightFrontPosVel.velocity.toDouble()
-                    )
-                ) * inPerTick
+            val heading = Rotation2d.exp(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS))
+            val headingDelta = heading.minus(lastHeading)
+
+            val (transIncr, rotIncr) = kinematics.forward(
+                MecanumKinematics.WheelIncrements(
+                    DualNum<Time>(
+                        listOf(
+                            leftFrontPosVel.position - lastLeftFrontPos + kinematics.trackWidth * headingDelta,
+                            leftFrontPosVel.velocity.toDouble()
+                        )
+                    ).times(IN_PER_TICK),
+                    DualNum<Time>(
+                        listOf(
+                            leftRearPosVel.position - lastLeftRearPos + kinematics.trackWidth * headingDelta,
+                            leftRearPosVel.velocity.toDouble()
+                        )
+                    ).times(IN_PER_TICK),
+                    DualNum<Time>(
+                        listOf(
+                            rightRearPosVel.position - lastRightRearPos - kinematics.trackWidth * headingDelta,
+                            rightRearPosVel.velocity.toDouble()
+                        )
+                    ).times(IN_PER_TICK),
+                    DualNum<Time>(
+                        listOf(
+                            rightFrontPosVel.position - lastRightFrontPos - kinematics.trackWidth * headingDelta,
+                            rightFrontPosVel.velocity.toDouble()
+                        )
+                    ).times(IN_PER_TICK)
+                )
             )
+
             lastLeftFrontPos = leftFrontPosVel.position
             lastLeftRearPos = leftRearPosVel.position
             lastRightRearPos = rightRearPosVel.position
             lastRightFrontPos = rightFrontPosVel.position
-            return kinematics.forward(incrs)
+
+            lastHeading = heading
+
+            return Twist2dIncrDual(
+                transIncr,
+                rotIncr.drop(1).addFront(headingDelta)
+            )
         }
     }
 
@@ -166,11 +185,18 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
 
     fun setDrivePowers(powers: Twist2d) {
         val wheelVels: MecanumKinematics.WheelVelocities<Time> =
-            kinematics.inverse(Twist2dDual.constant(powers, 1))
-        leftFront.power = wheelVels.leftFront[0]
-        leftBack.power = wheelVels.leftBack[0]
-        rightBack.power = wheelVels.rightBack[0]
-        rightFront.power = wheelVels.rightFront[0]
+            MecanumKinematics(1.0)
+                .inverse(Twist2dDual.constant(powers, 1))
+
+        var maxPowerMag = 1.0
+        for (power in wheelVels.all()) {
+            maxPowerMag = max(maxPowerMag, power.value())
+        }
+
+        leftFront.power = wheelVels.leftFront[0] / maxPowerMag
+        leftBack.power = wheelVels.leftBack[0] / maxPowerMag
+        rightBack.power = wheelVels.rightBack[0] / maxPowerMag
+        rightFront.power = wheelVels.rightFront[0] / maxPowerMag
     }
 
     /**
