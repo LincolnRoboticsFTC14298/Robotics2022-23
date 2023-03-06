@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.util
 
-import com.acmerobotics.roadrunner.geometry.Pose2d
-import com.acmerobotics.roadrunner.geometry.Vector2d
+import com.acmerobotics.roadrunner.Pose2d
+import com.acmerobotics.roadrunner.Vector2d
 import org.ejml.simple.SimpleMatrix
 
 operator fun SimpleMatrix.times(M: SimpleMatrix): SimpleMatrix = this.mult(M)
@@ -22,7 +22,7 @@ fun vectorToMatrix(vector: Vector2d) =
     SimpleMatrix(arrayOf(doubleArrayOf(vector.x, vector.y))).transpose()
 
 fun poseToMatrix(pose: Pose2d) =
-    SimpleMatrix(arrayOf(doubleArrayOf(pose.x, pose.y, pose.heading))).transpose()
+    SimpleMatrix(arrayOf(doubleArrayOf(pose.trans.x, pose.trans.y, pose.rot.log()))).transpose()
 
 
 fun matrixToVector(matrix: SimpleMatrix) =

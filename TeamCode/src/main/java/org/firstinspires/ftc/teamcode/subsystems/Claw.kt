@@ -2,14 +2,17 @@ package org.firstinspires.ftc.teamcode.subsystems
 
 import android.graphics.Color
 import android.util.Log
-import com.acmerobotics.roadrunner.profile.MotionProfile
-import com.acmerobotics.roadrunner.profile.MotionProfileGenerator
-import com.acmerobotics.roadrunner.profile.MotionState
+import com.acmerobotics.dashboard.canvas.Canvas
+import com.acmerobotics.roadrunner.Pose2d
+import com.acmerobotics.roadrunner.TimeProfile
+import com.acmerobotics.roadrunner.Vector2d
+import com.acmerobotics.roadrunner.constantProfile
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.arcrobotics.ftclib.hardware.SimpleServo
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor
 import com.qualcomm.robotcore.util.ElapsedTime
+import com.qualcomm.robotcore.util.Range.clip
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.RobotConfig
 import org.firstinspires.ftc.teamcode.RobotConfig.clawClosedPosition
@@ -30,18 +33,13 @@ class Claw(hwMap: HardwareMap, startingPosition: Double = clawClosedPosition) : 
     private var colorSensor = hwMap.get(NormalizedColorSensor::class.java, colorSensorName)
 
     private var timer = ElapsedTime()
-    private lateinit var motionProfile: MotionProfile
+    private lateinit var motionProfile: TimeProfile
 
     private var setpoint: Double = 0.0
         set(position) {
-            field = position
+            field = clip(position, 0.0, 1.0)
             timer.reset()
-            motionProfile = MotionProfileGenerator.generateSimpleMotionProfile(
-                MotionState(getPositionEstimate(), 0.0, 0.0),
-                MotionState(position, 0.0, 0.0),
-                RobotConfig.clawMaxVel,
-                RobotConfig.clawMaxAccel
-            )
+            motionProfile = TimeProfile(constantProfile(position - getPositionEstimate(), 0.0, RobotConfig.clawMaxVel, -RobotConfig.clawMaxAccel, RobotConfig.clawMaxAccel).baseProfile)
             Log.i("Claw desired position", setpoint.toString())
         }
 
@@ -53,8 +51,7 @@ class Claw(hwMap: HardwareMap, startingPosition: Double = clawClosedPosition) : 
 
     override fun periodic() {
         Log.v("Claw estimated angle", getPositionEstimate().toString())
-        val state = motionProfile[timer.seconds()]
-        servo.position = state.x
+        servo.position = motionProfile[timer.seconds()].value()
     }
 
     /**
@@ -79,7 +76,7 @@ class Claw(hwMap: HardwareMap, startingPosition: Double = clawClosedPosition) : 
      * Confirms if claw is at target.
      */
     fun atTarget() : Boolean {
-        return timer.seconds() > motionProfile.duration()
+        return timer.seconds() > motionProfile.duration
     }
 
     private fun getPositionEstimate() : Double {
@@ -104,6 +101,16 @@ class Claw(hwMap: HardwareMap, startingPosition: Double = clawClosedPosition) : 
     fun fetchTelemetry(telemetry: Telemetry) {
         telemetry.addData("Position Estimate", getPositionEstimate())
         telemetry.addData("Desired position", setpoint)
+    }
+
+    fun drawClaw(canvas: Canvas, clawOffset: Vector2d, pose: Pose2d) {
+        canvas.setStroke("#8CA231")
+        val (x, y) = pose.trans.plus(
+            pose.rot.inverse().times(
+                clawOffset
+            )
+        )
+        canvas.fillCircle(x, y, RobotConfig.coneDiameter / 2.0 * 1.2)
     }
 
 }

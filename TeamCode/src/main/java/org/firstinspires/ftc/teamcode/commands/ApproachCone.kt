@@ -1,13 +1,12 @@
 package org.firstinspires.ftc.teamcode.commands
 
-import com.acmerobotics.roadrunner.geometry.Vector2d
-import com.arcrobotics.ftclib.command.*
+import com.acmerobotics.roadrunner.Twist2d
+import com.arcrobotics.ftclib.command.InstantCommand
+import com.arcrobotics.ftclib.command.ParallelDeadlineGroup
+import com.arcrobotics.ftclib.command.SequentialCommandGroup
+import com.arcrobotics.ftclib.command.WaitUntilCommand
 import org.firstinspires.ftc.teamcode.commands.drive.ApproachRelativePoint
-import org.firstinspires.ftc.teamcode.subsystems.Claw
-import org.firstinspires.ftc.teamcode.subsystems.Lift
-import org.firstinspires.ftc.teamcode.subsystems.Passthrough
-import org.firstinspires.ftc.teamcode.subsystems.Mecanum
-import org.firstinspires.ftc.teamcode.subsystems.Vision
+import org.firstinspires.ftc.teamcode.subsystems.*
 
 /**
  * Drives until it detects a cone using vision. It then precisely aligns
@@ -17,12 +16,12 @@ import org.firstinspires.ftc.teamcode.subsystems.Vision
  * TODO: use GVF
  */
 class ApproachCone(
-    mecanum: Mecanum,
+    mecanum: MecanumDrive,
     vision: Vision,
     lift: Lift,
     passthrough: Passthrough,
     claw: Claw,
-    input: () -> Vector2d
+    input: () -> Twist2d
 ) : SequentialCommandGroup() {
 
     init {
@@ -34,9 +33,9 @@ class ApproachCone(
                 // Driving
                 ApproachRelativePoint(
                     mecanum,
-                    { vision.getClosestConePosition(pose = mecanum.getPoseEstimate()) },
-                    lift.getFutureRelativePosition() + passthrough.getFutureRelativePosition(),
-                    input
+                    { vision.getClosestCone(mecanum.pose)?.toVector() },
+                    lift.getFutureRelativePosition() * passthrough.getFutureRelativePosition(),
+                    { Twist2d(-input.invoke().transVel, input.invoke().rotVel) }
                 )
             ),
             InstantCommand(vision::startStreamingRearCamera)

@@ -1,7 +1,8 @@
 package org.firstinspires.ftc.teamcode.teleops
 
-import com.acmerobotics.roadrunner.geometry.Pose2d
-import com.acmerobotics.roadrunner.geometry.Vector2d
+import com.acmerobotics.roadrunner.Pose2d
+import com.acmerobotics.roadrunner.Twist2d
+import com.acmerobotics.roadrunner.Vector2d
 import com.arcrobotics.ftclib.command.*
 import com.arcrobotics.ftclib.command.button.Trigger
 import com.arcrobotics.ftclib.gamepad.GamepadEx
@@ -9,16 +10,11 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys
 import com.arcrobotics.ftclib.gamepad.TriggerReader
 import com.outoftheboxrobotics.photoncore.PhotonCore
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.RobotConfig
 import org.firstinspires.ftc.teamcode.commands.*
 import org.firstinspires.ftc.teamcode.commands.drive.JoystickDrive
-import org.firstinspires.ftc.teamcode.drive.PoseStorage
-import org.firstinspires.ftc.teamcode.drive.localization.MecanumMonteCarloLocalizer
-import org.firstinspires.ftc.teamcode.drive.localization.OdometryLocalizer
+import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer
 import org.firstinspires.ftc.teamcode.subsystems.*
-import org.firstinspires.ftc.teamcode.util.arrayToRowMatrix
-import java.time.Instant
 
 @TeleOp
 class BasicTeleOp : CommandOpMode() {
@@ -30,15 +26,14 @@ class BasicTeleOp : CommandOpMode() {
          * Initialize hardware                              *
          ****************************************************/
 
-        val lift = Lift(hardwareMap)
+        val voltageSensor = VoltageSensor(hardwareMap)
+        val lift = Lift(hardwareMap, voltageSensor)
         val claw = Claw(hardwareMap)
         val passthrough = Passthrough(hardwareMap)
         val vision = Vision(hardwareMap)
         //val localizer = MecanumMonteCarloLocalizer(hardwareMap, vision, Pose2d(), arrayToRowMatrix(doubleArrayOf()))
         val localizer = OdometryLocalizer(hardwareMap)
-        localizer.poseEstimate = Pose2d(0.0, 0.0, Math.toRadians(90.0))//PoseStorage.currentPose
-
-        val mecanum = Mecanum(hardwareMap, localizer, vision)
+        val mecanum = MecanumDrive(hardwareMap, Pose2d(0.0, 0.0, Math.toRadians(90.0)), localizer, voltageSensor)
 
         register(lift, claw, passthrough, mecanum, vision)
 
@@ -47,15 +42,13 @@ class BasicTeleOp : CommandOpMode() {
         /**
          * Drive
          */
-        val input = { Vector2d(driver1.leftY, -driver1.leftX) }
-        val rotation = { -driver1.rightX }
+        val input = { Twist2d(Vector2d(driver1.leftY, -driver1.leftX), -driver1.rightX) }
 
         var fieldCentric = false
 
         mecanum.defaultCommand = JoystickDrive(
             mecanum,
             input,
-            rotation,
             { fieldCentric }
         )
 

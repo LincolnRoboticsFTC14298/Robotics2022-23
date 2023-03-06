@@ -1,14 +1,19 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
 import com.acmerobotics.dashboard.FtcDashboard
-import com.acmerobotics.roadrunner.geometry.Pose2d
-import com.acmerobotics.roadrunner.geometry.Vector2d
+import com.acmerobotics.dashboard.canvas.Canvas
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket
+import com.acmerobotics.roadrunner.Pose2d
+import com.acmerobotics.roadrunner.Vector2d
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.teamcode.RobotConfig
+import org.firstinspires.ftc.teamcode.RobotConfig.coneDiameter
+import org.firstinspires.ftc.teamcode.RobotConfig.poleDiameter
 import org.firstinspires.ftc.teamcode.RobotConfig.singleConeToJunctionMaxDistance
 import org.firstinspires.ftc.teamcode.RobotConfig.stackToPoleMaxDistance
 import org.firstinspires.ftc.teamcode.vision.AprilTagDetectionPipeline
@@ -20,6 +25,10 @@ import org.openftc.easyopencv.OpenCvCameraFactory
 import org.openftc.easyopencv.OpenCvCameraRotation
 import org.openftc.easyopencv.OpenCvInternalCamera
 import org.openftc.easyopencv.OpenCvPipeline
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.sin
+
 
 
 /**
@@ -95,49 +104,6 @@ class Vision(
         })
     }
 
-    var numFramesWithoutDetection = 0
-
-    private val DECIMATION_HIGH = 3f
-    private val DECIMATION_LOW = 2f
-    private val THRESHOLD_HIGH_DECIMATION_RANGE_FEET = 3.0f
-    private val THRESHOLD_NUM_FRAMES_NO_DETECTION_BEFORE_LOW_DECIMATION = 4
-    fun updateAprilTag() : AprilTagResult? {
-        // Calling getDetectionsUpdate() will only return an object if there was a new frame
-        // processed since the last time we called it. Otherwise, it will return null. This
-        // enables us to only run logic when there has been a new frame, as opposed to the
-        // getLatestDetections() method which will always return an object.
-        val aprilTagDetectionPipeline = (FrontPipeline.APRIL_TAG.pipeline as AprilTagDetectionPipeline)
-        val detections: ArrayList<AprilTagDetection> = aprilTagDetectionPipeline.detectionsUpdate
-
-        // If there's been a new frame...
-        if (detections != null) {
-
-            // If we don't see any tags
-            if (detections.size == 0) {
-                numFramesWithoutDetection++
-
-                // If we haven't seen a tag for a few frames, lower the decimation
-                // so we can hopefully pick one up if we're e.g. far back
-                if (numFramesWithoutDetection >= THRESHOLD_NUM_FRAMES_NO_DETECTION_BEFORE_LOW_DECIMATION) {
-                    aprilTagDetectionPipeline.setDecimation(DECIMATION_LOW)
-                }
-            } else {
-                numFramesWithoutDetection = 0
-
-                // If the target is within 1 meter, turn on high decimation to
-                // increase the frame rate
-                if (detections[0].pose.z < THRESHOLD_HIGH_DECIMATION_RANGE_FEET) {
-                    aprilTagDetectionPipeline.setDecimation(DECIMATION_HIGH)
-                }
-                return AprilTagResult.find(detections.minBy{it.pose.z}.id)
-            }
-        }
-
-        return null
-    }
-
-
-
     /**
      * Starts streaming the front camera.
      */
@@ -178,21 +144,63 @@ class Vision(
         webCam.setPipeline(pipeline.pipeline)
     }
 
+    var numFramesWithoutDetection = 0
+
+    private val DECIMATION_HIGH = 3f
+    private val DECIMATION_LOW = 2f
+    private val THRESHOLD_HIGH_DECIMATION_RANGE_FEET = 3.0f
+    private val THRESHOLD_NUM_FRAMES_NO_DETECTION_BEFORE_LOW_DECIMATION = 4
+    fun updateAprilTag() : AprilTagResult? {
+        // Calling getDetectionsUpdate() will only return an object if there was a new frame
+        // processed since the last time we called it. Otherwise, it will return null. This
+        // enables us to only run logic when there has been a new frame, as opposed to the
+        // getLatestDetections() method which will always return an object.
+        val aprilTagDetectionPipeline = (FrontPipeline.APRIL_TAG.pipeline as AprilTagDetectionPipeline)
+        val detections: ArrayList<AprilTagDetection> = aprilTagDetectionPipeline.detectionsUpdate
+
+        // If there's been a new frame...
+        if (detections != null) {
+
+            // If we don't see any tags
+            if (detections.size == 0) {
+                numFramesWithoutDetection++
+
+                // If we haven't seen a tag for a few frames, lower the decimation
+                // so we can hopefully pick one up if we're e.g. far back
+                if (numFramesWithoutDetection >= THRESHOLD_NUM_FRAMES_NO_DETECTION_BEFORE_LOW_DECIMATION) {
+                    aprilTagDetectionPipeline.setDecimation(DECIMATION_LOW)
+                }
+            } else {
+                numFramesWithoutDetection = 0
+
+                // If the target is within 1 meter, turn on high decimation to
+                // increase the frame rate
+                if (detections[0].pose.z < THRESHOLD_HIGH_DECIMATION_RANGE_FEET) {
+                    aprilTagDetectionPipeline.setDecimation(DECIMATION_HIGH)
+                }
+                return AprilTagResult.find(detections.minBy{ it.pose.z }.id)
+            }
+        }
+
+        return null
+    }
 
     data class ObservationResult(val angle: Double, val distance: Double) {
 
         companion object {
-            fun vector(vector: Vector2d) : ObservationResult {
-               return ObservationResult(vector.angle(), vector.norm())
+            fun fromVector(vector: Vector2d) : ObservationResult {
+               return ObservationResult(vector.angleCast().log(), vector.norm())
             }
         }
-        fun toVector() = Vector2d.polar(distance, angle)
+        fun toVector() = Vector2d(distance * cos(angle), distance * sin(angle))
 
-        fun distance(other: ObservationResult) : Double {
-            return toVector().distTo(other.toVector())
-        }
+        fun distance(other: ObservationResult) = (toVector() - other.toVector()).norm()
 
-        override fun toString() = String.format("(%.3f, %.3f)", angle, distance)
+        fun sqrDistance(other: ObservationResult) = (toVector() - other.toVector()).sqrNorm()
+
+        operator fun plus(vector: Vector2d) = fromVector(vector + toVector())
+
+        override fun toString() = String.format("Angle: %.1f, Distance: %.2f", Math.toDegrees(angle), distance)
     }
 
     /**
@@ -212,7 +220,7 @@ class Vision(
             if (closestStack != null && closestStack.distance(pole) < stackToPoleMaxDistance) { // If sufficiently close, simply take the average between them
                 val observationVector = closestStack.toVector()
 
-                landmarks.add(ObservationResult.vector(observationVector))
+                landmarks.add(ObservationResult.fromVector(observationVector))
                 stacks.remove(closestStack) // Remove once identified as a pair
             } else {
                 landmarks.add(ObservationResult(pole.angle, pole.distanceByPitch ?: pole.distanceByWidth))
@@ -222,59 +230,48 @@ class Vision(
         return landmarks
     }
 
-    fun getLandmarkInfo(): List<ObservationResult> {
-        val cameraLandmarks = getCameraSpaceLandmarkInfo()
-        return List(cameraLandmarks.size) { i ->
-            val cameraLandmark = cameraLandmarks[i]
-            val robotLandmark = cameraLandmark.toVector() + RobotConfig.CameraData.LOGITECH_C920.relativePosition
-            ObservationResult.vector(robotLandmark)
-        }
-    }
+    fun getLandmarkInfo(): List<ObservationResult> = getCameraSpaceLandmarkInfo().map{ it + RobotConfig.CameraData.LOGITECH_C920.relativePosition }
 
     /**
      * Returns pole position in tangent space taking into account cones
      */
-    fun getClosestPolePosition(): Vector2d? {
-        return getLandmarkInfo().minByOrNull { it.distance }?.toVector()
-    }
+    fun getClosestPole() = getLandmarkInfo().minByOrNull { it.distance }
 
-    fun getClosestPoleAngle(): Double? {
-        return getClosestPolePosition()?.angle()
-    }
-    fun getClosestConePosition(pose: Pose2d? = null, useWidth: Boolean = false): Vector2d? {
+    fun getClosestCone(pose: Pose2d? = null, useWidth: Boolean = false): ObservationResult? {
         val cones = phoneCamPipeline.singleConeResults.toMutableList()
         val poles = phoneCamPipeline.poleResults.toMutableList()
         val junctions = enumValues<RobotConfig.Junction>()
 
         cones.forEachIndexed { i, cone ->
             val closestPole = poles.minByOrNull { it.distance(cone) }
+
+            // Remove if on pole
             if (closestPole != null &&
                 closestPole.distance(cone) < singleConeToJunctionMaxDistance) {
                 cones.removeAt(i)
                 poles.remove(closestPole)
-            } else if (pose != null) {
-                val closestJunction = junctions.minBy {
-                    val coneFieldFrame = cone.toVector().rotated(-pose.heading) + pose.vec()
-                    it.vector.distTo(coneFieldFrame)
-                }
-                if (closestJunction.vector.distTo(cone.toVector()) < singleConeToJunctionMaxDistance) {
+            }
+            else if (pose != null) {
+                // Remove if on junction
+                val coneFieldFrame = pose * cone.toVector()
+                val closestJunction = junctions.minBy { (it.vector - coneFieldFrame).sqrNorm() }
+                if ((closestJunction.vector - coneFieldFrame).norm() < singleConeToJunctionMaxDistance) {
                     cones.removeAt(i)
                 }
             }
         }
 
+        // Get closest one
         val closestCone = cones.minByOrNull { it.distanceByPitch ?: if(useWidth) it.distanceByWidth else Double.MAX_VALUE }
-        return closestCone?.toVector()?.plus(RobotConfig.CameraData.PHONECAM.relativePosition)
+
+        // Turn into observation result
+        val closestConeObservation = closestCone?.let { ObservationResult(it.angle, it.distanceByPitch ?: it.distanceByWidth) }
+
+        // Transform by the relative phone camera position
+        return closestConeObservation?.plus(RobotConfig.CameraData.PHONECAM.relativePosition)
     }
 
-    /**
-     * @return Coordinate of the closest cone in the robot tangent space.
-     */
-    fun getClosestConeAngle(pose: Pose2d? = null): Double? {
-        return getClosestConePosition(pose = pose, useWidth = true)?.angle()
-    }
-
-    fun getRawStacks() : List<ObservationResult> {
+    private fun getRawConeStacks() : List<ObservationResult> {
         val stacks = mutableListOf<ObservationResult>()
 
         phoneCamPipeline.stackResults.forEach { stack ->
@@ -288,10 +285,33 @@ class Vision(
         return stacks
     }
 
+    private fun getRawPoles() : List<ObservationResult> {
+        val poles = mutableListOf<ObservationResult>()
+
+        phoneCamPipeline.poleResults.forEach { pole ->
+            if (pole.distanceByPitch != null && abs(pole.distanceByPitch - pole.distanceByWidth) < 3.0 ) { // TODO make 3.0 a parameter
+                poles.add(ObservationResult(pole.angle, pole.distanceByPitch))
+            } else {
+                poles.add(ObservationResult(pole.angle, pole.distanceByWidth))
+            }
+        }
+
+        (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).poleResults.forEach { pole ->
+            if (pole.distanceByPitch != null && abs(pole.distanceByPitch - pole.distanceByWidth) < 3.0 ) {
+                poles.add(ObservationResult(pole.angle, pole.distanceByPitch))
+            } else {
+                poles.add(ObservationResult(pole.angle, pole.distanceByWidth))
+            }
+        }
+
+        return poles
+    }
+
     fun fetchTelemetry(telemetry: Telemetry, pose: Pose2d? = null) {
         telemetry.addLine("Processed data")
-        telemetry.addData("Closest cone", "angle: %.1f distance: %.1f position: %s", Math.toDegrees(getClosestConeAngle(pose) ?: Double.NaN), getClosestConePosition(pose)?.norm() ?: Double.NaN , getClosestConePosition(pose)?.toString())
-        telemetry.addData("Closest pole", "angle: %.1f distance: %.1f position: %s", Math.toDegrees(getClosestPoleAngle() ?: Double.NaN), getClosestPolePosition()?.norm() ?: Double.NaN, getClosestPolePosition()?.toString())
+        telemetry.addData("Closest cone", getClosestCone(pose)?.toString())
+        telemetry.addData("Closest cone using width", "Angle: 0.1f", getClosestCone(pose, useWidth = true)?.angle)
+        telemetry.addData("Closest pole", getClosestPole()?.toString())
         telemetry.addData("Landmarks", getLandmarkInfo())
 
         telemetry.addLine()
@@ -299,6 +319,44 @@ class Vision(
         telemetry.addData("Stacks", (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).stackResults)
         telemetry.addData("Poles", (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).poleResults)
         telemetry.addData("Single cones", (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).singleConeResults)
+    }
+
+    fun drawObservations(canvas: Canvas, pose: Pose2d, showAll: Boolean = false) {
+
+        // Draw the landmarks
+        val landmarks = getLandmarkInfo()
+        canvas.setStroke("#F9A801")
+        for (landmark in landmarks) {
+            drawObservationResult(canvas, landmark, pose, poleDiameter / 2.0, true)
+        }
+
+        // Draw the closest cone
+        val cone = getClosestCone(pose, false)
+        if (cone != null) {
+            canvas.setStroke("#253368")
+            drawObservationResult(canvas, cone, pose, coneDiameter / 2.0, true)
+        }
+
+        if (showAll) {
+            val poles = getRawPoles()
+            canvas.setStroke("#EB5E31")
+            for (pole in poles) {
+                drawObservationResult(canvas, pole, pose, poleDiameter / 2.0, false)
+            }
+
+            val stacks = getRawConeStacks()
+            canvas.setStroke("#2A4161")
+            for (stack in stacks) {
+                drawObservationResult(canvas, stack, pose, coneDiameter / 2.0, false)
+            }
+        }
+
+    }
+
+    private fun drawObservationResult(canvas: Canvas, observation: ObservationResult, pose: Pose2d, radius: Double, fill: Boolean = true) {
+        val (x, y) = pose.trans.plus(pose.rot.inverse().times(observation.toVector()))
+        if (fill) canvas.fillCircle(x, y, radius)
+        else canvas.strokeCircle(x, y, radius)
     }
 
 }

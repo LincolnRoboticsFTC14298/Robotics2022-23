@@ -1,17 +1,13 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
 import android.util.Log
-import com.acmerobotics.roadrunner.geometry.Pose2d
-import com.acmerobotics.roadrunner.profile.MotionProfile
-import com.acmerobotics.roadrunner.profile.MotionProfileGenerator
-import com.acmerobotics.roadrunner.profile.MotionState
+import com.acmerobotics.roadrunner.*
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.arcrobotics.ftclib.hardware.ServoEx
 import com.arcrobotics.ftclib.hardware.SimpleServo
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.robotcore.external.Telemetry
-import org.firstinspires.ftc.teamcode.RobotConfig
 import org.firstinspires.ftc.teamcode.RobotConfig.passthroughDepositAngle
 import org.firstinspires.ftc.teamcode.RobotConfig.passthroughMaxDegree
 import org.firstinspires.ftc.teamcode.RobotConfig.passthroughMinDegree
@@ -24,7 +20,6 @@ import org.firstinspires.ftc.teamcode.RobotConfig.passthroughOffsetDistanceFromL
 import org.firstinspires.ftc.teamcode.RobotConfig.passthroughTimeTolerance
 import org.firstinspires.ftc.teamcode.RobotConfig.rightPassthroughName
 import java.lang.Math.toRadians
-import kotlin.math.abs
 import kotlin.math.cos
 
 
@@ -53,18 +48,13 @@ class Passthrough(hwMap: HardwareMap, startingAngle: Double = passthroughMinDegr
     )
 
     private var timer = ElapsedTime()
-    private lateinit var motionProfile: MotionProfile
+    private lateinit var motionProfile: TimeProfile
 
     var setpoint: Double = 0.0
         set(angle) {
             field = angle
             timer.reset()
-            motionProfile = MotionProfileGenerator.generateSimpleMotionProfile(
-                MotionState(getAngleEstimate(), 0.0, 0.0),
-                MotionState(angle, 0.0, 0.0),
-                passthroughMaxVel,
-                passthroughMaxAccel
-            )
+            motionProfile = TimeProfile(constantProfile(field - getAngleEstimate(), 0.0, passthroughMaxVel, -passthroughMaxAccel, passthroughMaxAccel).baseProfile)
             Log.i("Passthrough desired angle", setpoint.toString())
         }
 
@@ -79,7 +69,7 @@ class Passthrough(hwMap: HardwareMap, startingAngle: Double = passthroughMinDegr
     // TODO: check direction of servo
 
     override fun periodic() {
-        val targetAngle = motionProfile[timer.seconds()].x
+        val targetAngle = motionProfile[timer.seconds()].value()
         servoLeft.turnToAngle(targetAngle)
         servoRight.turnToAngle(targetAngle)
 
@@ -135,18 +125,13 @@ class Passthrough(hwMap: HardwareMap, startingAngle: Double = passthroughMinDegr
      * @return If at desired angle based on time.
      */
     fun atTarget(): Boolean {
-        return timer.seconds() - motionProfile.duration() > passthroughTimeTolerance
+        return timer.seconds() - motionProfile.duration > passthroughTimeTolerance
     }
 
-    fun timeToTarget(angle: Double): Double {
-        val testProfile = MotionProfileGenerator.generateSimpleMotionProfile(
-            MotionState(getAngleEstimate(), 0.0, 0.0),
-            MotionState(angle, 0.0, 0.0),
-            passthroughMaxVel,
-            passthroughMaxAccel
-        )
-        return testProfile.duration()
-    }
+    fun timeToTarget(angle: Double) =
+        TimeProfile(
+            constantProfile(angle - getAngleEstimate(), 0.0, passthroughMaxVel, -passthroughMaxAccel, passthroughMaxAccel).baseProfile
+        ).duration
 
     /**
      * For debugging/tuning purposes

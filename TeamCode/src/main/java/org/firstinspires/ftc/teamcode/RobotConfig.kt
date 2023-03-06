@@ -1,11 +1,11 @@
 package org.firstinspires.ftc.teamcode
 
 import com.acmerobotics.dashboard.config.Config
-import com.acmerobotics.roadrunner.control.PIDCoefficients
-import com.acmerobotics.roadrunner.geometry.Vector2d
-import org.firstinspires.ftc.teamcode.subsystems.*
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive
-import org.firstinspires.ftc.teamcode.drive.localization.OdometryLocalizer
+import com.acmerobotics.roadrunner.Vector2d
+import org.firstinspires.ftc.teamcode.subsystems.Claw
+import org.firstinspires.ftc.teamcode.subsystems.Lift
+import org.firstinspires.ftc.teamcode.subsystems.Passthrough
+import org.firstinspires.ftc.teamcode.util.PIDCoefficients
 import org.opencv.core.CvType
 import org.opencv.core.Mat
 import org.opencv.core.MatOfDouble
@@ -89,41 +89,6 @@ object RobotConfig {
      ****************************************************/
 
     /**
-     * [SampleMecanumDrive]
-     */
-    @JvmField
-    var driveLeftFront: String = "leftFront"
-
-    @JvmField
-    var driveLeftRear: String = "leftRear"
-
-    @JvmField
-    var driveRightRear: String = "rightRear"
-
-    @JvmField
-    var driveRightFront: String = "rightFront"
-
-    /**
-     * [OdometryLocalizer]
-     */
-    const val leftEncoderName = "leftEncoder" // Must be ports 0 and 3
-    val rightEncoderName = driveRightRear
-    const val frontEncoderName = "frontEncoder" // port 1 or 2
-
-    var TICKS_PER_REV = 8192.0
-    var WHEEL_RADIUS = 1.37795 / 2.0 // in
-    var GEAR_RATIO = 1.0 // output (wheel) speed / input (encoder) speed
-
-    @JvmField
-    var X_MULTIPLIER = 1.0 // TODO multipliers for each individual encoder
-    @JvmField
-    var Y_MULTIPLIER = 1.0
-    @JvmField
-    var LATERAL_DISTANCE = 12.0 // in; distance between the left and right wheels
-    @JvmField
-    var FORWARD_OFFSET = 12.5 / 2.0 // in; offset of the lateral wheel
-
-    /**
      * [Lift]
      */
     const val leftLiftName = "leftLift"
@@ -154,7 +119,7 @@ object RobotConfig {
     var gravityFeedforward = 0.0
 
 
-    @JvmField
+    //@JvmField
     var liftCoeffs = PIDCoefficients(0.0, 0.0, 0.0) // TODO: Calculate from kV and kA
 
     val liftTargetErrorTolerance = 0.5 // in
@@ -189,7 +154,7 @@ object RobotConfig {
 
 
     /**
-     * Passthrough
+     * [Passthrough]
      */
     const val leftPassthroughName = "leftPassthrough"
     const val rightPassthroughName = "rightPassthrough"
@@ -233,22 +198,4 @@ object RobotConfig {
     const val visionToPoleMaxDistance = 5.0 // Difference between vision observation and pole location to be considered the same
     const val singleConeToJunctionMaxDistance = 4.0
 
-
-
-
-    /****************************************************
-     * Commands                                         *
-     ****************************************************/
-
-    // Time in seconds the passthrough starts moving before the lift reaches its target height.
-    @JvmField
-    val poleDepositAnticipationTime = 0.5
-
-
-    /****************************************************
-     * Driver Controls                                  *
-     ****************************************************/
-
-    const val teleOpSetPointAdj = 1.0
-    const val teleOpDepositAdj = 5.0
 }

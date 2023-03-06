@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.RobotConfig
 import org.firstinspires.ftc.teamcode.subsystems.Lift
+import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor
 import java.lang.Math.toRadians
 import kotlin.math.sin
 
@@ -16,7 +17,7 @@ class LiftDistancePerPulseTuner() : OpMode() {
     private lateinit var lift: Lift
 
     override fun init() {
-        lift = Lift(hardwareMap)
+        lift = Lift(hardwareMap, VoltageSensor(hardwareMap))
         telemetry = MultipleTelemetry(telemetry, FtcDashboard.getInstance().telemetry)
     }
 

@@ -1,11 +1,8 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
+import org.firstinspires.ftc.teamcode.util.PIDFController
 import android.util.Log
-import com.acmerobotics.roadrunner.control.PIDFController
-import com.acmerobotics.roadrunner.geometry.Pose2d
-import com.acmerobotics.roadrunner.profile.MotionProfile
-import com.acmerobotics.roadrunner.profile.MotionProfileGenerator
-import com.acmerobotics.roadrunner.profile.MotionState
+import com.acmerobotics.roadrunner.*
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.arcrobotics.ftclib.hardware.motors.Motor
 import com.arcrobotics.ftclib.hardware.motors.MotorGroup
@@ -44,7 +41,7 @@ import kotlin.math.sin
  * Lift consists of two multistage slides powered by a motor which pulls a string.
  * @param hwMap        HardwareMap.
  */
-class Lift(hwMap: HardwareMap) : SubsystemBase() {
+class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : SubsystemBase() {
 
     /**
      * Avoid using the individual motors, it's best to use the group.
@@ -54,12 +51,10 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
     private val rightMotor = Motor(hwMap, rightLiftName)
     private val motorGroup = MotorGroup(leftMotor, rightMotor)
 
-    private val batteryVoltageSensor = hwMap.voltageSensor.iterator().next()
-
     private val limit = hwMap.get(TouchSensor::class.java, magnetLimitName)
 
     private val controller = PIDFController(liftCoeffs, liftKStatic, liftKV, liftKA)
-    private lateinit var motionProfile: MotionProfile
+    private lateinit var motionProfile: TimeProfile
 
     private var filter: KalmanFilter
     private var state: DoubleArray = doubleArrayOf(0.0, 0.0, 0.0)
@@ -78,12 +73,7 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
         set(length) {
             profileTimer.reset()
             field = Range.clip(length, 0.0, liftMaxExtension)
-            motionProfile = MotionProfileGenerator.generateSimpleMotionProfile(
-                MotionState(getExtensionLength(), getVelocity(), getAcceleration()),
-                MotionState(field, 0.0, 0.0),
-                liftMaxVel,
-                liftMaxAccel
-            )
+            motionProfile = TimeProfile(constantProfile(field - getExtensionLength(), 0.0, liftMaxVel, -liftMaxAccel, liftMaxAccel).baseProfile)
             Log.i("Lift setpoint", length.toString())
         }
 
@@ -109,25 +99,25 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
         retract()
     }
 
-    lateinit var desiredState: MotionState
+    lateinit var desiredState: DoubleArray
     override fun periodic() {
         // TODO: Maybe only set power if it has actually changed!! Do this through thresholding
         //  integrating current power with desired power. Write wrappers for automatic voltage
         //  compensation.
         //  Naive optimization would only write when motion profiling is active; heavily trusts ff
 
-        desiredState = motionProfile[profileTimer.seconds()]
+        desiredState = motionProfile[profileTimer.seconds()].values().toDoubleArray()
 
         controller.apply {
-            targetPosition = desiredState.x
-            targetVelocity = desiredState.v
-            targetAcceleration = desiredState.a + gravityFeedforward
+            targetPosition = desiredState[0]
+            targetVelocity = desiredState[1]
+            targetAcceleration = desiredState[2] + gravityFeedforward
         }
 
         checkEncoder()
 
         // Get current state estimates using kalman filter//
-        val u = doubleArrayOf(desiredState.x-state[0], desiredState.v-state[1], desiredState.a-state[2]) // Subtract desired state with previous state estimate
+        val u = desiredState.zip(state).map { it.first - it.second }.toDoubleArray()
         updateFilter(arrayToColumnMatrix(u))
 
         setPower(controller.update(getExtensionLength(), getVelocity()))
@@ -188,7 +178,7 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
      * @param power         Percentage of the maximum speed of the lift.
      */
     fun setPower(power: Double) {
-        motorGroup.set(power * 12.0 / batteryVoltageSensor.voltage)
+        motorGroup.set(power * 12.0 / voltageSensor.voltage)
     }
 
     /**
@@ -249,7 +239,7 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
      * @return Time remaining from reaching the target.
      */
     fun timeFromTarget(): Double {
-        return motionProfile.duration() - profileTimer.seconds()
+        return motionProfile.duration - profileTimer.seconds()
     }
 
     /**
@@ -262,8 +252,8 @@ class Lift(hwMap: HardwareMap) : SubsystemBase() {
         telemetry.addData("Lift estimated length", getExtensionLength())
         telemetry.addData("Lift estimated velocity", getVelocity())
         telemetry.addData("Lift estimated acceleration", getAcceleration())
-        telemetry.addData("Target velocity", desiredState.v)
-        telemetry.addData("Velocity Error", desiredState.v - getVelocity())
+        telemetry.addData("Target velocity", desiredState[1])
+        telemetry.addData("Velocity Error", desiredState[1] - getVelocity())
     }
 
 }

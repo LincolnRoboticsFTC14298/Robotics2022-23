@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.subsystems.Lift
+import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor
 
 @TeleOp
 @Disabled
@@ -14,7 +15,7 @@ class LiftKalmanTest() : OpMode() {
     private lateinit var lift: Lift
 
     override fun init() {
-        lift = Lift(hardwareMap)
+        lift = Lift(hardwareMap, VoltageSensor(hardwareMap))
         telemetry = MultipleTelemetry(telemetry, FtcDashboard.getInstance().telemetry)
     }
 

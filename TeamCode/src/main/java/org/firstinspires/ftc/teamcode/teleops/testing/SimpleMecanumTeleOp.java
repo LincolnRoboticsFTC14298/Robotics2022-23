@@ -1,15 +1,11 @@
 package org.firstinspires.ftc.teamcode.teleops.testing;
 
-import static org.firstinspires.ftc.teamcode.RobotConfig.driveLeftFront;
-import static org.firstinspires.ftc.teamcode.RobotConfig.driveLeftRear;
-import static org.firstinspires.ftc.teamcode.RobotConfig.driveRightFront;
-import static org.firstinspires.ftc.teamcode.RobotConfig.driveRightRear;
-
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
+import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
 
 @TeleOp
 public class SimpleMecanumTeleOp extends LinearOpMode
@@ -19,10 +15,10 @@ public class SimpleMecanumTeleOp extends LinearOpMode
     {
 
         //motors
-        DcMotor motorFrontLeft  = hardwareMap.dcMotor.get(driveLeftFront);
-        DcMotor motorBackLeft = hardwareMap.dcMotor.get(driveLeftRear);
-        DcMotor motorFrontRight = hardwareMap.dcMotor.get(driveRightFront);
-        DcMotor motorBackRight = hardwareMap.dcMotor.get(driveRightRear);
+        DcMotor motorFrontLeft  = hardwareMap.dcMotor.get(MecanumDrive.leftFrontName);
+        DcMotor motorBackLeft = hardwareMap.dcMotor.get(MecanumDrive.leftRearName);
+        DcMotor motorFrontRight = hardwareMap.dcMotor.get(MecanumDrive.rightFrontName);
+        DcMotor motorBackRight = hardwareMap.dcMotor.get(MecanumDrive.rightRearName);
 
         motorFrontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         motorBackLeft.setDirection(DcMotorSimple.Direction.REVERSE);
