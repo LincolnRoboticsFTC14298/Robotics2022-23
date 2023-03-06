@@ -3,7 +3,8 @@ package org.firstinspires.ftc.teamcode.teleops.testing
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import com.qualcomm.robotcore.hardware.DcMotor
-import org.firstinspires.ftc.teamcode.RobotConfig
+import org.firstinspires.ftc.teamcode.FieldConfig
+import org.firstinspires.ftc.teamcode.subsystems.Lift
 
 @TeleOp
 class LiftManualTest : OpMode() {
@@ -11,8 +12,8 @@ class LiftManualTest : OpMode() {
     private lateinit var motorLeft: DcMotor
     private lateinit var motorRight: DcMotor
     override fun init() {
-        motorLeft = hardwareMap.dcMotor.get(RobotConfig.leftLiftName)
-        motorRight = hardwareMap.dcMotor.get(RobotConfig.rightLiftName)
+        motorLeft = hardwareMap.dcMotor.get(Lift.leftLiftName)
+        motorRight = hardwareMap.dcMotor.get(Lift.rightLiftName)
     }
 
     override fun loop() {

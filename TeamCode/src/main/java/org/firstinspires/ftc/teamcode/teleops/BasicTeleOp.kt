@@ -10,7 +10,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys
 import com.arcrobotics.ftclib.gamepad.TriggerReader
 import com.outoftheboxrobotics.photoncore.PhotonCore
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import org.firstinspires.ftc.teamcode.RobotConfig
+import org.firstinspires.ftc.teamcode.FieldConfig
 import org.firstinspires.ftc.teamcode.commands.*
 import org.firstinspires.ftc.teamcode.commands.drive.JoystickDrive
 import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer
@@ -66,7 +66,7 @@ class BasicTeleOp : CommandOpMode() {
             .getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
             .whenPressed(
                 SequentialCommandGroup(
-                    ReadyPoleDeposit(RobotConfig.PoleType.LOW, lift, passthrough),
+                    ReadyPoleDeposit(FieldConfig.PoleType.LOW, lift, passthrough),
                     approachPoleCommand
                 )
             )
@@ -75,7 +75,7 @@ class BasicTeleOp : CommandOpMode() {
             .getGamepadButton(GamepadKeys.Button.DPAD_UP)
             .whenPressed(
                 SequentialCommandGroup(
-                    ReadyPoleDeposit(RobotConfig.PoleType.MEDIUM, lift, passthrough),
+                    ReadyPoleDeposit(FieldConfig.PoleType.MEDIUM, lift, passthrough),
                     approachPoleCommand
                 )
             )
@@ -84,7 +84,7 @@ class BasicTeleOp : CommandOpMode() {
             .getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
             .whenPressed(
                 SequentialCommandGroup(
-                    ReadyPoleDeposit(RobotConfig.PoleType.HIGH, lift, passthrough),
+                    ReadyPoleDeposit(FieldConfig.PoleType.HIGH, lift, passthrough),
                     approachPoleCommand
                 )
             )

@@ -3,10 +3,10 @@ package org.firstinspires.ftc.teamcode.commands
 import com.arcrobotics.ftclib.command.InstantCommand
 import com.arcrobotics.ftclib.command.SequentialCommandGroup
 import com.arcrobotics.ftclib.command.WaitUntilCommand
-import org.firstinspires.ftc.teamcode.RobotConfig
-import org.firstinspires.ftc.teamcode.RobotConfig.passthroughDepositAngle
+import org.firstinspires.ftc.teamcode.FieldConfig
 import org.firstinspires.ftc.teamcode.subsystems.Lift
 import org.firstinspires.ftc.teamcode.subsystems.Passthrough
+import org.firstinspires.ftc.teamcode.subsystems.Passthrough.Companion.passthroughDepositAngle
 
 /**
  * Readies cone deposit at specified height.
@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Passthrough
  * @author Jared Haertel
  */
 class ReadyPoleDeposit(
-    pole: RobotConfig.PoleType,
+    pole: FieldConfig.PoleType,
     lift: Lift,
     passthrough: Passthrough
 ) : SequentialCommandGroup() {

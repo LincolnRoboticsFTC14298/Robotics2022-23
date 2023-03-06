@@ -4,7 +4,7 @@ import com.acmerobotics.roadrunner.*
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.ejml.simple.SimpleMatrix
-import org.firstinspires.ftc.teamcode.RobotConfig
+import org.firstinspires.ftc.teamcode.FieldConfig
 import org.firstinspires.ftc.teamcode.filters.particleFilter.ParticleFilter
 import org.firstinspires.ftc.teamcode.subsystems.Vision
 import org.firstinspires.ftc.teamcode.util.poseToMatrix
@@ -29,7 +29,7 @@ class MecanumMonteCarloLocalizer(
 
 
     val odometryLocalizer = OdometryLocalizer(hwMap)
-    private val visionMeasurementModel = VisionMeasurementModel(RobotConfig.CameraData.LOGITECH_C920)
+    private val visionMeasurementModel = VisionMeasurementModel(Vision.Companion.CameraData.LOGITECH_C920)
 
     private val particleFilter = ParticleFilter(50, odometryLocalizer, SimpleMatrix(arrayOf(doubleArrayOf(0.01, 0.01, 0.01))), visionMeasurementModel)
 

@@ -2,8 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystems
 
 import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.canvas.Canvas
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket
+import com.acmerobotics.dashboard.config.Config
 import com.acmerobotics.roadrunner.Pose2d
 import com.acmerobotics.roadrunner.Vector2d
 import com.arcrobotics.ftclib.command.SubsystemBase
@@ -11,13 +10,14 @@ import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
-import org.firstinspires.ftc.teamcode.RobotConfig
-import org.firstinspires.ftc.teamcode.RobotConfig.coneDiameter
-import org.firstinspires.ftc.teamcode.RobotConfig.poleDiameter
-import org.firstinspires.ftc.teamcode.RobotConfig.singleConeToJunctionMaxDistance
-import org.firstinspires.ftc.teamcode.RobotConfig.stackToPoleMaxDistance
+import org.firstinspires.ftc.teamcode.FieldConfig
+import org.firstinspires.ftc.teamcode.FieldConfig.coneDiameter
+import org.firstinspires.ftc.teamcode.FieldConfig.poleDiameter
 import org.firstinspires.ftc.teamcode.vision.AprilTagDetectionPipeline
 import org.firstinspires.ftc.teamcode.vision.GeneralPipeline
+import org.opencv.core.CvType
+import org.opencv.core.Mat
+import org.opencv.core.MatOfDouble
 import org.openftc.apriltag.AprilTagDetection
 import org.openftc.easyopencv.OpenCvCamera
 import org.openftc.easyopencv.OpenCvCamera.AsyncCameraOpenListener
@@ -34,6 +34,7 @@ import kotlin.math.sin
 /**
  * Manages all the pipelines and cameras.
  */
+@Config
 class Vision(
     hwMap: HardwareMap,
     startingPipeline: FrontPipeline = FrontPipeline.GENERAL_PIPELINE,
@@ -63,11 +64,11 @@ class Vision(
     }
 
     enum class FrontPipeline(var pipeline: OpenCvPipeline) {
-        APRIL_TAG(AprilTagDetectionPipeline(1.18,  RobotConfig.CameraData.LOGITECH_C920)),
-        GENERAL_PIPELINE(GeneralPipeline(GeneralPipeline.DisplayMode.ALL_CONTOURS, RobotConfig.CameraData.LOGITECH_C920, null))
+        APRIL_TAG(AprilTagDetectionPipeline(1.18,  CameraData.LOGITECH_C920)),
+        GENERAL_PIPELINE(GeneralPipeline(GeneralPipeline.DisplayMode.ALL_CONTOURS, CameraData.LOGITECH_C920, null))
     }
 
-    val phoneCamPipeline = GeneralPipeline(GeneralPipeline.DisplayMode.ALL_CONTOURS, RobotConfig.CameraData.PHONECAM, telemetry)
+    val phoneCamPipeline = GeneralPipeline(GeneralPipeline.DisplayMode.ALL_CONTOURS, CameraData.PHONECAM, telemetry)
 
     init {
         name = "Vision Subsystem"
@@ -230,7 +231,7 @@ class Vision(
         return landmarks
     }
 
-    fun getLandmarkInfo(): List<ObservationResult> = getCameraSpaceLandmarkInfo().map{ it + RobotConfig.CameraData.LOGITECH_C920.relativePosition }
+    fun getLandmarkInfo(): List<ObservationResult> = getCameraSpaceLandmarkInfo().map{ it + CameraData.LOGITECH_C920.relativePosition }
 
     /**
      * Returns pole position in tangent space taking into account cones
@@ -240,7 +241,7 @@ class Vision(
     fun getClosestCone(pose: Pose2d? = null, useWidth: Boolean = false): ObservationResult? {
         val cones = phoneCamPipeline.singleConeResults.toMutableList()
         val poles = phoneCamPipeline.poleResults.toMutableList()
-        val junctions = enumValues<RobotConfig.Junction>()
+        val junctions = enumValues<FieldConfig.Junction>()
 
         cones.forEachIndexed { i, cone ->
             val closestPole = poles.minByOrNull { it.distance(cone) }
@@ -268,7 +269,7 @@ class Vision(
         val closestConeObservation = closestCone?.let { ObservationResult(it.angle, it.distanceByPitch ?: it.distanceByWidth) }
 
         // Transform by the relative phone camera position
-        return closestConeObservation?.plus(RobotConfig.CameraData.PHONECAM.relativePosition)
+        return closestConeObservation?.plus(CameraData.PHONECAM.relativePosition)
     }
 
     private fun getRawConeStacks() : List<ObservationResult> {
@@ -357,6 +358,30 @@ class Vision(
         val (x, y) = pose.trans.plus(pose.rot.inverse().times(observation.toVector()))
         if (fill) canvas.fillCircle(x, y, radius)
         else canvas.strokeCircle(x, y, radius)
+    }
+
+    companion object {
+        enum class CameraData(val pitch: Double, val height: Double, val relativePosition: Vector2d, val FOVX: Double, val FOVY: Double, val fx: Double, val fy: Double, val cx: Double, val cy: Double, val distCoeffs: MatOfDouble) {
+            PHONECAM(0.0, 2.0, Vector2d(-5.0, 0.0),
+                Math.toRadians(60.0),
+                Math.toRadians(60.0), 0.0, 0.0, 0.0, 0.0, MatOfDouble(0.0, 0.0, 0.0, 0.0, 0.0)
+            ),
+            LOGITECH_C920(0.0, 3.0, Vector2d(5.0, 0.0),
+                Math.toRadians(60.0),
+                Math.toRadians(60.0), 1.44943054e+3, 1.44934063e+3, 9.37759430e+2, 5.34866814e+2, MatOfDouble(0.07622862, -0.41153656, -0.00089351, 0.00219123, 0.57699695)
+            );
+
+            fun getCameraMatrix(): Mat {
+                val cameraMat = Mat(3, 3, CvType.CV_64FC1)
+                val cameraData = doubleArrayOf(fx, 0.0, cx, 0.0, fy, cy, 0.0, 0.0, 1.0)
+                cameraMat.put(0, 0, *cameraData)
+                return cameraMat
+            }
+        }
+
+        const val stackToPoleMaxDistance = 5.0
+        const val visionToPoleMaxDistance = 5.0 // Difference between vision observation and pole location to be considered the same
+        const val singleConeToJunctionMaxDistance = 4.0
     }
 
 }

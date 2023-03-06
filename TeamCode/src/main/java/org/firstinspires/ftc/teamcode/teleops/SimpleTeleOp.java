@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.teleops;
 
-import static org.firstinspires.ftc.teamcode.RobotConfig.clawClosedPosition;
-import static org.firstinspires.ftc.teamcode.RobotConfig.passthroughMaxDegree;
+import static org.firstinspires.ftc.teamcode.subsystems.Claw.clawClosedPosition;
+import static org.firstinspires.ftc.teamcode.subsystems.Passthrough.passthroughMaxDegree;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;

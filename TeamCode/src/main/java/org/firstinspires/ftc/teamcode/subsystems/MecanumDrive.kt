@@ -11,8 +11,7 @@ import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.IMU
-import org.firstinspires.ftc.teamcode.RobotConfig
-import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer
+import org.firstinspires.ftc.teamcode.FieldConfig
 import org.firstinspires.ftc.teamcode.util.*
 import java.util.*
 import kotlin.math.ceil
@@ -179,7 +178,7 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
      *  Maybe use the velocity vector as well.
      * @return Gets the pole the robot is facing by minimizing the difference of heading.
      */
-    fun getFacingPole(): RobotConfig.Pole {
+    fun getFacingPole(): FieldConfig.Pole {
         val headVec = pose.rot.vec()
         val posVec = pose.trans
 
@@ -209,15 +208,15 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
         }
         */
 
-        return enumValues<RobotConfig.Pole>().maxBy {
+        return enumValues<FieldConfig.Pole>().maxBy {
             val diff = it.vector.minus(posVec)
             val dist = diff.norm()
             diff.dot(headVec) / (dist * dist) // divide by dist twice so that further values have smaller result
         }
     }
 
-    fun getClosestPoleOfType(poleType: RobotConfig.PoleType): RobotConfig.Pole {
-        val poles = RobotConfig.Pole.getPolesOfType(poleType)
+    fun getClosestPoleOfType(poleType: FieldConfig.PoleType): FieldConfig.Pole {
+        val poles = FieldConfig.Pole.getPolesOfType(poleType)
 
         val headVec = pose.rot.vec()
         val posVec = pose.trans

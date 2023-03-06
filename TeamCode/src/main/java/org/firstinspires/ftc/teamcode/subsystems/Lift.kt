@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystems
 
 import org.firstinspires.ftc.teamcode.util.PIDFController
 import android.util.Log
+import com.acmerobotics.dashboard.config.Config
 import com.acmerobotics.roadrunner.*
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.arcrobotics.ftclib.hardware.motors.Motor
@@ -12,25 +13,9 @@ import com.qualcomm.robotcore.util.ElapsedTime
 import com.qualcomm.robotcore.util.Range
 import org.ejml.simple.SimpleMatrix
 import org.firstinspires.ftc.robotcore.external.Telemetry
-import org.firstinspires.ftc.teamcode.RobotConfig
-import org.firstinspires.ftc.teamcode.RobotConfig.gravityFeedforward
-import org.firstinspires.ftc.teamcode.RobotConfig.leftLiftName
-import org.firstinspires.ftc.teamcode.RobotConfig.liftCoeffs
-import org.firstinspires.ftc.teamcode.RobotConfig.liftDPP
-import org.firstinspires.ftc.teamcode.RobotConfig.liftHeightOffset
-import org.firstinspires.ftc.teamcode.RobotConfig.liftKA
-import org.firstinspires.ftc.teamcode.RobotConfig.liftKStatic
-import org.firstinspires.ftc.teamcode.RobotConfig.liftKV
-import org.firstinspires.ftc.teamcode.RobotConfig.liftMaxAccel
-import org.firstinspires.ftc.teamcode.RobotConfig.liftMaxExtension
-import org.firstinspires.ftc.teamcode.RobotConfig.liftMaxVel
-import org.firstinspires.ftc.teamcode.RobotConfig.liftOffsetDistanceFromCenter
-import org.firstinspires.ftc.teamcode.RobotConfig.liftTargetErrorTolerance
-import org.firstinspires.ftc.teamcode.RobotConfig.magnetLimitName
-import org.firstinspires.ftc.teamcode.RobotConfig.poleLiftOffset
-import org.firstinspires.ftc.teamcode.RobotConfig.rightLiftName
-import org.firstinspires.ftc.teamcode.RobotConfig.withinSwitchRange
+import org.firstinspires.ftc.teamcode.FieldConfig
 import org.firstinspires.ftc.teamcode.filters.kalmanFilter.*
+import org.firstinspires.ftc.teamcode.util.PIDCoefficients
 import org.firstinspires.ftc.teamcode.util.arrayToColumnMatrix
 import java.lang.Math.toRadians
 import kotlin.math.abs
@@ -41,6 +26,7 @@ import kotlin.math.sin
  * Lift consists of two multistage slides powered by a motor which pulls a string.
  * @param hwMap        HardwareMap.
  */
+@Config
 class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : SubsystemBase() {
 
     /**
@@ -161,7 +147,7 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
      * Sets the target height of the lift and constructs an optimal motion profile for it.
      * @param pole          Based on [PoleType] heights.
      */
-    fun setHeight(pole: RobotConfig.PoleType) {
+    fun setHeight(pole: FieldConfig.PoleType) {
         setHeight(pole.height + poleLiftOffset)
     }
 
@@ -254,6 +240,43 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
         telemetry.addData("Lift estimated acceleration", getAcceleration())
         telemetry.addData("Target velocity", desiredState[1])
         telemetry.addData("Velocity Error", desiredState[1] - getVelocity())
+    }
+
+    companion object {
+        const val leftLiftName = "leftLift"
+        const val rightLiftName = "rightLift"
+        const val magnetLimitName = "magnet"
+
+        const val liftHeightOffset = 0.0 // in The raw height of zero is off the ground
+
+        const val liftMaxExtension = 0.0 // in Max allowable extension height
+        const val poleLiftOffset = 5.0 // in above the pole the lift should be at
+
+        const val liftDPP = 1.0 // TODO: Find experimentally
+
+        const val liftOffsetDistanceFromCenter = 0.0
+
+        @JvmField
+        var liftMaxVel = 20.0 // in / s  // TODO: Find max values
+        @JvmField
+        var liftMaxAccel = 20.0 // in / s2
+
+        @JvmField
+        var liftKStatic = 0.0
+        @JvmField
+        var liftKV = 1.0 / liftMaxVel
+        @JvmField
+        var liftKA = 0.0
+        @JvmField
+        var gravityFeedforward = 0.0
+
+
+        //@JvmField
+        var liftCoeffs = PIDCoefficients(0.0, 0.0, 0.0) // TODO: Calculate from kV and kA
+
+        val liftTargetErrorTolerance = 0.5 // in
+
+        const val withinSwitchRange = 3.0 // in from the bottom to check magnet switch for reset
     }
 
 }

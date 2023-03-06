@@ -4,11 +4,10 @@ import com.acmerobotics.roadrunner.Twist2d
 import com.acmerobotics.roadrunner.Vector2d
 import com.arcrobotics.ftclib.command.ParallelCommandGroup
 import com.arcrobotics.ftclib.command.SequentialCommandGroup
-import org.firstinspires.ftc.teamcode.RobotConfig
-import org.firstinspires.ftc.teamcode.RobotConfig.visionToPoleMaxDistance
+import org.firstinspires.ftc.teamcode.FieldConfig
 import org.firstinspires.ftc.teamcode.commands.drive.ApproachRelativePoint
 import org.firstinspires.ftc.teamcode.subsystems.*
-import org.firstinspires.ftc.teamcode.util.plus
+import org.firstinspires.ftc.teamcode.subsystems.Vision.Companion.visionToPoleMaxDistance
 
 /**
  * Uses localizer to align with pole most "in sight" of the robot for depositing
@@ -23,7 +22,7 @@ class ApproachPoleAndDeposit(
     lift: Lift,
     passthrough: Passthrough,
     claw: Claw,
-    poleType: RobotConfig.PoleType,
+    poleType: FieldConfig.PoleType,
     input: () -> Twist2d
 ) : SequentialCommandGroup() {
 

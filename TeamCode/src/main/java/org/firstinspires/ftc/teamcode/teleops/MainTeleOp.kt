@@ -9,10 +9,9 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx
 import com.arcrobotics.ftclib.gamepad.GamepadKeys
 import com.outoftheboxrobotics.photoncore.PhotonCore
 import org.firstinspires.ftc.robotcore.external.Telemetry
-import org.firstinspires.ftc.teamcode.RobotConfig
+import org.firstinspires.ftc.teamcode.FieldConfig
 import org.firstinspires.ftc.teamcode.commands.*
 import org.firstinspires.ftc.teamcode.commands.drive.JoystickDrive
-import org.firstinspires.ftc.teamcode.subsystems.localization.PoseStorage
 import org.firstinspires.ftc.teamcode.subsystems.*
 import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer
 
@@ -125,15 +124,15 @@ class MainTeleOp : CommandOpMode() {
         // Press DPAD_LEFT to go to low pole and extend passthrough
         driver2
             .getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-            .whenPressed(ReadyPoleDeposit(RobotConfig.PoleType.LOW, lift, passthrough))
+            .whenPressed(ReadyPoleDeposit(FieldConfig.PoleType.LOW, lift, passthrough))
         // Press DPAD_RIGHT to go to medium pole and extend passthrough
         driver2
             .getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
-            .whenPressed(ReadyPoleDeposit(RobotConfig.PoleType.MEDIUM, lift, passthrough))
+            .whenPressed(ReadyPoleDeposit(FieldConfig.PoleType.MEDIUM, lift, passthrough))
         // Press DPAD_UP to go to high pole and extend passthrough
         driver2
             .getGamepadButton(GamepadKeys.Button.DPAD_UP)
-            .whenPressed(ReadyPoleDeposit(RobotConfig.PoleType.HIGH, lift, passthrough))
+            .whenPressed(ReadyPoleDeposit(FieldConfig.PoleType.HIGH, lift, passthrough))
 
         // Adjust lift height
         // TODO: this doesn't remember changes to height

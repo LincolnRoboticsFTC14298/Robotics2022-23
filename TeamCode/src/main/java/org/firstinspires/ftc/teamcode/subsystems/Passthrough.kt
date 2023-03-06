@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
 import android.util.Log
+import com.acmerobotics.dashboard.config.Config
 import com.acmerobotics.roadrunner.*
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.arcrobotics.ftclib.hardware.ServoEx
@@ -8,17 +9,6 @@ import com.arcrobotics.ftclib.hardware.SimpleServo
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.robotcore.external.Telemetry
-import org.firstinspires.ftc.teamcode.RobotConfig.passthroughDepositAngle
-import org.firstinspires.ftc.teamcode.RobotConfig.passthroughMaxDegree
-import org.firstinspires.ftc.teamcode.RobotConfig.passthroughMinDegree
-import org.firstinspires.ftc.teamcode.RobotConfig.passthroughPickUpAngle
-import org.firstinspires.ftc.teamcode.RobotConfig.leftPassthroughName
-import org.firstinspires.ftc.teamcode.RobotConfig.passthroughJunctionAngle
-import org.firstinspires.ftc.teamcode.RobotConfig.passthroughMaxAccel
-import org.firstinspires.ftc.teamcode.RobotConfig.passthroughMaxVel
-import org.firstinspires.ftc.teamcode.RobotConfig.passthroughOffsetDistanceFromLift
-import org.firstinspires.ftc.teamcode.RobotConfig.passthroughTimeTolerance
-import org.firstinspires.ftc.teamcode.RobotConfig.rightPassthroughName
 import java.lang.Math.toRadians
 import kotlin.math.cos
 
@@ -29,6 +19,7 @@ import kotlin.math.cos
  * The angle is that made with the heading vector (i.e. w/ the front of the intake side)
  * @param hwMap             HardwareMap
  */
+@Config
 class Passthrough(hwMap: HardwareMap, startingAngle: Double = passthroughMinDegree) : SubsystemBase() {
 
     /**
@@ -138,6 +129,31 @@ class Passthrough(hwMap: HardwareMap, startingAngle: Double = passthroughMinDegr
      */
     fun fetchTelemetry(telemetry: Telemetry) {
         telemetry.addData("Passthrough desired angle", setpoint)
+    }
+
+    companion object {
+        const val leftPassthroughName = "leftPassthrough"
+        const val rightPassthroughName = "rightPassthrough"
+
+        const val passthroughMinDegree = -45.0 // degrees
+        const val passthroughMaxDegree = 180.0 // degrees
+
+        const val passthroughOffsetDistanceFromLift = 0.0
+
+        @JvmField
+        var passthroughPickUpAngle = -45.0 // degrees
+        @JvmField
+        var passthroughDepositAngle = 180.0 // degrees
+        @JvmField
+        var passthroughJunctionAngle = -15.0
+
+        @JvmField
+        var passthroughMaxVel = 25.0
+        @JvmField
+        var passthroughMaxAccel = 25.0
+
+        @JvmField
+        var passthroughTimeTolerance = 0.2 // Seconds to wait after motion profile supposedly complete
     }
 
 }

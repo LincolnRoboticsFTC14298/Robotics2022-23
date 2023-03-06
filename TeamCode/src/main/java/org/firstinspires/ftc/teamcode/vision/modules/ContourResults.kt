@@ -1,7 +1,8 @@
 package org.firstinspires.ftc.teamcode.vision.modules
 
 import com.acmerobotics.roadrunner.Vector2d
-import org.firstinspires.ftc.teamcode.RobotConfig
+import org.firstinspires.ftc.teamcode.FieldConfig
+import org.firstinspires.ftc.teamcode.subsystems.Vision
 import org.firstinspires.ftc.teamcode.util.epsilonEquals
 import org.firstinspires.ftc.teamcode.vision.modulelib.AbstractPipelineModule
 import org.opencv.core.Mat
@@ -21,7 +22,7 @@ import kotlin.math.sin
  */
 class ContourResults(
     private val contourModule: AbstractPipelineModule<List<MatOfPoint>>,
-    private val camera: RobotConfig.CameraData,
+    private val camera: Vision.Companion.CameraData,
     private val targetWidth: Double,
     private val targetHeightOffset: Double = 0.0,
     private val pitchDistanceOffset: Double = targetWidth/2.0 // Used incase the center of the object is wanted instead

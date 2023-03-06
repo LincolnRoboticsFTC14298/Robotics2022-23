@@ -3,8 +3,6 @@ package org.firstinspires.ftc.teamcode.commands
 import com.arcrobotics.ftclib.command.InstantCommand
 import com.arcrobotics.ftclib.command.SequentialCommandGroup
 import com.arcrobotics.ftclib.command.WaitUntilCommand
-import org.firstinspires.ftc.teamcode.RobotConfig.passthroughDepositAngle
-import org.firstinspires.ftc.teamcode.RobotConfig.passthroughPickUpAngle
 import org.firstinspires.ftc.teamcode.subsystems.*
 
 /**

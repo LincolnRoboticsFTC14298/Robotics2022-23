@@ -2,14 +2,14 @@ package org.firstinspires.ftc.teamcode.subsystems.localization
 
 import com.acmerobotics.roadrunner.Rotation2d
 import org.ejml.simple.SimpleMatrix
-import org.firstinspires.ftc.teamcode.RobotConfig
+import org.firstinspires.ftc.teamcode.FieldConfig
 import org.firstinspires.ftc.teamcode.filters.particleFilter.ProbabilisticMeasurementModel
 import org.firstinspires.ftc.teamcode.subsystems.Vision
 import org.firstinspires.ftc.teamcode.subsystems.Vision.ObservationResult
 import org.firstinspires.ftc.teamcode.util.matrixToVector
 import kotlin.math.*
 
-class VisionMeasurementModel(private val camera: RobotConfig.CameraData) : ProbabilisticMeasurementModel {
+class VisionMeasurementModel(private val camera: Vision.Companion.CameraData) : ProbabilisticMeasurementModel {
     override fun calculateProbability(z: SimpleMatrix, state: SimpleMatrix): Double {
         var probability = 1.0
 
@@ -31,7 +31,7 @@ class VisionMeasurementModel(private val camera: RobotConfig.CameraData) : Proba
 
         val polesInSight = mutableListOf<ObservationResult>()
 
-        for (pole in enumValues<RobotConfig.Pole>().toList()) {
+        for (pole in enumValues<FieldConfig.Pole>().toList()) {
             val diff = pole.vector - matrixToVector(state)
             val localVec = Rotation2d.exp(state.get(2)).inverse() * diff
 

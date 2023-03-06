@@ -1,9 +1,10 @@
 package org.firstinspires.ftc.teamcode.vision
 
 import org.firstinspires.ftc.robotcore.external.Telemetry
-import org.firstinspires.ftc.teamcode.RobotConfig
-import org.firstinspires.ftc.teamcode.RobotConfig.coneDiameter
-import org.firstinspires.ftc.teamcode.RobotConfig.poleDiameter
+import org.firstinspires.ftc.teamcode.FieldConfig
+import org.firstinspires.ftc.teamcode.FieldConfig.coneDiameter
+import org.firstinspires.ftc.teamcode.FieldConfig.poleDiameter
+import org.firstinspires.ftc.teamcode.subsystems.Vision
 import org.firstinspires.ftc.teamcode.vision.modulelib.InputModule
 import org.firstinspires.ftc.teamcode.vision.modulelib.ModularPipeline
 import org.firstinspires.ftc.teamcode.vision.modules.*
@@ -16,7 +17,7 @@ import org.opencv.imgproc.Imgproc.drawContours
 
 open class GeneralPipeline(
     private var displayMode: DisplayMode = DisplayMode.ALL_CONTOURS,
-    camera: RobotConfig.CameraData,
+    camera: Vision.Companion.CameraData,
     var telemetry: Telemetry?
 ) : ModularPipeline() {
 

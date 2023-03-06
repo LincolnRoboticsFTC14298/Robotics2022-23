@@ -21,7 +21,8 @@
 
 package org.firstinspires.ftc.teamcode.vision;
 
-import org.firstinspires.ftc.teamcode.RobotConfig;
+import org.firstinspires.ftc.teamcode.FieldConfig;
+import org.firstinspires.ftc.teamcode.subsystems.Vision;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -84,7 +85,7 @@ public class AprilTagDetectionPipeline extends OpenCvPipeline
         nativeApriltagPtr = AprilTagDetectorJNI.createApriltagDetector(AprilTagDetectorJNI.TagFamily.TAG_36h11.string, 3, 3);
     }
 
-    public AprilTagDetectionPipeline(double tagsize, RobotConfig.CameraData camera)
+    public AprilTagDetectionPipeline(double tagsize, Vision.Companion.CameraData camera)
     {
         this.tagsize = tagsize;
         this.tagsizeX = tagsize;
