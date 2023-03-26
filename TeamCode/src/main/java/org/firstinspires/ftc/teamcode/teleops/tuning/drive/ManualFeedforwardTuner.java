@@ -45,6 +45,8 @@ public class ManualFeedforwardTuner extends LinearOpMode {
         double startTs = System.nanoTime() / 1e9;
 
         while (!isStopRequested()) {
+            view.voltageSensor.periodic();
+
             telemetry.addData("mode", mode);
 
             switch (mode) {
@@ -53,8 +55,8 @@ public class ManualFeedforwardTuner extends LinearOpMode {
                         mode = Mode.DRIVER_MODE;
                     }
 
-                    for (int i = 0; i < view.forwardEncs.size(); i++) {
-                        double v = view.forwardEncs.get(i).getPositionAndVelocity().velocity;
+                    for (int i = 0; i < view.forwardEncsWrapped.size(); i++) {
+                        double v = view.forwardEncsWrapped.get(i).getPositionAndVelocity().velocity;
                         telemetry.addData("v" + i, view.inPerTick * v);
                     }
 

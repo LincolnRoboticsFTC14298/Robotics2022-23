@@ -17,7 +17,7 @@ import org.firstinspires.ftc.ftccommon.external.WebHandlerRegistrar;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer;
-import org.firstinspires.ftc.teamcode.teleops.OpModeManager;
+import org.firstinspires.ftc.teamcode.teleops.OpModeRegister;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -46,7 +46,7 @@ public final class LogFiles {
         public long nsInit = System.nanoTime();
         public long nsStart, nsStop;
 
-        public String driveClassName = OpModeManager.DRIVE_CLASS.getCanonicalName();
+        public String driveClassName = OpModeRegister.DRIVE_CLASS.getCanonicalName();
 
         public double mecInPerTick = MecanumDrive.IN_PER_TICK;
         public double mecLateralInPerTick = MecanumDrive.LATERAL_IN_PER_TICK;
