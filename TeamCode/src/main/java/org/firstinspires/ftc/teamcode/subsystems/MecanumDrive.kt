@@ -144,6 +144,9 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
         rightBack = hardwareMap.get(DcMotorEx::class.java, rightRearName)
         rightFront = hardwareMap.get(DcMotorEx::class.java, rightFrontName)
 
+        leftFront.direction = DcMotorSimple.Direction.REVERSE
+        leftBack.direction = DcMotorSimple.Direction.REVERSE
+
         leftFront.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
         leftBack.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
         rightBack.zeroPowerBehavior = DcMotor.ZeroPowerBehavior.BRAKE
@@ -153,7 +156,7 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
         val parameters = IMU.Parameters(
             RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
+                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD
             )
         )
 
