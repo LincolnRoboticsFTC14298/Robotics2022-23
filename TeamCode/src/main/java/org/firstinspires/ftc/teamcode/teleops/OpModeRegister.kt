@@ -16,14 +16,16 @@ object OpModeRegister {
 
     enum class BATCH(vararg val opModes: Class<out OpMode>) {
         ROAD_RUNNER_TUNING(
-            AngularRampLogger::class.java,
+            MecanumMotorDirectionDebugger::class.java,
             ForwardPushTest::class.java,
-            ForwardRampLogger::class.java,
             LateralPushTest::class.java,
-            ManualFeedbackTuner::class.java,
+            SimpleLocalizationTest::class.java,
+            ForwardRampLogger::class.java,
+            AngularRampLogger::class.java,
             ManualFeedforwardTuner::class.java,
+            LateralMultiplierTuning::class.java,
+            ManualFeedbackTuner::class.java,
             SplineTest::class.java,
-            MecanumMotorDirectionDebugger::class.java
         ),
         VISION(
             SimpleWebcamTest::class.java,
