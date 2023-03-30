@@ -1,9 +1,7 @@
 package org.firstinspires.ftc.teamcode
 
-import com.acmerobotics.dashboard.config.Config
 import com.acmerobotics.roadrunner.Vector2d
 
-@Config
 object FieldConfig {
 
     const val tileSize = 23.5 // in
