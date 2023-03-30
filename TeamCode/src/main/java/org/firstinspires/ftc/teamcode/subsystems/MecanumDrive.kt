@@ -7,10 +7,7 @@ import com.acmerobotics.roadrunner.*
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot
-import com.qualcomm.robotcore.hardware.DcMotor
-import com.qualcomm.robotcore.hardware.DcMotorEx
-import com.qualcomm.robotcore.hardware.HardwareMap
-import com.qualcomm.robotcore.hardware.IMU
+import com.qualcomm.robotcore.hardware.*
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.teamcode.FieldConfig
 import org.firstinspires.ftc.teamcode.util.*
@@ -23,7 +20,7 @@ import kotlin.math.max
 class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Localizer, val voltageSensor: VoltageSensor) : SubsystemBase() {
     private val kinematics = MecanumKinematics(
         IN_PER_TICK * TRACK_WIDTH_TICKS,
-        IN_PER_TICK / LATERAL_IN_PER_TICK
+        LATERAL_MULTIPLIER //IN_PER_TICK / LATERAL_IN_PER_TICK
     )
     private val feedforward = MotorFeedforward(kS, kV, kA)
     private val defaultTurnConstraints = TurnConstraints(
@@ -452,7 +449,9 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
         @JvmField
         var IN_PER_TICK = 0.0
         @JvmField
-        var LATERAL_IN_PER_TICK = 1.0
+        var LATERAL_IN_PER_TICK = IN_PER_TICK
+        @JvmField
+        var LATERAL_MULTIPLIER = 1.0
         @JvmField
         var TRACK_WIDTH_TICKS = 0.0
 
