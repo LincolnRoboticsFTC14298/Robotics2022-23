@@ -366,9 +366,9 @@ class Vision(
                 Math.toRadians(60.0),
                 Math.toRadians(60.0), 0.0, 0.0, 0.0, 0.0, MatOfDouble(0.0, 0.0, 0.0, 0.0, 0.0)
             ),
-            LOGITECH_C920(0.0, 3.0, Vector2d(5.0, 0.0),
-                Math.toRadians(60.0),
-                Math.toRadians(60.0), 1.44943054e+3, 1.44934063e+3, 9.37759430e+2, 5.34866814e+2, MatOfDouble(0.07622862, -0.41153656, -0.00089351, 0.00219123, 0.57699695)
+            LOGITECH_C920(0.0, 6.0, Vector2d(4.5, 0.0),
+                Math.toRadians(70.42),
+                Math.toRadians(43.3), 1.44943054e+3, 1.44934063e+3, 9.37759430e+2, 5.34866814e+2, MatOfDouble(0.07622862, -0.41153656, -0.00089351, 0.00219123, 0.57699695)
             );
 
             fun getCameraMatrix(): Mat {
