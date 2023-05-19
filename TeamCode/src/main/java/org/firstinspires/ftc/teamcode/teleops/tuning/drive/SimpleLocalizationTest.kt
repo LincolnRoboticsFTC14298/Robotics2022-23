@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.teleops.tuning.drive
 import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.config.Config
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket
 import com.acmerobotics.roadrunner.Pose2d
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive
@@ -25,7 +26,16 @@ class SimpleLocalizationTest : OpMode() {
         voltageSensor.periodic()
         mecanumDrive.periodic()
 
-        telemetry.addData("Pose", mecanumDrive.pose)
+        val pose = mecanumDrive.pose
+
+        val p = TelemetryPacket()
+        p.put("x", pose.trans.x)
+        p.put("y", pose.trans.y)
+        p.put("heading (deg)", Math.toDegrees(pose.rot.log()))
+
+        mecanumDrive.drawRobot(p.fieldOverlay())
+
+        FtcDashboard.getInstance().sendTelemetryPacket(p)
         telemetry.update()
     }
 
