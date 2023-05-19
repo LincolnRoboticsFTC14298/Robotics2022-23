@@ -10,6 +10,10 @@ class SimpleJoystickDrive(
     private val fieldCentric: () -> Boolean,
 ) : CommandBase() {
 
+    init{
+        addRequirements(mecanum)
+    }
+
     override fun execute() {
         val power =
             if (fieldCentric.invoke())
