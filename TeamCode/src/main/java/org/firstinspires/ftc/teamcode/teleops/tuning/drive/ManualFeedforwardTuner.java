@@ -28,8 +28,7 @@ public class ManualFeedforwardTuner extends LinearOpMode {
 
         final DriveView view = new DriveView(hardwareMap);
 
-        final TimeProfile profile = new TimeProfile(Profiles.constantProfile(
-                DISTANCE, 0, view.maxVel, view.minAccel, view.maxAccel).baseProfile);
+        TimeProfile profile;
 
         Mode mode = Mode.TUNING_MODE;
 
@@ -46,6 +45,10 @@ public class ManualFeedforwardTuner extends LinearOpMode {
 
         while (!isStopRequested()) {
             view.voltageSensor.periodic();
+
+            view.updateMaxAccelVelsTurns();
+            profile = new TimeProfile(Profiles.constantProfile(
+                    DISTANCE, 0, view.maxVel, view.minAccel, view.maxAccel).baseProfile);
 
             telemetry.addData("mode", mode);
 
