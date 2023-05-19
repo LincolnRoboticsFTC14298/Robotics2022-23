@@ -5,7 +5,7 @@ import com.acmerobotics.roadrunner.Vector2d;
 
 import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor;
 import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer;
-import org.firstinspires.ftc.teamcode.teleops.ActionOpMode;
+import org.firstinspires.ftc.teamcode.util.Action.ActionOpMode;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
 import org.firstinspires.ftc.teamcode.teleops.OpModeRegister;
 
