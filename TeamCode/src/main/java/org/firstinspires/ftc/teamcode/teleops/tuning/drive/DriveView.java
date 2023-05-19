@@ -30,11 +30,13 @@ final class DriveView {
     public final String type;
 
     public final double inPerTick;
-    public final double maxVel, minAccel, maxAccel;
+    public double maxVel;
+    public double minAccel;
+    public double maxAccel;
 
     public final List<LynxModule> lynxModules;
 
-    public final List<DcMotorEx> leftMotors, rightMotors;
+    public final List<DcMotorEx> leftMotors, rightMotors, flbr, frbl;
     public final List<DcMotorEx> motors;
 
     // invariant: (leftEncs.isEmpty() && rightEncs.isEmpty()) ||
@@ -73,6 +75,8 @@ final class DriveView {
             md = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0), new OdometryLocalizer(hardwareMap), new VoltageSensor(hardwareMap)); ;
             leftMotors = Arrays.asList(md.getLeftFront(), md.getLeftBack());
             rightMotors = Arrays.asList(md.getRightFront(), md.getRightBack());
+            flbr = Arrays.asList(md.getLeftFront(), md.getRightBack());
+            frbl = Arrays.asList(md.getRightFront(), md.getLeftBack());
             imu = md.getImu();
             voltageSensor = md.getVoltageSensor();
 
@@ -124,7 +128,7 @@ final class DriveView {
 
     public MotorFeedforward feedforward() {
         if (md != null) {
-            return new MotorFeedforward(MecanumDrive.kS, MecanumDrive.kV, MecanumDrive.kA);
+            return new MotorFeedforward(MecanumDrive.kS, MecanumDrive.kV / inPerTick, MecanumDrive.kA / inPerTick);
         }
 
         throw new AssertionError();
@@ -143,6 +147,12 @@ final class DriveView {
         for (LynxModule m : lynxModules) {
             m.setBulkCachingMode(mode);
         }
+    }
+
+    public void updateMaxAccelVelsTurns() {
+        maxVel = MecanumDrive.MAX_WHEEL_VEL;
+        minAccel = MecanumDrive.MIN_PROFILE_ACCEL;
+        maxAccel = MecanumDrive.MAX_PROFILE_ACCEL;
     }
 
     public Map<SerialNumber, Double> resetAndBulkRead(MidpointTimer t) {
