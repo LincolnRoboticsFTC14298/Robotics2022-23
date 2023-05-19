@@ -31,7 +31,8 @@ public final class TuningFiles {
     public enum FileType {
         FORWARD_RAMP("forward-ramp"),
         ANGULAR_RAMP("angular-ramp"),
-        ACCEL("accel");
+        ACCEL("accel"),
+        LATERAL_RAMP("lateral-ramp");
 
         public final String name;
 
