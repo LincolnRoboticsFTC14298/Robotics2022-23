@@ -8,14 +8,11 @@ import com.acmerobotics.roadrunner.Vector2d
 import com.arcrobotics.ftclib.command.CommandOpMode
 import com.arcrobotics.ftclib.gamepad.GamepadEx
 import com.arcrobotics.ftclib.gamepad.GamepadKeys
-import com.qualcomm.robotcore.eventloop.opmode.Disabled
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import org.firstinspires.ftc.teamcode.commands.drive.MotionProfiledJoystickDrive
 import org.firstinspires.ftc.teamcode.commands.drive.SimpleJoystickDrive
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive
-import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer
 import org.firstinspires.ftc.teamcode.subsystems.Vision
 import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor
+import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer
 
 class VisionTest : CommandOpMode() {
 
@@ -48,6 +45,7 @@ class VisionTest : CommandOpMode() {
     }
 
     override fun run() {
+        super.run()
         telemetry.addData("Field Centric", fieldCentric)
         telemetry.addData("Use Pose", usePose)
         vision.fetchTelemetry(telemetry, if (usePose) mecanum.pose else null)
