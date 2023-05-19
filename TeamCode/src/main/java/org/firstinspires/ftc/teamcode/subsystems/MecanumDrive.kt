@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.util.*
 import java.util.*
 import kotlin.math.ceil
 import kotlin.math.max
+import kotlin.math.sqrt
 
 
 @Config
@@ -22,7 +23,7 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
         IN_PER_TICK * TRACK_WIDTH_TICKS,
         LATERAL_MULTIPLIER //IN_PER_TICK / LATERAL_IN_PER_TICK
     )
-    private val feedforward = MotorFeedforward(kS, kV, kA)
+    private val feedforward = MotorFeedforward(kS, kV / IN_PER_TICK, kA / IN_PER_TICK)
     private val defaultTurnConstraints = TurnConstraints(
         MAX_ANG_VEL, -MAX_ANG_ACCEL, MAX_ANG_ACCEL
     )
@@ -44,7 +45,6 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
 
     var robotVelRobot: Twist2d = Twist2d(Vector2d(0.0, 0.0), 0.0)
 
-    val inPerTick = IN_PER_TICK
     private val poseHistory = LinkedList<Pose2d>()
 
     inner class DriveLocalizer : Localizer {
@@ -80,7 +80,7 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
             val rightRearPosVel = rightRear.positionAndVelocity
             val rightFrontPosVel = rightFront.positionAndVelocity
 
-            val heading = Rotation2d.exp(imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS))
+            val heading = Rotation2d.exp(imu.robotYawPitchRollAngles.getYaw(AngleUnit.RADIANS))
             val headingDelta = heading.minus(lastHeading)
 
             val (transIncr, rotIncr) = kinematics.forward(
@@ -170,6 +170,10 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
         }
         LogFiles.recordPose(pose)
         robotVelRobot = incr.velocity().value()
+//
+//        AXIAL_VEL_GAIN = smartDamp(AXIAL_GAIN)
+//        LATERAL_VEL_GAIN = smartDamp(LATERAL_GAIN)
+//        HEADING_VEL_GAIN = smartDamp(HEADING_GAIN)
     }
 
     fun setDriveSignal(vels: Twist2d) {
@@ -276,6 +280,8 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
         }
 
         override fun run(p: TelemetryPacket): Boolean {
+            periodic()
+
             val t: Double
             if (beginTs < 0) {
                 beginTs = now()
@@ -295,7 +301,7 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
             val txWorldTarget = timeTrajectory[t]
             val command = HolonomicController(
                 AXIAL_GAIN, LATERAL_GAIN, HEADING_GAIN,
-                AXIAL_VEL_GAIN, LATERAL_VEL_GAIN, HEADING_VEL_GAIN
+                smartDamp(AXIAL_GAIN), smartDamp(LATERAL_GAIN), smartDamp(HEADING_GAIN)
             )
                 .compute(txWorldTarget, pose, robotVelRobot)
 
@@ -305,6 +311,10 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
             leftBack.power = feedforward.compute(wheelVels.leftBack) / voltage
             rightBack.power = feedforward.compute(wheelVels.rightBack) / voltage
             rightFront.power = feedforward.compute(wheelVels.rightFront) / voltage
+
+            p.put("command x", command.value().transVel.x)
+            p.put("command y", command.value().transVel.y)
+            p.put("command rot", command.value().rotVel)
 
             LogFiles.recordTargetPose(txWorldTarget.value())
 
@@ -345,6 +355,8 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
         private var beginTs = -1.0
 
         override fun run(p: TelemetryPacket): Boolean {
+            periodic()
+            
             val t: Double
             if (beginTs < 0) {
                 beginTs = now()
@@ -375,6 +387,7 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
             rightBack.power = feedforward.compute(wheelVels.rightBack) / voltage
             rightFront.power = feedforward.compute(wheelVels.rightFront) / voltage
 
+            //p.put("command x", command.value().)
             LogFiles.recordTargetPose(txWorldTarget.value())
             val c = p.fieldOverlay()
             drawPoseHistory(c)
@@ -424,9 +437,9 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
         c.strokePolyline(xPoints, yPoints)
     }
 
-    private fun drawRobot(c: Canvas, t: Pose2d) {
+    fun drawRobot(c: Canvas, t: Pose2d = pose) {
         c.setStrokeWidth(1)
-        c.strokeRect(t.trans.x, t.trans.y, TRACK_WIDTH, TRACK_WIDTH)
+        c.strokeRect(t.trans.x - TRACK_WIDTH/2.0, t.trans.y - TRACK_WIDTH/2.0, TRACK_WIDTH, TRACK_WIDTH)
         val halfv = t.rot.vec().times(0.25 * TRACK_WIDTH)
         val p1 = t.trans.plus(halfv)
         val (x, y) = p1.plus(halfv)
@@ -447,21 +460,21 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
 
         // drive model parameters
         @JvmField
-        var IN_PER_TICK = 0.0
+        var IN_PER_TICK = 72.0 / 135426.0
         @JvmField
         var LATERAL_IN_PER_TICK = IN_PER_TICK
         @JvmField
         var LATERAL_MULTIPLIER = 1.0
         @JvmField
-        var TRACK_WIDTH_TICKS = 0.0
+        var TRACK_WIDTH_TICKS = 47133.00826222479
 
         // feedforward parameters
         @JvmField
-        var kS = 0.0
+        var kS = 1.3704012088907165
         @JvmField
-        var kV = 1.0 / rpmToVelocity(MAX_RPM)
+        var kV = 0.00009412030525896 //1.0 / rpmToVelocity(MAX_RPM)
         @JvmField
-        var kA = 0.0
+        var kA = 0.0000180762925878
 
         // path profile parameters
         @JvmField
@@ -494,5 +507,8 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
         private fun rpmToVelocity(rpm: Double) =
             rpm * GEAR_RATIO * 2 * Math.PI * WHEEL_RADIUS / 60.0
 
+        private fun smartDamp(kP: Double) : Double {
+            return 2*sqrt(kA / IN_PER_TICK * kP) - kV / IN_PER_TICK
+        }
     }
 }
