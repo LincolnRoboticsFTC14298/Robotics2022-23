@@ -59,19 +59,23 @@ class ContourResults(
         return List(contours.size) { i ->
             val contour = contours[i]
 
-            val boundingBox = boundingRect(contour)
-            val pixelX = boundingBox.x+(boundingBox.width/2.0)
-            val pixelY = (boundingBox.y+boundingBox.height).toDouble()
-            val pixelPoint = Point(pixelX, pixelY) // find pixel location of bottom middle of contour bounding box
+            val points = contour.toList()
+            val bottom = points.maxBy { it.y }
+//            val boundingBox = boundingRect(contour)
+//            val pixelX = boundingBox.x+(boundingBox.width/2.0)
+//            val pixelY = (boundingBox.y+boundingBox.height).toDouble()
+//            val pixelPoint = Point(pixelX, pixelY) // find pixel location of bottom middle of contour bounding box
 
-            // adjust to aiming coordinate space
-            val Ax = (pixelPoint.x - (rawInput.size().width/2)) / (rawInput.size().width/2.0)
-            val Ay = (pixelPoint.y - (rawInput.size().height/2)) / (rawInput.size().height/2.0)
+            // adjust to aiming coordinate space to x: [left -1, right 1] y: [top 1, bottom -1]
+            val w = rawInput.size().width
+            val h = rawInput.size().height
+            val Ax = (bottom.x - w/2.0) / (w/2.0)
+            val Ay = (h/2.0 - bottom.y) / (h/2.0)
 
             // calculate angle and distance
-            val pitch = (Ay/2.0) * camera.FOVY
-            val yaw = (Ax/2.0) * camera.FOVX
-            val distanceByPitch = (targetHeightOffset - camera.height) / tan(camera.pitch + pitch) / cos(yaw) + pitchDistanceOffset // TODO Replace w/ inverse projection
+            val pitch = Ay * camera.FOVY / 2.0
+            val yaw = Ax * camera.FOVX / 2.0
+            val distanceByPitch = (targetHeightOffset - camera.height) / tan(camera.pitch - pitch) / cos(yaw) + pitchDistanceOffset // TODO Replace w/ inverse projection
 
             /// New variable
             val contour2f = MatOfPoint2f(*contour.toArray())
