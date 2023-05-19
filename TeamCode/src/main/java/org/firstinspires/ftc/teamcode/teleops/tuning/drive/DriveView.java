@@ -3,38 +3,48 @@ package org.firstinspires.ftc.teamcode.teleops.tuning.drive;
 import com.acmerobotics.roadrunner.MotorFeedforward;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Twist2d;
-import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.util.SerialNumber;
 
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor;
 import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer;
-import org.firstinspires.ftc.teamcode.teleops.OpModeManager;
+import org.firstinspires.ftc.teamcode.teleops.OpModeRegister;
 import org.firstinspires.ftc.teamcode.util.Encoder;
 import org.firstinspires.ftc.teamcode.util.Localizer;
+import org.firstinspires.ftc.teamcode.util.MidpointTimer;
 import org.firstinspires.ftc.teamcode.util.OverflowEncoder;
 import org.firstinspires.ftc.teamcode.util.RawEncoder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 final class DriveView {
     public final String type;
 
     public final double inPerTick;
-    public final double maxVel, minAccel, maxAccel;
+    public double maxVel;
+    public double minAccel;
+    public double maxAccel;
 
-    public final List<DcMotorEx> leftMotors, rightMotors;
+    public final List<LynxModule> lynxModules;
+
+    public final List<DcMotorEx> leftMotors, rightMotors, flbr, frbl;
     public final List<DcMotorEx> motors;
 
     // invariant: (leftEncs.isEmpty() && rightEncs.isEmpty()) ||
     //                  (parEncs.isEmpty() && perpEncs.isEmpty())
     public final List<RawEncoder> leftEncs, rightEncs, parEncs, perpEncs;
     public final List<RawEncoder> forwardEncs;
+
+    public final List<Encoder> forwardEncsWrapped;
 
     public final IMU imu;
 
@@ -51,8 +61,10 @@ final class DriveView {
     }
 
     public DriveView(HardwareMap hardwareMap) {
+        lynxModules = hardwareMap.getAll(LynxModule.class);
+
         final Localizer localizer;
-        if (OpModeManager.DRIVE_CLASS.equals(MecanumDrive.class)) {
+        if (OpModeRegister.DRIVE_CLASS.equals(MecanumDrive.class)) {
             type = "mecanum";
 
             inPerTick = MecanumDrive.IN_PER_TICK;
@@ -60,10 +72,11 @@ final class DriveView {
             minAccel = MecanumDrive.MIN_PROFILE_ACCEL;
             maxAccel = MecanumDrive.MAX_PROFILE_ACCEL;
 
-            md = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0), new OdometryLocalizer(hardwareMap), new VoltageSensor(hardwareMap));
-
+            md = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0), new OdometryLocalizer(hardwareMap), new VoltageSensor(hardwareMap)); ;
             leftMotors = Arrays.asList(md.getLeftFront(), md.getLeftBack());
             rightMotors = Arrays.asList(md.getRightFront(), md.getRightBack());
+            flbr = Arrays.asList(md.getLeftFront(), md.getRightBack());
+            frbl = Arrays.asList(md.getRightFront(), md.getLeftBack());
             imu = md.getImu();
             voltageSensor = md.getVoltageSensor();
 
@@ -72,18 +85,29 @@ final class DriveView {
             throw new AssertionError();
         }
 
+        forwardEncsWrapped = new ArrayList<>();
+
         if (localizer instanceof OdometryLocalizer) {
             OdometryLocalizer l3 = (OdometryLocalizer) localizer;
             parEncs = Arrays.asList(unwrap(l3.getPar0()), unwrap(l3.getPar1()));
             perpEncs = Collections.singletonList(unwrap(l3.getPerp()));
             leftEncs = Collections.emptyList();
             rightEncs = Collections.emptyList();
+
+            forwardEncsWrapped.add(l3.getPar0());
+            forwardEncsWrapped.add(l3.getPar1());
+            forwardEncsWrapped.add(l3.getPerp());
         } else if (localizer instanceof MecanumDrive.DriveLocalizer) {
             MecanumDrive.DriveLocalizer dl = (MecanumDrive.DriveLocalizer) localizer;
             parEncs = Collections.emptyList();
             perpEncs = Collections.emptyList();
             leftEncs = Arrays.asList(unwrap(dl.getLeftFront()), unwrap(dl.getLeftRear()));
             rightEncs = Arrays.asList(unwrap(dl.getRightFront()), unwrap(dl.getRightRear()));
+
+            forwardEncsWrapped.add(dl.getLeftFront());
+            forwardEncsWrapped.add(dl.getLeftRear());
+            forwardEncsWrapped.add(dl.getRightFront());
+            forwardEncsWrapped.add(dl.getRightRear());
         } else {
             throw new AssertionError();
         }
@@ -100,19 +124,11 @@ final class DriveView {
         List<RawEncoder> allEncs = new ArrayList<>();
         allEncs.addAll(forwardEncs);
         allEncs.addAll(perpEncs);
-
-        DcMotorController c1 = allEncs.get(0).getController();
-        for (Encoder e : allEncs) {
-            DcMotorController c2 = e.getController();
-            if (c1 != c2) {
-                throw new IllegalArgumentException("all encoders must be attached to the same hub");
-            }
-        }
     }
 
     public MotorFeedforward feedforward() {
         if (md != null) {
-            return new MotorFeedforward(MecanumDrive.kS, MecanumDrive.kV, MecanumDrive.kA);
+            return new MotorFeedforward(MecanumDrive.kS, MecanumDrive.kV / inPerTick, MecanumDrive.kA / inPerTick);
         }
 
         throw new AssertionError();
@@ -125,5 +141,29 @@ final class DriveView {
         }
 
         throw new AssertionError();
+    }
+
+    public void setBulkCachingMode(LynxModule.BulkCachingMode mode) {
+        for (LynxModule m : lynxModules) {
+            m.setBulkCachingMode(mode);
+        }
+    }
+
+    public void updateMaxAccelVelsTurns() {
+        maxVel = MecanumDrive.MAX_WHEEL_VEL;
+        minAccel = MecanumDrive.MIN_PROFILE_ACCEL;
+        maxAccel = MecanumDrive.MAX_PROFILE_ACCEL;
+    }
+
+    public Map<SerialNumber, Double> resetAndBulkRead(MidpointTimer t) {
+        final Map<SerialNumber, Double> times = new HashMap<>();
+        for (LynxModule m : lynxModules) {
+            m.clearBulkCache();
+
+            t.addSplit();
+            m.getBulkData();
+            times.put(m.getSerialNumber(), t.addSplit());
+        }
+        return times;
     }
 }

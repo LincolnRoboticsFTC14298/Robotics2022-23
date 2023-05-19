@@ -1,24 +1,22 @@
 package org.firstinspires.ftc.teamcode
 
-import com.acmerobotics.dashboard.config.Config
 import com.acmerobotics.roadrunner.Vector2d
 
-@Config
 object FieldConfig {
 
     const val tileSize = 23.5 // in
 
     const val coneDiameter = 5.0 // in TODO measure
-    const val poleDiameter = 2.0 // in TODO measure
-    const val poleBaseHeight = 5.0 //in TODO measure
+    const val poleDiameter = 1.0 // in TODO measure
+    const val poleBaseHeight = 3.0 //in TODO measure
 
     /**
      * Different types of poles. Height in inches.
      */
     enum class PoleType(val height: Double) {
-        LOW(0.0),
-        MEDIUM(0.0),
-        HIGH(0.0)
+        LOW(13.5),
+        MEDIUM(23.5),
+        HIGH(33.5)
     }
 
     /**

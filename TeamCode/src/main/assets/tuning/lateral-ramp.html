@@ -1,0 +1,148 @@
+<!doctype html>
+<html>
+<head>
+  <title>RR Dead Wheel Angular Ramp Regression</title>
+
+  <style>
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.content {
+  margin: auto;
+}
+
+header {
+  max-width: 600px;
+  margin: auto;
+}
+
+.bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+fieldset {
+  display: flex;
+  justify-content: space-between;
+}
+
+h1 {
+  margin-bottom: 0;
+}
+
+details, a {
+  display: block;
+  margin: 1rem 0 1rem 0;
+}
+    </style>
+
+  <script src="/tuning/plotly-2.12.1.min.js"></script>
+
+  <!-- https://tom-alexander.github.io/regression-js/ -->
+  <script src="/tuning/regression-2.0.1.min.js"></script>
+
+  <!-- <script src="/tuning/common.js"></script> -->
+  <script src="common.js"></script>
+</head>
+<body>
+<div class="content">
+  <header>
+    <h1>RR Lateral Ramp Regression</h1>
+    <details></details>
+
+    <div id="download"></div>
+
+    <fieldset>
+      <legend>Feedforward Parameters</legend>
+      <div>
+        kV: <input id="kv" type="text" />
+      </div>
+      <div>
+        kS: <input id="ks" type="text" />
+      </div>
+      <input id="update" type="button" value="update" />
+    </fieldset>
+
+    <p>
+      <button id="latest">Latest</button>
+      <input id="browse" type="file" accept="application/json">
+    </p>
+  </header>
+
+  <div id="lateralInPerTickChart"></div>
+
+</div>
+
+<script>
+function loadRegression(data) {
+
+  const perpEncVels = data.perpEncVels.flatMap((vs, i) =>
+      fixVels(vs.times.slice(0, -1), data.perpEncPositions[i].values.slice(0, -1), vs.values.slice(0, -1)))
+      .map(v => Math.abs(v));
+
+  const allPowers = [...data.flbrPowers, ...data.frblPowers];
+  const appliedVoltages = data.voltages.values.slice(0, -1).map((v, i) =>
+    allPowers.reduce((acc, ps) => Math.max(acc, ps.values[i]), 0) * v).slice(1, -1);
+
+  const setParams = (() => {
+
+    const setLateralInPerTickData = newLinearRegressionChart(
+      document.getElementById('lateralInPerTickChart'),
+      [], [],
+      {title: 'Lateral Ramp Regression', slope: 'Lateral Multiplier', noIntercept: true}
+    );
+
+
+    return (kV, kS) => setLateralInPerTickData(perpEncVels, appliedVoltages.map((v, i) =>
+      (v - kS) / kV ));
+  })();
+
+  const kvInput = document.getElementById('kv');
+  const ksInput = document.getElementById('ks');
+  document.getElementById('update').addEventListener('click', () => {
+    setParams(parseFloat(kvInput.value), parseFloat(ksInput.value));
+  });
+
+  setParams(parseFloat(kvInput.value), parseFloat(ksInput.value));
+}
+
+const latestButton = document.getElementById('latest');
+latestButton.addEventListener('click', function() {
+  fetch('/tuning/lateral-ramp/latest.json')
+    .then(res => {
+      if (res.ok) {
+        const filename = res.headers.get('X-Filename');
+
+        const a = document.createElement('a');
+        a.innerText = 'Download';
+        a.href = `/tuning/lateral-ramp/${filename}`;
+        a.download = `lateral-ramp-${filename}`;
+
+        const download = document.getElementById('download');
+        download.innerHTML = '';
+        download.appendChild(a);
+
+        return res.json();
+      } else {
+        document.getElementById('lateralInPerTickChart').innerText = 'No data files found';
+        throw new Error();
+      }
+    })
+    .then(loadRegression)
+    .catch(console.log.bind(console));
+});
+
+const browseInput = document.getElementById('browse');
+browseInput.addEventListener('change', function(evt) {
+  const reader = new FileReader();
+  reader.onload = function() {
+    loadRegression(JSON.parse(reader.result.trim()));
+  };
+
+  reader.readAsText(browseInput.files[0]);
+});
+    </script>
+</body>
+</html>

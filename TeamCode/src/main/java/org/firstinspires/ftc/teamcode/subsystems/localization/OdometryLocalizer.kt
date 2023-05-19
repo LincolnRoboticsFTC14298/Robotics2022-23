@@ -140,11 +140,11 @@ class OdometryLocalizer(
         var FORWARD_OFFSET = 12.5 / 2.0 // in; offset of the lateral wheel
 
         @JvmField
-        var PAR0_Y_TICKS = 0.0
+        var PAR0_Y_TICKS = -9664.594625447902
         @JvmField
-        var PAR1_Y_TICKS = 0.0
+        var PAR1_Y_TICKS = 12265.310512671498
         @JvmField
-        var PERP_X_TICKS = 0.0
+        var PERP_X_TICKS = 12705.066008931835
     }
 
 }

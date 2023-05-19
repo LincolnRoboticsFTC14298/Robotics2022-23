@@ -7,7 +7,6 @@ import com.acmerobotics.roadrunner.Pose2d
 import com.acmerobotics.roadrunner.Vector2d
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.qualcomm.robotcore.hardware.HardwareMap
-import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.teamcode.FieldConfig
@@ -41,10 +40,10 @@ class Vision(
     private val telemetry: Telemetry? = null
 ) : SubsystemBase() {
 
-    var cameraMonitorViewId = hardwareMap.appContext.resources.getIdentifier(
+    val cameraMonitorViewId = hwMap.appContext.resources.getIdentifier(
         "cameraMonitorViewId",
         "id",
-        hardwareMap.appContext.packageName
+        hwMap.appContext.packageName
     )
 
     var viewportContainerIds = OpenCvCameraFactory.getInstance().splitLayoutForMultipleViewports(cameraMonitorViewId, 2, OpenCvCameraFactory.ViewportSplitMethod.VERTICALLY)
@@ -79,6 +78,8 @@ class Vision(
         phoneCam.openCameraDeviceAsync(object : AsyncCameraOpenListener {
             override fun onOpened() {
                 phoneCam.setPipeline(phoneCamPipeline)
+                phoneCam.showFpsMeterOnViewport(true)
+                phoneCam.setViewportRenderer(OpenCvCamera.ViewportRenderer.GPU_ACCELERATED)
             }
 
             override fun onError(errorCode: Int) {
@@ -87,7 +88,6 @@ class Vision(
                  */
             }
         })
-
 
         webCam.openCameraDeviceAsync(object : AsyncCameraOpenListener {
             override fun onOpened() {
@@ -109,7 +109,7 @@ class Vision(
      * Starts streaming the front camera.
      */
     fun startStreamingFrontCamera() {
-        webCam.startStreaming(320, 240, OpenCvCameraRotation.SIDEWAYS_LEFT) // TODO Check
+        webCam.startStreaming(1280, 720, OpenCvCameraRotation.UPRIGHT ) // TODO Check
         dashboard.startCameraStream(webCam, 10.0)
     }
 
@@ -309,10 +309,12 @@ class Vision(
     }
 
     fun fetchTelemetry(telemetry: Telemetry, pose: Pose2d? = null) {
+        telemetry.addData("Camera info/calibration???", webCam.calibrationIdentity)
+        telemetry.addData("FPS", webCam.fps)
         telemetry.addLine("Processed data")
-        telemetry.addData("Closest cone", getClosestCone(pose)?.toString())
+        telemetry.addData("Closest cone", getClosestCone(pose))
         telemetry.addData("Closest cone using width", "Angle: 0.1f", getClosestCone(pose, useWidth = true)?.angle)
-        telemetry.addData("Closest pole", getClosestPole()?.toString())
+        telemetry.addData("Closest pole", getClosestPole())
         telemetry.addData("Landmarks", getLandmarkInfo())
 
         telemetry.addLine()
@@ -366,9 +368,9 @@ class Vision(
                 Math.toRadians(60.0),
                 Math.toRadians(60.0), 0.0, 0.0, 0.0, 0.0, MatOfDouble(0.0, 0.0, 0.0, 0.0, 0.0)
             ),
-            LOGITECH_C920(0.0, 3.0, Vector2d(5.0, 0.0),
-                Math.toRadians(60.0),
-                Math.toRadians(60.0), 1.44943054e+3, 1.44934063e+3, 9.37759430e+2, 5.34866814e+2, MatOfDouble(0.07622862, -0.41153656, -0.00089351, 0.00219123, 0.57699695)
+            LOGITECH_C920(0.0, 6.0, Vector2d(4.5, 0.0),
+                Math.toRadians(70.42),
+                Math.toRadians(43.3), 1.44943054e+3, 1.44934063e+3, 9.37759430e+2, 5.34866814e+2, MatOfDouble(0.07622862, -0.41153656, -0.00089351, 0.00219123, 0.57699695)
             );
 
             fun getCameraMatrix(): Mat {

@@ -3,11 +3,10 @@ package org.firstinspires.ftc.teamcode.teleops.tuning.drive;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor;
 import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer;
-import org.firstinspires.ftc.teamcode.teleops.OpModeManager;
+import org.firstinspires.ftc.teamcode.teleops.OpModeRegister;
 
 public final class LateralPushTest extends LinearOpMode {
     private static double lateralSum(MecanumDrive.DriveLocalizer dl) {
@@ -20,7 +19,7 @@ public final class LateralPushTest extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        if (!OpModeManager.DRIVE_CLASS.equals(MecanumDrive.class)) {
+            if (!OpModeRegister.DRIVE_CLASS.equals(MecanumDrive.class)) {
             throw new RuntimeException(getClass().getSimpleName() + " is for mecanum drives only.");
         }
 

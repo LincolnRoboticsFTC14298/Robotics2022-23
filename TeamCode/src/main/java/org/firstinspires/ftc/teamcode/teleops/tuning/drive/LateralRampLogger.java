@@ -13,9 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public final class ForwardRampLogger extends LinearOpMode {
+public class LateralRampLogger extends LinearOpMode {
     private static double power(double seconds) {
-        return Math.min(0.1 * seconds, 0.9);
+        return Math.min(0.25 * seconds, 0.9);
     }
 
     private static class Signal {
@@ -42,21 +42,27 @@ public final class ForwardRampLogger extends LinearOpMode {
         class Data {
             public final String type = view.type;
 
-            public final List<Signal> powers = new ArrayList<>();
+            public final List<Signal> frblPowers = new ArrayList<>();
+
+            public final List<Signal> flbrPowers = new ArrayList<>();
 
             public final Signal voltages = new Signal();
 
-            public final List<Signal> forwardEncPositions = new ArrayList<>();
-            public final List<Signal> forwardEncVels = new ArrayList<>();
+            public final List<Signal> perpEncPositions = new ArrayList<>();
+
+            public final List<Signal> perpEncVels = new ArrayList<>();
         }
 
         Data data = new Data();
-        for (DcMotorEx m : view.motors) {
-            data.powers.add(new Signal());
+        for (DcMotorEx m : view.flbr) {
+            data.flbrPowers.add(new Signal());
         }
-        for (Encoder e : view.forwardEncs) {
-            data.forwardEncPositions.add(new Signal());
-            data.forwardEncVels.add(new Signal());
+        for (DcMotorEx m : view.frbl) {
+            data.frblPowers.add(new Signal());
+        }
+        for (Encoder e : view.perpEncs) {
+            data.perpEncPositions.add(new Signal());
+            data.perpEncVels.add(new Signal());
         }
 
         waitForStart();
@@ -65,11 +71,20 @@ public final class ForwardRampLogger extends LinearOpMode {
         while (opModeIsActive()) {
             view.voltageSensor.periodic();
 
-            for (int i = 0; i < view.motors.size(); i++) {
+            for (int i = 0; i < view.flbr.size(); i++) {
                 double power = power(t.seconds());
-                view.motors.get(i).setPower(power);
+                view.flbr.get(i).setPower(power);
 
-                Signal s = data.powers.get(i);
+                Signal s = data.flbrPowers.get(i);
+                s.times.add(t.addSplit());
+                s.values.add(power);
+            }
+
+            for (int i = 0; i < view.frbl.size(); i++) {
+                double power = -power(t.seconds());
+                view.frbl.get(i).setPower(power);
+
+                Signal s = data.frblPowers.get(i);
                 s.times.add(t.addSplit());
                 s.values.add(power);
             }
@@ -79,12 +94,12 @@ public final class ForwardRampLogger extends LinearOpMode {
 
             Map<SerialNumber, Double> encTimes = view.resetAndBulkRead(t);
 
-            for (int i = 0; i < view.forwardEncs.size(); i++) {
+            for (int i = 0; i < view.perpEncs.size(); i++) {
                 recordEncoderData(
-                        view.forwardEncs.get(i),
+                        view.perpEncs.get(i),
                         encTimes,
-                        data.forwardEncPositions.get(i),
-                        data.forwardEncVels.get(i)
+                        data.perpEncPositions.get(i),
+                        data.perpEncVels.get(i)
                 );
             }
         }
@@ -93,6 +108,6 @@ public final class ForwardRampLogger extends LinearOpMode {
             m.setPower(0);
         }
 
-        TuningFiles.save(TuningFiles.FileType.FORWARD_RAMP, data);
+        TuningFiles.save(TuningFiles.FileType.LATERAL_RAMP, data);
     }
 }

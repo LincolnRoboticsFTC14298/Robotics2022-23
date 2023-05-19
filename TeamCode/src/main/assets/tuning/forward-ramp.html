@@ -49,6 +49,14 @@ details, a {
 
         <div id="download"></div>
 
+        <fieldset>
+          <legend>Encoder Parameters</legend>
+          <div>
+            inchesPerTick: <input id="inchesPerTick" type="text" />
+          </div>
+          <input id="update" type="button" value="update" />
+        </fieldset>
+
         <p>
           <button id="latest">Latest</button>
           <input id="browse" type="file" accept="application/json">
@@ -60,20 +68,33 @@ details, a {
 
     <script>
 function loadRegression(data) {
-  const forwardEncVels = data.forwardEncVels.flatMap((vs, i) => 
-    fixVels(data.encTimes.slice(0, -1), data.forwardEncPositions[i].slice(0, -1), vs.slice(0, -1)));
-  const appliedVoltages = data.forwardEncVels.flatMap(vs => {
-    const voltages = data.voltages.slice(0, -1).map((v, i) =>
-      data.powers.reduce((acc, ps) => Math.max(acc, ps[i]), 0) * v);
+  const appliedVoltages = data.forwardEncVels.flatMap(() => {
+    const voltages = data.voltages.values.slice(0, -1).map((v, i) =>
+      data.powers.reduce((acc, ps) => Math.max(acc, ps.values[i]), 0) * v);
 
     return voltages.slice(1, voltages.length - 1);
   });
 
-  newLinearRegressionChart(
-    document.getElementById('rampChart'),
-    forwardEncVels, appliedVoltages,
-    {title: 'Ramp Regression', slope: 'kV', intercept: 'kS', noIntercept: false}
-  );
+  const setParams = (() => {
+    const forwardEncVels = data.forwardEncVels.flatMap((vs, i) =>
+      fixVels(vs.times.slice(0, -1), data.forwardEncPositions[i].values.slice(0, -1), vs.values.slice(0, -1)));
+
+    const setLateralInPerTickData = newLinearRegressionChart(
+      document.getElementById('rampChart'),
+      [], [],
+      {title: 'Ramp Regression', slope: 'kV', intercept: 'kS', noIntercept: false}
+    );
+
+    return (ticksPerInch) => setLateralInPerTickData(forwardEncVels.map((v, i) =>
+      v * ticksPerInch), appliedVoltages);
+  })();
+
+  const inchesPerTickInput = document.getElementById('inchesPerTick');
+  document.getElementById('update').addEventListener('click', () => {
+    setParams(parseFloat(inchesPerTickInput.value));
+  });
+
+  setParams(parseFloat(inchesPerTickInput.value));
 }
 
 const latestButton = document.getElementById('latest');
