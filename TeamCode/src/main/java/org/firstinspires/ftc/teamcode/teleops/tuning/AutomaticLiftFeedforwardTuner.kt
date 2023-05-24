@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.teleops.tuning
 
 import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket
 import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
@@ -40,7 +41,9 @@ class AutomaticLiftFeedforwardTuner : LinearOpMode() {
         while(!isStopRequested) {
             lift.updateFilter(null)
             lift.checkEncoder()
-            lift.fetchTelemetry(telemetry)
+            val p = TelemetryPacket()
+            lift.fetchTelemetry(p)
+            // TODO: This doesn't actually update telemetry
             telemetry.update()
 
             if (lift.getRawExtensionLength() < 0.1) {
@@ -86,7 +89,8 @@ class AutomaticLiftFeedforwardTuner : LinearOpMode() {
             velocitySamples.add(lift.getVelocity())
             accelerationSamples.add(lift.getAcceleration())
 
-            lift.fetchTelemetry(telemetry)
+            val p = TelemetryPacket()
+            lift.fetchTelemetry(p)
             telemetry.update()
         }
 
@@ -116,7 +120,8 @@ class AutomaticLiftFeedforwardTuner : LinearOpMode() {
             velocitySamples.add(lift.getVelocity())
             accelerationSamples.add(lift.getAcceleration())
 
-            lift.fetchTelemetry(telemetry)
+            val p = TelemetryPacket()
+            lift.fetchTelemetry(p)
             telemetry.update()
         }
 

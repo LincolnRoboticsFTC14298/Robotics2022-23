@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystems
 import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.canvas.Canvas
 import com.acmerobotics.dashboard.config.Config
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket
 import com.acmerobotics.roadrunner.Pose2d
 import com.acmerobotics.roadrunner.Vector2d
 import com.arcrobotics.ftclib.command.SubsystemBase
@@ -308,20 +309,20 @@ class Vision(
         return poles
     }
 
-    fun fetchTelemetry(telemetry: Telemetry, pose: Pose2d? = null) {
-        telemetry.addData("Camera info/calibration???", webCam.calibrationIdentity)
-        telemetry.addData("FPS", webCam.fps)
-        telemetry.addLine("Processed data")
-        telemetry.addData("Closest cone", getClosestCone(pose))
-        telemetry.addData("Closest cone using width", "Angle: 0.1f", getClosestCone(pose, useWidth = true)?.angle)
-        telemetry.addData("Closest pole", getClosestPole())
-        telemetry.addData("Landmarks", getLandmarkInfo())
+    fun fetchTelemetry(packet: TelemetryPacket, pose: Pose2d? = null) {
+        packet.put("Camera info/calibration???", webCam.calibrationIdentity)
+        packet.put("FPS", webCam.fps)
+        packet.addLine("Processed data")
+        packet.put("Closest cone", getClosestCone(pose))
+        packet.put("Closest cone using width", "Angle: ${getClosestCone(pose, useWidth = true)?.angle}")
+        packet.put("Closest pole", getClosestPole())
+        packet.put("Landmarks", getLandmarkInfo())
 
-        telemetry.addLine()
-        telemetry.addLine("Raw data")
-        telemetry.addData("Stacks", (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).stackResults)
-        telemetry.addData("Poles", (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).poleResults)
-        telemetry.addData("Single cones", (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).singleConeResults)
+        packet.addLine("")
+        packet.addLine("Raw data")
+        packet.put("Stacks", (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).stackResults)
+        packet.put("Poles", (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).poleResults)
+        packet.put("Single cones", (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).singleConeResults)
     }
 
     fun drawObservations(canvas: Canvas, pose: Pose2d, showAll: Boolean = false) {

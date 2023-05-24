@@ -1,19 +1,23 @@
 package org.firstinspires.ftc.teamcode.teleops.testing
 
 import com.acmerobotics.dashboard.FtcDashboard
+import com.acmerobotics.dashboard.config.Config
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket
 import com.acmerobotics.roadrunner.Pose2d
 import com.acmerobotics.roadrunner.Twist2d
 import com.acmerobotics.roadrunner.Vector2d
 import com.arcrobotics.ftclib.command.CommandOpMode
 import com.arcrobotics.ftclib.gamepad.GamepadEx
 import com.arcrobotics.ftclib.gamepad.GamepadKeys
+import org.firstinspires.ftc.teamcode.FieldConfig.tileSize
 import org.firstinspires.ftc.teamcode.commands.drive.SimpleJoystickDrive
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive
 import org.firstinspires.ftc.teamcode.subsystems.Vision
 import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor
 import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer
 
+@Config
 class VisionTest : CommandOpMode() {
 
     private lateinit var vision: Vision
@@ -27,13 +31,13 @@ class VisionTest : CommandOpMode() {
 
         vision = Vision(hardwareMap)
         val localizer = OdometryLocalizer(hardwareMap)
-        mecanum = MecanumDrive(hardwareMap, Pose2d(0.0, 0.0, Math.toRadians(90.0)), localizer, VoltageSensor(hardwareMap))
+        mecanum = MecanumDrive(hardwareMap, startPose, localizer, VoltageSensor(hardwareMap))
 
         register(mecanum, vision)
 
         val driver1 = GamepadEx(gamepad1)
 
-        val input = { Twist2d(Vector2d(driver1.leftY, -driver1.leftX), -driver1.rightX) }
+        val input = { Twist2d(Vector2d(driver1.leftX, driver1.leftY), -driver1.rightX) }
 
 
         val fieldCentricProvider = { fieldCentric }
@@ -46,10 +50,16 @@ class VisionTest : CommandOpMode() {
 
     override fun run() {
         super.run()
-        telemetry.addData("Field Centric", fieldCentric)
-        telemetry.addData("Use Pose", usePose)
-        vision.fetchTelemetry(telemetry, if (usePose) mecanum.pose else null)
-        telemetry.update()
+        val p = TelemetryPacket()
+        mecanum.drawRobot(p.fieldOverlay())
+        p.put("Field Centric", fieldCentric)
+        p.put("Use Pose", usePose)
+        vision.fetchTelemetry(p, if (usePose) mecanum.pose else null)
+        FtcDashboard.getInstance().sendTelemetryPacket(p)
+    }
+
+    companion object {
+        val startPose = Pose2d(-1.5 * tileSize, -1.5 * tileSize, Math.toRadians(90.0))
     }
 
 }

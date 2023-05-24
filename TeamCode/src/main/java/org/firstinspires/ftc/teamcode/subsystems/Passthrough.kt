@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystems
 
 import android.util.Log
 import com.acmerobotics.dashboard.config.Config
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket
 import com.acmerobotics.roadrunner.*
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.arcrobotics.ftclib.hardware.ServoEx
@@ -127,8 +128,8 @@ class Passthrough(hwMap: HardwareMap, startingAngle: Double = passthroughMinDegr
     /**
      * For debugging/tuning purposes
      */
-    fun fetchTelemetry(telemetry: Telemetry) {
-        telemetry.addData("Passthrough desired angle", setpoint)
+    fun fetchTelemetry(packet: TelemetryPacket) {
+        packet.put("Passthrough desired angle", setpoint)
     }
 
     companion object {

@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.vision
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.FieldConfig
 import org.firstinspires.ftc.teamcode.FieldConfig.coneDiameter
+import org.firstinspires.ftc.teamcode.FieldConfig.poleBaseHeight
 import org.firstinspires.ftc.teamcode.FieldConfig.poleDiameter
 import org.firstinspires.ftc.teamcode.subsystems.Vision
 import org.firstinspires.ftc.teamcode.vision.modulelib.InputModule
@@ -84,7 +85,7 @@ open class GeneralPipeline(
     private val singleConeResultsModule = ContourResults(singleConeContours, camera, coneDiameter)
     private val redSingleConeResultsModule = ContourResults(redSingleConeContours, camera, coneDiameter)
     private val blueSingleConeResultsModule = ContourResults(blueSingleConeContours, camera, coneDiameter)
-    private val poleResultsModule = ContourResults(poleContours, camera, poleDiameter)
+    private val poleResultsModule = ContourResults(poleContours, camera, poleDiameter, poleBaseHeight)
 
     // Data we care about and wish to access
     var stackResults = listOf<ContourResults.AnalysisResult>()

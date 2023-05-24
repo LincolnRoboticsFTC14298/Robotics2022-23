@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.teleops.tuning
 
 import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket
 import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
@@ -31,6 +32,8 @@ class ManualLiftFeedforwardTuner : OpMode() {
         }
 
         lift.periodic()
-        lift.fetchTelemetry(telemetry)
+        val p = TelemetryPacket()
+        lift.fetchTelemetry(p)
+        FtcDashboard.getInstance().sendTelemetryPacket(p)
     }
 }

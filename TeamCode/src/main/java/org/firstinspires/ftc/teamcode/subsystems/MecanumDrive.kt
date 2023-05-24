@@ -439,7 +439,7 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
 
     fun drawRobot(c: Canvas, t: Pose2d = pose) {
         c.setStrokeWidth(1)
-        c.strokeRect(t.trans.x - TRACK_WIDTH/2.0, t.trans.y - TRACK_WIDTH/2.0, TRACK_WIDTH, TRACK_WIDTH)
+        c.strokeCircle(t.trans.x, t.trans.y, TRACK_WIDTH/2.0)
         val halfv = t.rot.vec().times(0.25 * TRACK_WIDTH)
         val p1 = t.trans.plus(halfv)
         val (x, y) = p1.plus(halfv)
