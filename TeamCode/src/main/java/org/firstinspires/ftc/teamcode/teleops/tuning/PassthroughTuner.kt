@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.teleops.tuning
 
+import com.acmerobotics.dashboard.FtcDashboard
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket
 import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
@@ -35,10 +37,12 @@ class PassthroughTuner() : OpMode() {
             passthrough.setPosition(0.0)
         }
 
-        telemetry.addData("Time to deposit", passthrough.timeToTarget(passthroughDepositAngle))
-        telemetry.addData("Time to junction deposit", passthrough.timeToTarget(passthroughJunctionAngle))
-        telemetry.addData("Time to pick up", passthrough.timeToTarget(passthroughPickUpAngle))
-        passthrough.fetchTelemetry(telemetry)
-        telemetry.update()
+        val p = TelemetryPacket()
+
+        p.put("Time to deposit", passthrough.timeToTarget(passthroughDepositAngle))
+        p.put("Time to junction deposit", passthrough.timeToTarget(passthroughJunctionAngle))
+        p.put("Time to pick up", passthrough.timeToTarget(passthroughPickUpAngle))
+        passthrough.fetchTelemetry(p)
+        FtcDashboard.getInstance().sendTelemetryPacket(p)
     }
 }

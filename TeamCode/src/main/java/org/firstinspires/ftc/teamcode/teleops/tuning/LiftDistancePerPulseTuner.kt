@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.teleops.tuning
 
 import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.subsystems.Lift
@@ -23,9 +24,11 @@ class LiftDistancePerPulseTuner() : OpMode() {
         lift.checkEncoder()
         lift.setPower(power)
         lift.updateFilter(null)
-        telemetry.addData("power", power)
-        lift.fetchTelemetry(telemetry)
-        telemetry.update()
+
+        val p = TelemetryPacket()
+        p.put("power", power)
+        lift.fetchTelemetry(p)
+        FtcDashboard.getInstance().sendTelemetryPacket(p)
     }
 
 }

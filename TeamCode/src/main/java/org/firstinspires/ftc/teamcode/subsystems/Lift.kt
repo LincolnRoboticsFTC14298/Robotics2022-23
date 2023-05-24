@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystems
 import org.firstinspires.ftc.teamcode.util.PIDFController
 import android.util.Log
 import com.acmerobotics.dashboard.config.Config
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket
 import com.acmerobotics.roadrunner.*
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.arcrobotics.ftclib.hardware.motors.Motor
@@ -231,15 +232,15 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
     /**
      * For debugging/tuning purposes
      */
-    fun fetchTelemetry(telemetry: Telemetry) {
-        telemetry.addData("Lift raw length", getRawExtensionLength())
-        telemetry.addData("Lift raw velocity", getRawVelocity())
-        telemetry.addData("Lift raw acceleration", motorGroup.encoder.acceleration * liftDPP)
-        telemetry.addData("Lift estimated length", getExtensionLength())
-        telemetry.addData("Lift estimated velocity", getVelocity())
-        telemetry.addData("Lift estimated acceleration", getAcceleration())
-        telemetry.addData("Target velocity", desiredState[1])
-        telemetry.addData("Velocity Error", desiredState[1] - getVelocity())
+    fun fetchTelemetry(packet: TelemetryPacket) {
+        packet.put("Lift raw length", getRawExtensionLength())
+        packet.put("Lift raw velocity", getRawVelocity())
+        packet.put("Lift raw acceleration", motorGroup.encoder.acceleration * liftDPP)
+        packet.put("Lift estimated length", getExtensionLength())
+        packet.put("Lift estimated velocity", getVelocity())
+        packet.put("Lift estimated acceleration", getAcceleration())
+        packet.put("Target velocity", desiredState[1])
+        packet.put("Velocity Error", desiredState[1] - getVelocity())
     }
 
     companion object {

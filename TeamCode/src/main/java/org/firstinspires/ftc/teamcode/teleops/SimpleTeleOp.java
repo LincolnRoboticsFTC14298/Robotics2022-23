@@ -70,9 +70,9 @@ public class SimpleTeleOp extends LinearOpMode
 
             claw.periodic();
             passthrough.periodic();
-            claw.fetchTelemetry(telemetry);
-            passthrough.fetchTelemetry(telemetry);
-            telemetry.update();
+//            claw.fetchTelemetry(telemetry);
+//            passthrough.fetchTelemetry(telemetry);
+//            telemetry.update();
         }
     }
 }

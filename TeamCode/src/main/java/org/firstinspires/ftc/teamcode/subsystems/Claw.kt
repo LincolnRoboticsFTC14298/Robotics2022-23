@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.util.Log
 import com.acmerobotics.dashboard.canvas.Canvas
 import com.acmerobotics.dashboard.config.Config
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket
 import com.acmerobotics.roadrunner.Pose2d
 import com.acmerobotics.roadrunner.TimeProfile
 import com.acmerobotics.roadrunner.Vector2d
@@ -93,9 +94,9 @@ class Claw(hwMap: HardwareMap, startingPosition: Double = clawClosedPosition) : 
     /**
      * For debugging/tuning purposes
      */
-    fun fetchTelemetry(telemetry: Telemetry) {
-        telemetry.addData("Position Estimate", getPositionEstimate())
-        telemetry.addData("Desired position", setpoint)
+    fun fetchTelemetry(packet: TelemetryPacket) {
+        packet.put("Position Estimate", getPositionEstimate())
+        packet.put("Desired position", setpoint)
     }
 
     fun drawClaw(canvas: Canvas, clawOffset: Vector2d, pose: Pose2d) {

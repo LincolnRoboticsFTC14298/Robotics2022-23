@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.teleops.testing
 
 import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket
 import com.acmerobotics.roadrunner.Pose2d
 import com.acmerobotics.roadrunner.Twist2d
 import com.acmerobotics.roadrunner.Vector2d
@@ -63,10 +64,11 @@ class ConeAutoTest : CommandOpMode() {
 
     override fun run() {
         super.run()
-        vision.fetchTelemetry(telemetry, mecanum.pose)
-        telemetry.addData("Lift position", lift.getRelativePosition())
-        telemetry.addData("Passthrough position", lift.getRelativePosition() * passthrough.getRelativePosition())
-        telemetry.update()
+        val p = TelemetryPacket()
+        vision.fetchTelemetry(p, mecanum.pose)
+        p.put("Lift position", lift.getRelativePosition())
+        p.put("Passthrough position", lift.getRelativePosition() * passthrough.getRelativePosition())
+        FtcDashboard.getInstance().sendTelemetryPacket(p)
     }
 
 }

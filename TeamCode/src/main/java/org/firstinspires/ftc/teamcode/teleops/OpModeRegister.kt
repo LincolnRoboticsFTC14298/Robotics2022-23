@@ -1,5 +1,10 @@
 package org.firstinspires.ftc.teamcode.teleops
 
+import com.acmerobotics.dashboard.FtcDashboard
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
+import com.arcrobotics.ftclib.command.button.GamepadButton
+import com.arcrobotics.ftclib.gamepad.GamepadEx
+import com.arcrobotics.ftclib.gamepad.GamepadKeys
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManager
 import com.qualcomm.robotcore.eventloop.opmode.OpModeRegistrar
@@ -12,7 +17,7 @@ import org.firstinspires.ftc.teamcode.teleops.tuning.drive.*
 object OpModeRegister {
     @JvmField
     val DRIVE_CLASS: Class<*> = MecanumDrive::class.java
-    private val currentBatch = BATCH.ROAD_RUNNER_TUNING
+    var currentBatch = BATCH.VISION
 
     enum class BATCH(vararg val opModes: Class<out OpMode>) {
         ROAD_RUNNER_TUNING(
@@ -24,6 +29,7 @@ object OpModeRegister {
             AngularRampLogger::class.java,
             ManualFeedforwardTuner::class.java,
             LateralMultiplierTuning::class.java,
+            LateralRampLogger::class.java,
             ManualFeedbackTuner::class.java,
             SplineTest::class.java,
         ),
@@ -67,6 +73,17 @@ object OpModeRegister {
     @OpModeRegistrar
     @JvmStatic
     fun register(manager: OpModeManager) {
+
+        val selector = ModeSelector::class.java
+
+        manager.register(
+            OpModeMeta.Builder()
+                .setName(selector.simpleName)
+                .setGroup(currentBatch.name)
+                .setFlavor(OpModeMeta.Flavor.TELEOP)
+                .build(), selector
+        )
+
         for (o in currentBatch.opModes) {
             manager.register(
                 OpModeMeta.Builder()
@@ -77,4 +94,30 @@ object OpModeRegister {
             )
         }
     }
+
+    class ModeSelector() : OpMode() {
+
+        val values = enumValues<BATCH>()
+        lateinit var gamepad: GamepadEx
+
+        override fun init() {
+            gamepad = GamepadEx(gamepad1)
+            telemetry = MultipleTelemetry(telemetry, FtcDashboard.getInstance().telemetry)
+        }
+
+        override fun loop() {
+            if (gamepad.wasJustPressed(GamepadKeys.Button.DPAD_UP)) {
+                currentBatch = values[(currentBatch.ordinal + 1) % values.size]
+                telemetry.addLine("YES")
+            } else if (gamepad.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) {
+                currentBatch = values[(currentBatch.ordinal - 1 + values.size) % values.size]
+                telemetry.addLine("YES BUT NO")
+            }
+
+            telemetry.addData("Current batch", currentBatch.name)
+            telemetry.update()
+        }
+
+    }
+
 }
