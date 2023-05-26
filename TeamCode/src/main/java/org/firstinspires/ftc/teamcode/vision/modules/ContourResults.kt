@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.vision.modules
 
+import android.util.Log
 import com.acmerobotics.roadrunner.Vector2d
 import org.firstinspires.ftc.teamcode.FieldConfig
 import org.firstinspires.ftc.teamcode.subsystems.Vision
+import org.firstinspires.ftc.teamcode.util.LogFiles.log
 import org.firstinspires.ftc.teamcode.util.epsilonEquals
 import org.firstinspires.ftc.teamcode.vision.modulelib.AbstractPipelineModule
 import org.opencv.core.Mat
@@ -75,12 +77,15 @@ class ContourResults(
             // calculate angle and distance
             val pitch = Ay * camera.FOVY / 2.0
             val yaw = Ax * camera.FOVX / 2.0
-            val distanceByPitch = (targetHeightOffset - camera.height) / tan(camera.pitch - pitch) / cos(yaw) + pitchDistanceOffset // TODO Replace w/ inverse projection
+            val distanceByPitch = (targetHeightOffset - camera.height) / tan(camera.pitch + pitch) / cos(yaw) + pitchDistanceOffset // TODO Replace w/ inverse projection
+
+            Log.i("Pitch", pitch.toString())
+            Log.i("Yaw", yaw.toString())
 
             /// New variable
             val contour2f = MatOfPoint2f(*contour.toArray())
             val contourMinAreaRect = minAreaRect(contour2f)
-            val measuredWidth = min(contourMinAreaRect.size.width, contourMinAreaRect.size.height)
+            val measuredWidth = contourMinAreaRect.size.width//min(contourMinAreaRect.size.width, contourMinAreaRect.size.height)
             val distanceByWidth = targetWidth * camera.fx / measuredWidth
 
             // add to results
