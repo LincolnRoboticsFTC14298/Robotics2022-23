@@ -3,15 +3,13 @@ package org.firstinspires.ftc.teamcode.vision.modules
 import org.firstinspires.ftc.teamcode.vision.modulelib.AbstractPipelineModule
 import org.opencv.core.Core
 import org.opencv.core.Mat
-import org.opencv.core.Scalar
 
-
-class CombineMasks (
+class CombineMasks(
     private val inputModule1: AbstractPipelineModule<Mat>,
     private val inputModule2: AbstractPipelineModule<Mat>
 ) : AbstractPipelineModule<Mat>() {
 
-    private lateinit var output: Mat
+    private var output: Mat? = null
 
     init {
         addParentModules(inputModule1, inputModule2)
@@ -22,9 +20,8 @@ class CombineMasks (
         output = input.clone()
     }
 
-    override fun processFrameForCache(rawInput: Mat): Mat {
-        Core.bitwise_or(inputModule1.processFrame(rawInput), inputModule2.processFrame(rawInput), output)
-        return output
-    }
-
+    override fun processFrameForCache(rawInput: Mat): Mat =
+        output?.apply {
+            Core.bitwise_or(inputModule1.processFrame(rawInput), inputModule2.processFrame(rawInput), this)
+        } ?: Mat().also { output = it }
 }

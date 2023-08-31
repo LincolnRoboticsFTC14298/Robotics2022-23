@@ -3,31 +3,24 @@ package org.firstinspires.ftc.teamcode.vision.modules.features
 import org.opencv.core.MatOfInt
 import org.opencv.core.MatOfPoint
 import org.opencv.core.Point
-import org.opencv.imgproc.Imgproc.*
+import org.opencv.imgproc.Imgproc.contourArea
+import org.opencv.imgproc.Imgproc.convexHull
+import kotlin.math.pow
 
-class Solidity() : Feature {
+class Solidity : Feature {
 
     private val solidityResults = mutableListOf<Double>()
 
     override fun featureMeasurement(contour: MatOfPoint): Double {
         val contourArea = contourArea(contour)
-
-        val hullList: ArrayList<MatOfPoint> = ArrayList()
-
         val hull = MatOfInt()
         convexHull(contour, hull)
 
-        val contourArray = contour.toArray()
-        val hullPoints = arrayOfNulls<Point>(hull.rows())
-        val hullContourIdxList = hull.toList()
-        for (i in hullContourIdxList.indices) {
-            hullPoints[i] = contourArray[hullContourIdxList[i]]
-        }
-
+        val hullPoints = hull.toList().map { contour.toArray()[it] }.toTypedArray()
         val convexHull = MatOfPoint(*hullPoints)
-        hullList.add(convexHull)
 
         val hullArea = contourArea(convexHull)
+        if (hullArea == 0.0) return 0.0
 
         val solidity = contourArea / hullArea
         solidityResults.add(solidity)
@@ -35,10 +28,11 @@ class Solidity() : Feature {
     }
 
     override fun mean(): Double {
-        return solidityResults.sumOf{it}/solidityResults.size
+        return if (solidityResults.isNotEmpty()) solidityResults.average() else 0.0
     }
 
     override fun variance(): Double {
-        return solidityResults.sumOf { (it-mean()) * (it-mean()) } / solidityResults.size
+        val meanValue = mean()
+        return if (solidityResults.isNotEmpty()) solidityResults.sumOf { (it - meanValue).pow(2) } / solidityResults.size else 0.0
     }
 }

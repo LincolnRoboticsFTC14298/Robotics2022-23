@@ -1,15 +1,17 @@
 package org.firstinspires.ftc.teamcode.vision.modules
 
 import org.firstinspires.ftc.teamcode.vision.modulelib.AbstractPipelineModule
-import org.opencv.core.*
+import org.opencv.core.CvType
+import org.opencv.core.Mat
+import org.opencv.core.MatOfPoint
+import org.opencv.core.Scalar
 import org.opencv.imgproc.Imgproc
 
-
-class ContourToMask (
+class ContourToMask(
     private val contourModule: AbstractPipelineModule<List<MatOfPoint>>
 ) : AbstractPipelineModule<Mat>() {
 
-    private lateinit var output: Mat
+    private var output: Mat = Mat()
 
     init {
         addParentModules(contourModule)
@@ -21,9 +23,9 @@ class ContourToMask (
     }
 
     override fun processFrameForCache(rawInput: Mat): Mat {
-        output.setTo(Scalar.all(0.0)) // Set matrix all to zero
-        Imgproc.drawContours(output, contourModule.processFrame(rawInput), -1, Scalar(255.0), -1)
-        return output
+        return output.apply {
+            setTo(Scalar.all(0.0))
+            Imgproc.drawContours(this, contourModule.processFrame(rawInput), -1, Scalar(255.0), -1)
+        }
     }
-
 }

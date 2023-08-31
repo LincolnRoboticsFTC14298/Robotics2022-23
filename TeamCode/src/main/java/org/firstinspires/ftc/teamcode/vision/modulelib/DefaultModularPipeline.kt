@@ -3,25 +3,19 @@ package org.firstinspires.ftc.teamcode.vision.modulelib
 import org.opencv.core.Mat
 import org.openftc.easyopencv.OpenCvPipeline
 
-/**
- * Simple modular pipeline implementation for arbitrary display and output modules.
- * @author Jared Haertel
- */
 class DefaultModularPipeline(
     private val displayModule: AbstractPipelineModule<Mat>,
     private vararg val outputModules: AbstractPipelineModule<*>
-    ) : ModularPipeline() {
+) : ModularPipeline() {
 
     init {
         addEndModules(displayModule, *outputModules)
     }
 
-    var lastOutput: Array<Any?> = arrayOfNulls(outputModules.size)
-        private set
+    private var lastOutput: Array<Any?> = arrayOfNulls(outputModules.size)
 
     override fun processFrameForCache(input: Mat): Mat {
-        outputModules.forEachIndexed { i, module -> lastOutput[i] = module.processFrame(input) }
+        lastOutput = outputModules.map { it.processFrame(input) }.toTypedArray()
         return displayModule.processFrame(input)
     }
-
 }

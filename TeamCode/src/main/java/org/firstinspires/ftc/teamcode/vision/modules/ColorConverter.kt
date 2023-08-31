@@ -9,21 +9,18 @@ class ColorConverter(
     private val colorMode: Int = Imgproc.COLOR_RGB2Lab
 ) : AbstractPipelineModule<Mat>() {
 
-    private lateinit var output: Mat
+    private var output: Mat? = null
 
     init {
         addParentModules(inputModule)
     }
-
 
     override fun init(input: Mat) {
         super.init(input)
         output = input.clone()
     }
 
-    override fun processFrameForCache(rawInput: Mat): Mat {
-        Imgproc.cvtColor(inputModule.processFrame(rawInput), output, colorMode)
-        return output
-    }
-
+    override fun processFrameForCache(rawInput: Mat): Mat =
+        output?.apply { Imgproc.cvtColor(inputModule.processFrame(rawInput), this, colorMode) }
+            ?: Mat().also { output = it }
 }

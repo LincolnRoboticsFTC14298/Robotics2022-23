@@ -3,44 +3,32 @@ package org.firstinspires.ftc.teamcode.vision.modules.features
 import org.opencv.core.MatOfInt
 import org.opencv.core.MatOfPoint
 import org.opencv.core.MatOfPoint2f
-import org.opencv.core.Point
-import org.opencv.imgproc.Imgproc.*
+import org.opencv.imgproc.Imgproc.arcLength
+import org.opencv.imgproc.Imgproc.convexHull
+import kotlin.math.pow
 
-class Convexity() : Feature {
+class Convexity : Feature {
 
     private val convexityResults = mutableListOf<Double>()
-
 
     override fun featureMeasurement(contour: MatOfPoint): Double {
         val contourPerimeter = arcLength(MatOfPoint2f(*contour.toArray()), true)
 
-        val hullList: ArrayList<MatOfPoint> = ArrayList()
-
         val hull = MatOfInt()
         convexHull(contour, hull)
 
-        val contourArray = contour.toArray()
-        val hullPoints = arrayOfNulls<Point>(hull.rows())
-        val hullContourIdxList = hull.toList()
-        for (i in hullContourIdxList.indices) {
-            hullPoints[i] = contourArray[hullContourIdxList[i]]
-        }
-
+        val hullPoints = hull.toList().map { contour.toArray()[it] }.toTypedArray()
         val convexHull = MatOfPoint(*hullPoints)
-        hullList.add(convexHull)
 
         val hullPerimeter = arcLength(MatOfPoint2f(*convexHull.toArray()), true)
 
-        val convexity = hullPerimeter / contourPerimeter
-        convexityResults.add(convexity)
-        return convexity
+        return (hullPerimeter / contourPerimeter).also { convexityResults.add(it) }
     }
 
-    override fun mean(): Double {
-        return convexityResults.sumOf{it}/convexityResults.size
-    }
+    override fun mean(): Double = convexityResults.average()
 
     override fun variance(): Double {
-        return convexityResults.sumOf { (it-mean()) * (it-mean()) } / convexityResults.size
+        val mean = mean()
+        return convexityResults.sumOf { (it - mean).pow(2) } / convexityResults.size
     }
 }
